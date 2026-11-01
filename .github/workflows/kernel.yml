@@ -29,6 +29,9 @@ on:
         description: Diagnostics, make -k (collect all compile errors)
         type: boolean
         default: false
+      rom_url:
+        description: ROM zip to check this kernel against (default .github/ci/test-rom.url)
+        default: ''
 
 permissions:
   contents: write
@@ -119,9 +122,9 @@ jobs:
         working-directory: tree/out/target/product/Pong
         run: |
           cp obj/KERNEL_OBJ/.config kernel.config
-          cp obj/KERNEL_OBJ/System.map obj/KERNEL_OBJ/Module.symvers .
+          cp obj/KERNEL_OBJ/System.map obj/KERNEL_OBJ/Module.symvers obj/KERNEL_OBJ/.vmlinux.permitted-imports.c .
           zip -qr ../../../../../Pong-kernel.zip kernel dtb.img dtbo.img kernel.config System.map Module.symvers \
-            vendor_dlkm vendor_ramdisk recovery
+            .vmlinux.permitted-imports.c vendor_dlkm vendor_ramdisk recovery
 
       - uses: actions/upload-artifact@v4
         if: success()
@@ -142,3 +145,82 @@ jobs:
           git add -A
           git commit -qm "Kernel CI run ${{ github.run_number }} (${{ job.status }}) for ${{ github.sha }}"
           git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" HEAD:refs/heads/ci-logs
+
+  # A flashable AnyKernel3 zip of this kernel, and a check of a ROM (PenguinOS,
+  # redducc's 6.12) whose modules would run with it when only the kernel is
+  # flashed: the zip replaces the kernel of the boot image, nothing else.
+  anykernel:
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: Pong-kernel-${{ github.run_number }}
+
+      - name: Tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq erofs-utils kmod lz4 cpio zip llvm >/dev/null
+          unzip -q Pong-kernel.zip -d k
+          git init -q ci && git -C ci fetch -q --depth=1 https://github.com/${{ github.repository }} ${{ github.sha }} && git -C ci checkout -q FETCH_HEAD
+
+      - name: AnyKernel3 zip
+        run: |
+          git clone -q https://github.com/osm0sis/AnyKernel3 ak3
+          git -C ak3 checkout -q 41f04bd
+          rm -rf ak3/.git ak3/.github ak3/README.md ak3/modules ak3/patch ak3/ramdisk
+          cp ci/.github/ci/anykernel.sh ak3/anykernel.sh
+          cp k/kernel ak3/Image
+          rel=$(strings k/kernel | grep -m1 -o "Linux version [^ ]*" | cut -d' ' -f3)
+          sed -i "s|@RELEASE@|$rel|; s|@RUN@|${{ github.run_number }}|; s|@SHA@|${GITHUB_SHA::7}|" ak3/anykernel.sh
+          (cd ak3 && zip -qr9 ../Pong-6.12-AnyKernel3-${{ github.run_number }}.zip .)
+          echo "AnyKernel3 zip: kernel $rel" | tee anykernel.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Pong-6.12-AnyKernel3-${{ github.run_number }}
+          path: Pong-6.12-AnyKernel3-${{ github.run_number }}.zip
+          retention-days: 14
+
+      - name: Check the test ROM's modules against this kernel
+        if: inputs.rom_url != '' || github.ref_name == 'ci-run'
+        run: |
+          url="${{ inputs.rom_url }}"; [ -n "$url" ] || url=$(cat ci/.github/ci/test-rom.url)
+          echo "ROM: $url" | tee rom-check.txt
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc
+          curl -sSfL --retry 3 -o rom.zip "$url"
+          curl -sSfL -o pd.tgz https://github.com/ssut/payload-dumper-go/releases/download/2.1.0/payload-dumper-go_2.1.0_linux_amd64.tar.gz
+          tar xzf pd.tgz payload-dumper-go
+          unzip -q -o rom.zip payload.bin && rm rom.zip
+          ./payload-dumper-go -o img -p boot,vendor_boot,dtbo,vendor_dlkm payload.bin >/dev/null && rm payload.bin
+          git clone -q --depth=1 https://android.googlesource.com/platform/system/tools/mkbootimg
+          python3 mkbootimg/unpack_bootimg.py --boot_img img/boot.img --out boot >/dev/null
+          python3 mkbootimg/unpack_bootimg.py --boot_img img/vendor_boot.img --out vboot > vboot.txt
+          { echo "ROM kernel: $(strings boot/kernel | grep -m1 'Linux version')"
+            echo "this kernel: $(strings k/kernel | grep -m1 'Linux version')"
+            echo "vendor_boot dtb vs this dtb.img: $(cmp -s vboot/dtb k/dtb.img && echo identical || echo DIFFERENT)"
+            n=$(stat -c %s k/dtbo.img)
+            echo "dtbo vs this dtbo.img: $(cmp -s -n $n img/dtbo.img k/dtbo.img && echo identical || echo DIFFERENT)"
+          } | tee -a rom-check.txt
+          mkdir -p rom/vendor_dlkm rom/vendor_ramdisk
+          fsck.erofs --extract=rom/vendor_dlkm img/vendor_dlkm.img >/dev/null 2>&1 || \
+            debugfs -R "rdump / rom/vendor_dlkm" img/vendor_dlkm.img >/dev/null 2>&1
+          for r in vboot/vendor_ramdisk*; do
+            (cd rom/vendor_ramdisk && { lz4 -dc "../../$r" 2>/dev/null || gzip -dc "../../$r"; } | cpio -idm --quiet 2>/dev/null) || true
+          done
+          V=$(modinfo -F vermagic $(find k/vendor_dlkm -name '*.ko' | head -1))
+          LLVM_NM=llvm-nm python3 ci/.github/ci/check_rom_modules.py k/Module.symvers k/.vmlinux.permitted-imports.c "$V" \
+            rom/vendor_dlkm rom/vendor_ramdisk | tee -a rom-check.txt
+          echo "ROM modules not built here: $(comm -23 <(find rom -name '*.ko' -printf '%f\n' | sort -u) <(find k/vendor_dlkm -name '*.ko' -printf '%f\n' | sort -u) | tr '\n' ' ')" | tee -a rom-check.txt
+
+      - name: Publish to the ci-logs branch
+        if: always()
+        run: |
+          git clone -q --depth=1 -b ci-logs https://x-access-token:${{ github.token }}@github.com/${{ github.repository }} logs || exit 0
+          cp anykernel.txt rom-check.txt logs/ 2>/dev/null || true
+          cd logs
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -qm "AnyKernel3 / ROM check, run ${{ github.run_number }}" && git push -q origin HEAD:ci-logs || true
+          cat ../rom-check.txt >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
