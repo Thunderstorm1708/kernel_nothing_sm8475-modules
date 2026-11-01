@@ -1,37 +1,75 @@
-/* Copyright (c) 2018-2021, The Linux Foundation. All rights reserved.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 and
- * only version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+/* SPDX-License-Identifier: GPL-2.0-only */
+/*
+ * Copyright (c) 2018-2021, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2025 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
-#ifndef DATARMNETbf894466c7
-#define DATARMNETbf894466c7
+#ifndef __RMNET_OFFLOAD_ENGINE_H__
+#define __RMNET_OFFLOAD_ENGINE_H__
+
 #include <linux/types.h>
 #include "rmnet_offload_main.h"
-#define DATARMNET78d9393ac8 (0xef7+1112-0x131d)
-enum{DATARMNET7af645849a,DATARMNETb0bd5db24d,DATARMNET0413b43080,};enum{
-DATARMNETa2ddeec85f,DATARMNET2d89680280=DATARMNETa2ddeec85f,DATARMNET03daf91a60,
-DATARMNET88a9920663,DATARMNET5fe3af8828,DATARMNETaccb69cf16=DATARMNET5fe3af8828,
-};struct DATARMNETd7c9631acd{struct hlist_node DATARMNETbd5d7d96d8;struct 
-list_head DATARMNETb76b79d0d5;struct DATARMNET4287f07234 DATARMNET78fd20ce0e;u32
- DATARMNET381f1cadc4;u16 DATARMNETcf28ae376b;u32 DATARMNETd3a1a2b9b5;u16 
-DATARMNET1978d5d8de;u8 DATARMNET1db11fa85e;};struct DATARMNET907d58c807{struct 
-DATARMNETd7c9631acd DATARMNET2846a01cce[DATARMNET78d9393ac8];u8 
-DATARMNET8dfc11cccd;u8 DATARMNET57d435b225;};void DATARMNETd4230b6bfe(void);void
- DATARMNET560e127137(void);int DATARMNET241493ab9a(u64 DATARMNET0470698d6c,u64 
-DATARMNETfeff65e096);void DATARMNETa3055c21f2(struct DATARMNETd7c9631acd*
-DATARMNETaa568481cf,struct list_head*DATARMNET6f9bfa17e6);void 
-DATARMNETc38c135c9f(u32 DATARMNET3f8cc6fc24,struct list_head*DATARMNET6f9bfa17e6
-);u32 DATARMNETae70636c90(struct list_head*DATARMNET6f9bfa17e6);void 
-DATARMNET33aa5df9ef(struct DATARMNETd7c9631acd*DATARMNETaa568481cf,struct 
-DATARMNETd812bcdbb5*DATARMNET5fe4c722a8);bool DATARMNETfbf5798e15(struct 
-DATARMNETd812bcdbb5*DATARMNET5fe4c722a8,struct list_head*DATARMNET6f9bfa17e6);
-void DATARMNETb98b78b8e3(void);int DATARMNETdbcaf01255(void);
-#endif
 
+#define RMNET_OFFLOAD_ENGINE_NUM_FLOWS 50
+
+enum {
+	RMNET_OFFLOAD_ENGINE_FLUSH_ALL,
+	RMNET_OFFLOAD_ENGINE_FLUSH_SOME,
+	RMNET_OFFLOAD_ENGINE_FLUSH_NONE,
+};
+
+enum {
+	RMNET_OFFLOAD_ENGINE_MODE_MIN,
+	RMNET_OFFLOAD_ENGINE_MODE_ALL = RMNET_OFFLOAD_ENGINE_MODE_MIN,
+	RMNET_OFFLOAD_ENGINE_MODE_TCP,
+	RMNET_OFFLOAD_ENGINE_MODE_UDP,
+	RMNET_OFFLOAD_ENGINE_MODE_NONE,
+	RMNET_OFFLOAD_ENGINE_MODE_MAX = RMNET_OFFLOAD_ENGINE_MODE_NONE,
+};
+
+struct rmnet_offload_flow {
+	/* Lists */
+	struct hlist_node rof_flow_list;
+	struct list_head rof_pkts;
+
+	/* Flow header information */
+	struct rmnet_offload_header_info rof_hdrs;
+
+	/* 5 tuple hash key */
+	u32 rof_hash_key;
+
+	/* Total data length */
+	u16 rof_len;
+
+	/* TCP sequence number */
+	u32 rof_tcp_seq;
+
+	/* GSO segment size */
+	u16 rof_gso_len;
+
+	/* Number of packets in the flow */
+	u8 rof_pkts_held;
+};
+
+struct rmnet_offload_engine_state {
+	struct rmnet_offload_flow roe_flow_pool[RMNET_OFFLOAD_ENGINE_NUM_FLOWS];
+	u8 roe_nodes_used;
+	u8 roe_recycle_idx;
+};
+
+void rmnet_offload_engine_enable_chain_flush(void);
+void rmnet_offload_engine_disable_chain_flush(void);
+int rmnet_offload_engine_mode_change(u64 old_mode, u64 new_mode);
+void rmnet_offload_engine_flush_flow(struct rmnet_offload_flow *flow,
+				     struct list_head *flush_list);
+void rmnet_offload_engine_flush_by_hash(u32 hash_val,
+					struct list_head *flush_list);
+u32 rmnet_offload_engine_flush_all_flows(struct list_head *flush_list);
+void rmnet_offload_engine_add_flow_pkt(struct rmnet_offload_flow *flow,
+				       struct rmnet_offload_info *pkt);
+bool rmnet_offload_engine_ingress(struct rmnet_offload_info *pkt,
+				  struct list_head *flush_list);
+void rmnet_offload_engine_exit(void);
+int rmnet_offload_engine_init(void);
+
+#endif

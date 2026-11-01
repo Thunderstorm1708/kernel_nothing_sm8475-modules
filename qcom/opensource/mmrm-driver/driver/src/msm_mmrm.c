@@ -3,14 +3,14 @@
  * Copyright (c) 2020-2021, The Linux Foundation. All rights reserved.
  */
 
-#include <linux/of.h>
 #include <linux/module.h>
 #include <linux/of_platform.h>
 #include <linux/platform_device.h>
 #include <linux/slab.h>
 #include <linux/soc/qcom/msm_mmrm.h>
 #include <linux/fs.h>
-
+#include <linux/of.h>
+#include <linux/version.h>
 #include "mmrm_internal.h"
 #include "mmrm_debug.h"
 #include "mmrm_clk_rsrc_mgr.h"
@@ -279,6 +279,19 @@ err_exit:
 }
 EXPORT_SYMBOL(mmrm_client_get_value);
 
+int mmrm_client_get_clk_count(void)
+{
+	struct mmrm_sw_clk_mgr_info *sinfo;
+
+	if (drv_data == (void *) -EPROBE_DEFER)
+		return 0;
+
+	sinfo = &(drv_data->clk_mgr->data.sw_info);
+
+	return sinfo->tot_clk_clients;
+}
+EXPORT_SYMBOL(mmrm_client_get_clk_count);
+
 static int sysfs_get_param(const char *buf, u32 *param)
 {
 	int base;
@@ -389,8 +402,13 @@ static ssize_t dump_clk_res_info_show(struct device *dev,
 	struct nom_clk_src_info *pclk;
 	int left_spaces = MMRM_SYSFS_ENTRY_MAX_LEN;
 
-	for (i=0, pclk=clk_set->clk_src_tbl; i < clk_set->count && left_spaces > 1; i++, pclk++) {
-		len = scnprintf(buf, left_spaces, "%d  %d   %d  %d  %d\n",
+	len = scnprintf(buf, left_spaces, "threshold: %d\n",
+		cres->peak_threshold);
+	left_spaces -= len;
+	buf += len;
+
+	for (i = 0, pclk = clk_set->clk_src_tbl; i < clk_set->count && left_spaces > 1; i++, pclk++) {
+		len = scnprintf(buf, left_spaces, "%d\t%d\t% 8d\t%d\t%d\n",
 			pclk->domain,
 			pclk->clk_src_id,
 			pclk->nom_dyn_pwr,
@@ -524,7 +542,7 @@ err_exit:
 	return rc;
 }
 
-static int msm_mmrm_remove(struct platform_device *pdev)
+static int __remove(struct platform_device *pdev)
 {
 	int rc = 0;
 
@@ -553,6 +571,18 @@ err_exit:
 	return rc;
 }
 
+#if (KERNEL_VERSION(6, 10, 0) <= LINUX_VERSION_CODE)
+static void msm_mmrm_remove(struct platform_device *pdev)
+{
+	__remove(pdev);
+}
+#else
+static int msm_mmrm_remove(struct platform_device *pdev)
+{
+	return __remove(pdev);
+}
+#endif
+
 static const struct of_device_id msm_mmrm_dt_match[] = {
 	{.compatible = "qcom,msm-mmrm"},
 	{}
@@ -560,15 +590,9 @@ static const struct of_device_id msm_mmrm_dt_match[] = {
 
 MODULE_DEVICE_TABLE(of, msm_mmrm_dt_match);
 
-/* Linux 6.11+: platform_driver.remove returns void */
-static void msm_mmrm_remove_void(struct platform_device *pdev)
-{
-	msm_mmrm_remove(pdev);
-}
-
 static struct platform_driver msm_mmrm_driver = {
 	.probe = msm_mmrm_probe,
-	.remove = msm_mmrm_remove_void,
+	.remove = msm_mmrm_remove,
 	.driver = {
 		.name = "msm-mmrm",
 		.of_match_table = msm_mmrm_dt_match,

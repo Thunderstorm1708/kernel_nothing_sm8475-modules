@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2018-2020, The Linux Foundation. All rights reserved.
- * Copyright (c) 2022-2024 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
  */
 
 #include "ipa_i.h"
@@ -351,7 +351,7 @@ static int ipa3_odl_register_pm(void)
 	pm_reg.skip_clk_vote = true;
 	result = ipa_pm_register(&pm_reg, &ipa3_odl_ctx->odl_pm_hdl);
 	if (result) {
-		IPAERR("failed to create IPA PM client %d\n", result);
+		IPAERR_BOOTUP("failed to create IPA PM client %d\n", result);
 		return result;
 	}
 	return result;
@@ -668,6 +668,55 @@ static long ipa_adpl_ioctl(struct file *filp,
 fail:
 	return retval;
 }
+#ifdef CONFIG_COMPAT
+
+long compat_ipa_odl_ctl_fops_ioctl(struct file *filp, unsigned int cmd,
+							unsigned long arg)
+{
+        IPAERR("compat_odl_ctl_ioctl cmd=%x nr=%d\n", cmd, _IOC_NR(cmd));
+
+        if (_IOC_TYPE(cmd) != IPA_IOC_MAGIC)
+                return -ENOTTY;
+
+	switch(_IOC_NR(cmd)) {
+	case IPA_IOCTL_ODL_QUERY_ADAPL_EP_INFO:
+		if(_IOC_DIR(cmd) != _IOC_DIR(IPA_IOC_ODL_QUERY_ADAPL_EP_INFO))
+			return -ENOTTY;
+		cmd = IPA_IOC_ODL_QUERY_ADAPL_EP_INFO;
+		break;
+	case IPA_IOCTL_ODL_QUERY_MODEM_CONFIG:
+		if(_IOC_DIR(cmd) != _IOC_DIR(IPA_IOC_ODL_QUERY_MODEM_CONFIG))
+			return -ENOTTY;
+		cmd = IPA_IOC_ODL_QUERY_MODEM_CONFIG;
+		break;
+	default:
+		return -ENOIOCTLCMD;
+	}
+	return ipa_odl_ctl_fops_ioctl(filp, cmd, (unsigned long) compat_ptr(arg));
+}
+
+long compat_ipa_adpl_ioctl(struct file *filp,
+	unsigned int cmd, unsigned long arg)
+{
+	IPAERR("compat_ipa3_adpl_ioctl cmd=%x nr=%d\n", cmd, _IOC_NR(cmd));
+
+	if (_IOC_TYPE(cmd) != IPA_IOC_MAGIC)
+		return -ENOTTY;
+
+	switch(_IOC_NR(cmd)) {
+	case IPA_IOCTL_ODL_GET_AGG_BYTE_LIMIT:
+		if(_IOC_DIR(cmd) != _IOC_DIR(IPA_IOC_ODL_GET_AGG_BYTE_LIMIT))
+			return -ENOTTY;
+		cmd = IPA_IOC_ODL_GET_AGG_BYTE_LIMIT;
+		break;
+	default:
+		print_ipa_odl_state_bit_mask();
+		return -ENOIOCTLCMD;
+	}
+	return ipa_adpl_ioctl(filp, cmd, (unsigned long) compat_ptr(arg));
+}
+
+#endif
 
 static const struct file_operations ipa_odl_ctl_fops = {
 	.owner = THIS_MODULE,
@@ -675,6 +724,9 @@ static const struct file_operations ipa_odl_ctl_fops = {
 	.release = ipa_odl_ctl_fops_release,
 	.read = ipa_odl_ctl_fops_read,
 	.unlocked_ioctl = ipa_odl_ctl_fops_ioctl,
+#ifdef CONFIG_COMPAT
+	.compat_ioctl = compat_ipa_odl_ctl_fops_ioctl,
+#endif
 	.poll = ipa_odl_ctl_fops_poll,
 };
 
@@ -684,6 +736,9 @@ static const struct file_operations ipa_adpl_fops = {
 	.release = ipa_adpl_release,
 	.read = ipa_adpl_read,
 	.unlocked_ioctl = ipa_adpl_ioctl,
+#ifdef CONFIG_COMPAT
+	.compat_ioctl = compat_ipa_adpl_ioctl,
+#endif
 };
 
 int ipa_odl_init(void)
@@ -708,14 +763,14 @@ int ipa_odl_init(void)
 	odl_cdev[loop].class = class_create("ipa_adpl");
 
 	if (IS_ERR(odl_cdev[loop].class)) {
-		IPAERR("Error: odl_cdev->class NULL\n");
+		IPAERR_BOOTUP("Error: odl_cdev->class NULL\n");
 		result = -ENODEV;
 		goto create_char_dev0_fail;
 	}
 
 	result = alloc_chrdev_region(&odl_cdev[loop].dev_num, 0, 1, "ipa_adpl");
 	if (result) {
-		IPAERR("alloc_chrdev_region error for ipa adpl pipe\n");
+		IPAERR_BOOTUP("alloc_chrdev_region error for ipa adpl pipe\n");
 		result = -ENODEV;
 		goto alloc_chrdev0_region_fail;
 	}
@@ -723,7 +778,7 @@ int ipa_odl_init(void)
 	odl_cdev[loop].dev = device_create(odl_cdev[loop].class, NULL,
 		 odl_cdev[loop].dev_num, ipa3_ctx, "ipa_adpl");
 	if (IS_ERR(odl_cdev[loop].dev)) {
-		IPAERR("device_create err:%ld\n", PTR_ERR(odl_cdev[loop].dev));
+		IPAERR_BOOTUP("device_create err:%ld\n", PTR_ERR(odl_cdev[loop].dev));
 		result = PTR_ERR(odl_cdev[loop].dev);
 		goto device0_create_fail;
 	}
@@ -735,7 +790,7 @@ int ipa_odl_init(void)
 
 	result = cdev_add(cdev, odl_cdev[loop].dev_num, 1);
 	if (result) {
-		IPAERR("cdev_add err=%d\n", -result);
+		IPAERR_BOOTUP("cdev_add err=%d\n", -result);
 		goto cdev0_add_fail;
 	}
 
@@ -744,7 +799,7 @@ int ipa_odl_init(void)
 	odl_cdev[loop].class = class_create("ipa_odl_ctl");
 
 	if (IS_ERR(odl_cdev[loop].class)) {
-		IPAERR("Error: odl_cdev->class NULL\n");
+		IPAERR_BOOTUP("Error: odl_cdev->class NULL\n");
 		result =  -ENODEV;
 		goto create_char_dev1_fail;
 	}
@@ -752,14 +807,14 @@ int ipa_odl_init(void)
 	result = alloc_chrdev_region(&odl_cdev[loop].dev_num, 0, 1,
 							"ipa_odl_ctl");
 	if (result) {
-		IPAERR("alloc_chrdev_region error for ipa odl ctl pipe\n");
+		IPAERR_BOOTUP("alloc_chrdev_region error for ipa odl ctl pipe\n");
 		goto alloc_chrdev1_region_fail;
 	}
 
 	odl_cdev[loop].dev = device_create(odl_cdev[loop].class, NULL,
 		 odl_cdev[loop].dev_num, ipa3_ctx, "ipa_odl_ctl");
 	if (IS_ERR(odl_cdev[loop].dev)) {
-		IPAERR("device_create err:%ld\n", PTR_ERR(odl_cdev[loop].dev));
+		IPAERR_BOOTUP("device_create err:%ld\n", PTR_ERR(odl_cdev[loop].dev));
 		result = PTR_ERR(odl_cdev[loop].dev);
 		goto device1_create_fail;
 	}
@@ -771,7 +826,7 @@ int ipa_odl_init(void)
 
 	result = cdev_add(cdev, odl_cdev[loop].dev_num, 1);
 	if (result) {
-		IPAERR(":cdev_add err=%d\n", -result);
+		IPAERR_BOOTUP(":cdev_add err=%d\n", -result);
 		goto cdev1_add_fail;
 	}
 

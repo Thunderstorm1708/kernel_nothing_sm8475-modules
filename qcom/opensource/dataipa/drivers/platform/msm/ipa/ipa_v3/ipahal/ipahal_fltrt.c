@@ -4931,7 +4931,7 @@ int ipahal_rt_generate_empty_img(u32 tbls_num, u32 hash_hdr_size,
 	for (retry_count = 0; retry_count < MAX_RETRY_ALLOC; retry_count++) {
 		mem->base = dma_alloc_coherent(ipahal_ctx->ipa_pdev, mem->size,
 			&mem->phys_base, flag);
-		if (mem->base)
+		if(mem->base)
 			break;
 	}
 	if (!mem->base) {
@@ -5019,7 +5019,7 @@ int ipahal_flt_generate_empty_img(u32 tbls_num, u32 hash_hdr_size,
 	for (retry_count = 0; retry_count < MAX_RETRY_ALLOC; retry_count++) {
 		mem->base = dma_alloc_coherent(ipahal_ctx->ipa_pdev, mem->size,
 			&mem->phys_base, flag);
-		if (mem->base)
+		if(mem->base)
 			break;
 	}
 	if (!mem->base) {

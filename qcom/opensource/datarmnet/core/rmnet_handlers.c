@@ -21,6 +21,9 @@
 #include <linux/ipv6.h>
 #include <linux/inet.h>
 #include <net/sock.h>
+#if !defined(TRANSPORT_RMNET_BAM)
+#include <linux/ipa.h>
+#endif
 #include <linux/tracepoint.h>
 #include "rmnet_private.h"
 #include "rmnet_config.h"
@@ -30,7 +33,7 @@
 #include "rmnet_descriptor.h"
 #include "rmnet_ll.h"
 #include "rmnet_module.h"
-
+#include "rmnet_mem.h"
 
 #include "rmnet_qmi.h"
 #include "qmi_rmnet.h"
@@ -82,6 +85,8 @@ EXPORT_SYMBOL(rmnet_set_skb_proto);
 void
 rmnet_deliver_skb(struct sk_buff *skb, struct rmnet_port *port)
 {
+	int rc = 0;
+
 	trace_rmnet_low(RMNET_MODULE, RMNET_DLVR_SKB, 0xDEF, 0xDEF,
 			0xDEF, 0xDEF, (void *)skb, NULL);
 	skb_reset_network_header(skb);
@@ -89,6 +94,12 @@ rmnet_deliver_skb(struct sk_buff *skb, struct rmnet_port *port)
 
 	skb->pkt_type = PACKET_HOST;
 	skb_set_mac_header(skb, 0);
+
+	if (rmnet_module_hook_perf_ecn_ingress(&rc, skb)) {
+		if (rc)
+			/* SKB has been freed */
+			return;
+	}
 
 	/* Low latency packets use a different balancing scheme */
 	if (skb->priority == 0xda1a)
@@ -338,7 +349,7 @@ static int rmnet_map_egress_handler(struct sk_buff *skb,
 
 	if (csum_type)
 		rmnet_map_checksum_uplink_packet(skb, port, orig_dev,
-						 csum_type);
+						 csum_type, low_latency);
 
 	map_header = rmnet_map_add_map_header(skb, additional_header_len, 0,
 					      port);
@@ -429,7 +440,6 @@ rx_handler_result_t rmnet_rx_priv_handler(struct sk_buff **pskb)
 		return rc;
 
 	rmnet_module_hook_perf_ingress_rx_handler(skb);
-
 	return RX_HANDLER_PASS;
 }
 
@@ -487,3 +497,12 @@ drop:
 	this_cpu_inc(priv->pcpu_stats->stats.tx_drops);
 	kfree_skb(skb);
 }
+
+#if !defined(TRANSPORT_RMNET_BAM)
+int rmnet_ipa_notify_cb(struct notifier_block *nb,
+			unsigned long event, void *data)
+{
+	rmnet_mem_cb(event, data);
+	return 0;
+}
+#endif

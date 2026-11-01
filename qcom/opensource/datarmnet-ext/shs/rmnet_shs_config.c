@@ -1,15 +1,7 @@
-/* Copyright (c) 2018-2021 The Linux Foundation. All rights reserved.
- * Copyright (c) 2022-2024 Qualcomm Innovation Center, Inc. All rights reserved.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 and
- * only version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
+// SPDX-License-Identifier: GPL-2.0-only
+/*
+ * Copyright (c) 2018-2021 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2022-2025 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 #include <linux/kernel.h>
@@ -23,86 +15,205 @@
 #include "rmnet_shs_ll.h"
 #include "rmnet_shs_freq.h"
 #include "rmnet_shs_wq_genl.h"
+#include "rmnet_shs_wq_mem.h"
 #include "rmnet_shs_common.h"
 #include "rmnet_shs_modules.h"
 #include "rmnet_module.h"
-static int DATARMNETe9173bbe0e(struct notifier_block*DATARMNET272c159b3c,
-unsigned long DATARMNET7f045a1e6e,void*data);static struct notifier_block 
-DATARMNET5fc54f7a13 __read_mostly={.notifier_call=DATARMNETe9173bbe0e,.priority=
-(0xd1f+216-0xdf5),};static char*DATARMNETbc8418e817[]={"\x34\x33\x61\x36\x62",
-"\x61\x32\x63\x65\x36","\x64\x31\x61\x62\x31","\x64\x38\x37\x39\x62",
-"\x61\x63\x36\x32\x36","\x35\x63\x66\x66\x37","\x61\x35\x38\x36\x62"};
-module_param_array(DATARMNETbc8418e817,charp,NULL,(0xcb7+5769-0x221c));
-MODULE_PARM_DESC(DATARMNETbc8418e817,
-"\x56\x65\x72\x73\x69\x6f\x6e\x20\x6f\x66\x20\x73\x68\x73\x20\x64\x72\x69\x76\x65\x72"
-);static const struct rmnet_module_hook_register_info DATARMNETf6217b20b8={.
-hooknum=RMNET_MODULE_HOOK_SHS_SKB_LL_ENTRY,.func=DATARMNETf5821256ad};static int
- DATARMNET2cb9ae589c;int __init DATARMNET163e93649e(void){pr_info(
-"\x25\x73\x28\x29\x3a\x20\x4c\x6f\x61\x64\x65\x64\x20\x72\x6d\x6e\x65\x74\x20\x53\x48\x53\x20\x6d\x6f\x64\x75\x6c\x65\x20" "\n"
-,__func__);trace_rmnet_shs_high(DATARMNET1790979ccf,DATARMNET72cb00fdc0,
-(0x16e8+787-0xc0c),(0x16e8+787-0xc0c),(0x16e8+787-0xc0c),(0x16e8+787-0xc0c),NULL
-,NULL);if(DATARMNET0dbc627e8f()){rm_err("\x25\x73",
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x46\x61\x69\x6c\x65\x64\x20\x74\x6f\x20\x69\x6e\x69\x74\x20\x67\x65\x6e\x65\x72\x69\x63\x20\x6e\x65\x74\x6c\x69\x6e\x6b"
-);}return register_netdevice_notifier(&DATARMNET5fc54f7a13);}void __exit 
-DATARMNETf3298dab6f(void){trace_rmnet_shs_high(DATARMNET1790979ccf,
-DATARMNET89958f9b63,(0x16e8+787-0xc0c),(0x16e8+787-0xc0c),(0x16e8+787-0xc0c),
-(0x16e8+787-0xc0c),NULL,NULL);unregister_netdevice_notifier(&DATARMNET5fc54f7a13
-);DATARMNETeabd69d1ab();pr_info(
-"\x25\x73\x28\x29\x3a\x20\x45\x78\x69\x74\x69\x6e\x67\x20\x72\x6d\x6e\x65\x74\x20\x53\x48\x53\x20\x6d\x6f\x64\x75\x6c\x65" "\n"
-,__func__);}static int DATARMNETe9173bbe0e(struct notifier_block*
-DATARMNET272c159b3c,unsigned long DATARMNET7f045a1e6e,void*data){struct 
-net_device*dev=netdev_notifier_info_to_dev(data);struct rmnet_priv*priv;struct 
-rmnet_port*port;int ret=(0xd2d+202-0xdf7);if(!dev){DATARMNET68d84e7b98[
-DATARMNETf5157a9b85]++;return NOTIFY_DONE;}if(!(strncmp(dev->name,
-"\x72\x6d\x6e\x65\x74\x5f\x64\x61\x74\x61",(0xd27+224-0xdfd))==(0xd2d+202-0xdf7)
-))return NOTIFY_DONE;switch(DATARMNET7f045a1e6e){case NETDEV_DOWN:
-DATARMNETd6ee05f1b4(dev);break;case NETDEV_UNREGISTER:DATARMNET2cb9ae589c--;if(!
-DATARMNET2cb9ae589c&&DATARMNETecc0627c70.DATARMNETfc89d842ae){unsigned int 
-DATARMNET9f4bc49c6f;pr_info(
-"\x72\x6d\x6e\x65\x74\x5f\x73\x68\x73\x20\x64\x65\x69\x6e\x69\x74\x20\x25\x73\x20\x67\x6f\x69\x6e\x67\x20\x64\x6f\x77\x6e" "\n"
-,dev->name);DATARMNET203752febd();DATARMNETa871eeb7e7();
-rmnet_module_hook_unregister_no_sync(&DATARMNETf6217b20b8,(0xd26+209-0xdf6));
-qmi_rmnet_ps_ind_deregister(DATARMNETecc0627c70.port,&DATARMNETecc0627c70.
-rmnet_idl_ind_cb);rmnet_map_dl_ind_deregister(DATARMNETecc0627c70.port,&
-DATARMNETecc0627c70.DATARMNET08dbb5ab35);rmnet_map_pb_ind_deregister(
-DATARMNETecc0627c70.port,&DATARMNETecc0627c70.DATARMNET6b783c98fe);
-DATARMNETeacad8334e();DATARMNET90fe3a4b56();DATARMNET9f4bc49c6f=
-DATARMNET02cdd9b125();if(DATARMNETecc0627c70.DATARMNET9c869c1ec2)
-DATARMNET7fcf8c178f();DATARMNETf7dcab9a9e();DATARMNET9297340f58(
-DATARMNET9f4bc49c6f);trace_rmnet_shs_high(DATARMNET1790979ccf,
-DATARMNET443dab7031,(0x16e8+787-0xc0c),(0x16e8+787-0xc0c),(0x16e8+787-0xc0c),
-(0x16e8+787-0xc0c),NULL,NULL);}break;case NETDEV_REGISTER:DATARMNET2cb9ae589c++;
-if(DATARMNET2cb9ae589c&&!DATARMNETecc0627c70.DATARMNETfc89d842ae){pr_info(
-"\x72\x6d\x6e\x65\x74\x5f\x73\x68\x73\x20\x69\x6e\x69\x74\x69\x61\x6c\x69\x7a\x69\x6e\x67\x20\x25\x73" "\n"
-,dev->name);priv=netdev_priv(dev);port=rmnet_get_port(priv->real_dev);if(!port){
-pr_err(
-"\x72\x6d\x6e\x65\x74\x5f\x73\x68\x73\x3a\x20\x69\x6e\x76\x61\x6c\x69\x64\x20\x72\x6d\x6e\x65\x74\x5f\x70\x6f\x72\x74" "\n"
-);break;}DATARMNET45d8cdb224(priv->real_dev,dev);DATARMNET3ae0d614d6();
-DATARMNETe1f95274f1();}break;case NETDEV_UP:if(!DATARMNETecc0627c70.
-DATARMNET9c869c1ec2&&DATARMNETecc0627c70.DATARMNETfc89d842ae){port=
-DATARMNETecc0627c70.port;if(!port){pr_err(
-"\x72\x6d\x6e\x65\x74\x5f\x73\x68\x73\x3a\x20\x69\x6e\x76\x61\x6c\x69\x64\x20\x72\x6d\x6e\x65\x74\x5f\x63\x66\x67\x5f\x70\x6f\x72\x74" "\n"
-);break;}DATARMNETecc0627c70.DATARMNET08dbb5ab35.priority=RMNET_SHS;
-DATARMNETecc0627c70.DATARMNET6b783c98fe.priority=RMNET_SHS;if(port->data_format&
-RMNET_INGRESS_FORMAT_DL_MARKER_V2){DATARMNETecc0627c70.DATARMNET08dbb5ab35.
-dl_hdr_handler_v2=&DATARMNET78bb6be330;DATARMNETecc0627c70.DATARMNET08dbb5ab35.
-dl_trl_handler_v2=&DATARMNETf61cd23b90;DATARMNETecc0627c70.DATARMNET6b783c98fe.
-pb_ind_handler=&DATARMNET4684d6c911;}DATARMNETecc0627c70.rmnet_idl_ind_cb.
-ps_on_handler=&DATARMNET7f1d9480cb;DATARMNETecc0627c70.rmnet_idl_ind_cb.
-ps_off_handler=&DATARMNETa4bd2ef52c;ret=rmnet_map_dl_ind_register(port,&
-DATARMNETecc0627c70.DATARMNET08dbb5ab35);if(ret)pr_err(
-"\x25\x73\x28\x29\x3a\x20\x72\x6d\x6e\x65\x74\x20\x64\x6c\x5f\x69\x6e\x64\x20\x72\x65\x67\x69\x73\x74\x72\x61\x74\x69\x6f\x6e\x20\x66\x61\x69\x6c" "\n"
-,__func__);ret=rmnet_map_pb_ind_register(port,&DATARMNETecc0627c70.
-DATARMNET6b783c98fe);if(ret)pr_err(
-"\x25\x73\x28\x29\x3a\x20\x72\x6d\x6e\x65\x74\x20\x70\x62\x5f\x69\x6e\x64\x20\x72\x65\x67\x69\x73\x74\x72\x61\x74\x69\x6f\x6e\x20\x66\x61\x69\x6c" "\n"
-,__func__);ret=qmi_rmnet_ps_ind_register(port,&DATARMNETecc0627c70.
-rmnet_idl_ind_cb);if(ret)pr_err(
-"\x25\x73\x28\x29\x3a\x20\x72\x6d\x6e\x65\x74\x20\x70\x73\x5f\x69\x6e\x64\x20\x72\x65\x67\x69\x73\x74\x72\x61\x74\x69\x6f\x6e\x20\x66\x61\x69\x6c" "\n"
-,__func__);DATARMNET7492293980(dev);DATARMNET039ac6d55d();DATARMNET0a6fb12cb2();
-DATARMNETe46c480d71();trace_rmnet_shs_high(DATARMNET1790979ccf,
-DATARMNET443dab7031,(0x16e8+787-0xc0c),(0x16e8+787-0xc0c),(0x16e8+787-0xc0c),
-(0x16e8+787-0xc0c),NULL,NULL);DATARMNETa871eeb7e7();DATARMNET7520667b38();
-rmnet_module_hook_register(&DATARMNETf6217b20b8,(0xd26+209-0xdf6));
-DATARMNETed3cac41ac();DATARMNETecc0627c70.DATARMNET9c869c1ec2=(0xd26+209-0xdf6);
-break;}DATARMNET7492293980(dev);break;default:break;}return NOTIFY_DONE;}
-module_init(DATARMNET163e93649e);module_exit(DATARMNETf3298dab6f);
+
+#if (KERNEL_VERSION(6, 6, 0) <= LINUX_VERSION_CODE)
+#include <net/netdev_rx_queue.h>
+#endif
+
+static int rmnet_shs_dev_notify_cb(struct notifier_block *nb,
+				    unsigned long event, void *data);
+
+static struct notifier_block rmnet_shs_dev_notifier __read_mostly = {
+	.notifier_call = rmnet_shs_dev_notify_cb,
+	.priority = 2,
+};
+
+static const struct rmnet_module_hook_register_info
+rmnet_shs_ll_entry_hook = {
+		.hooknum = RMNET_MODULE_HOOK_SHS_SKB_LL_ENTRY,
+		.func = rmnet_shs_ll_handler
+};
+
+static int rmnet_vnd_total;
+/* Enable smart hashing capability upon call to initialize module*/
+int __init rmnet_shs_module_init(void)
+{
+	pr_info("%s(): Loaded rmnet SHS module \n", __func__);
+	trace_rmnet_shs_high(RMNET_SHS_MODULE, RMNET_SHS_MODULE_INIT,
+			    0xDEF, 0xDEF, 0xDEF, 0xDEF, NULL, NULL);
+
+	if (rmnet_shs_wq_genl_init()) {
+		rm_err("%s", "SHS_GNL: Failed to init generic netlink");
+	}
+	rmnet_shs_wq_mem_init();
+
+	return register_netdevice_notifier(&rmnet_shs_dev_notifier);
+}
+
+/* Remove smart hashing capability upon call to initialize module */
+void __exit rmnet_shs_module_exit(void)
+{
+	trace_rmnet_shs_high(RMNET_SHS_MODULE, RMNET_SHS_MODULE_EXIT,
+			    0xDEF, 0xDEF, 0xDEF, 0xDEF, NULL, NULL);
+	unregister_netdevice_notifier(&rmnet_shs_dev_notifier);
+
+	rmnet_shs_wq_mem_deinit();
+	rmnet_shs_wq_genl_deinit();
+
+	pr_info("%s(): Exiting rmnet SHS module\n", __func__);
+}
+
+static int rmnet_shs_dev_notify_cb(struct notifier_block *nb,
+				    unsigned long event, void *data)
+{
+
+	struct net_device *dev = netdev_notifier_info_to_dev(data);
+	struct rmnet_priv *priv;
+	struct rmnet_port *port;
+	struct rps_map *map;
+	int ret = 0;
+
+	if (!dev) {
+		rmnet_shs_crit_err[RMNET_SHS_NETDEV_ERR]++;
+		return NOTIFY_DONE;
+	}
+
+	if (!(strncmp(dev->name, "rmnet_data", 10) == 0))
+		return NOTIFY_DONE;
+
+	switch (event) {
+	case NETDEV_UNREGISTER:
+		rmnet_vnd_total--;
+
+		/* Deinitialize if last vnd is going down or if
+		 * phy_dev is going down.
+		 */
+		if (!rmnet_vnd_total && rmnet_shs_cfg.rmnet_shs_init_complete) {
+
+			pr_info("rmnet_shs deinit %s going down\n", dev->name);
+			rmnet_shs_skb_entry_disable();
+			rmnet_shs_switch_disable();
+
+			rmnet_module_hook_unregister_no_sync(&rmnet_shs_ll_entry_hook, 1);
+			qmi_rmnet_ps_ind_deregister(rmnet_shs_cfg.port,
+						    &rmnet_shs_cfg.rmnet_idl_ind_cb);
+			rmnet_map_dl_ind_deregister(rmnet_shs_cfg.port,
+						    &rmnet_shs_cfg.dl_mrk_ind_cb);
+			rmnet_map_pb_ind_deregister(rmnet_shs_cfg.port,
+						    &rmnet_shs_cfg.pb_mrk_ind_cb);
+
+			rmnet_shs_cancel_table();
+			rmnet_shs_ll_deinit();
+			rmnet_shs_rx_wq_exit();
+			/* Only Unhook vh if we registered in 1st place */
+			if (rmnet_shs_cfg.is_reg_dl_mrk_ind)
+				rmnet_shs_vh_unset();
+			rmnet_shs_wq_exit();
+			rmnet_shs_exit();
+			trace_rmnet_shs_high(RMNET_SHS_MODULE,
+					     RMNET_SHS_MODULE_INIT_WQ,
+					     0xDEF, 0xDEF, 0xDEF,
+					     0xDEF, NULL, NULL);
+		}
+		break;
+
+	case NETDEV_REGISTER:
+		rmnet_vnd_total++;
+
+		if (rmnet_vnd_total && !rmnet_shs_cfg.rmnet_shs_init_complete) {
+			pr_info("rmnet_shs initializing %s\n", dev->name);
+			priv = netdev_priv(dev);
+			port = rmnet_get_port(priv->real_dev);
+			if (!port) {
+				pr_err("rmnet_shs: invalid rmnet_port\n");
+				break;
+			}
+			rmnet_shs_init(priv->real_dev, dev);
+			rmnet_shs_wq_init();
+			rmnet_shs_rx_wq_init();
+		}
+
+		break;
+	case NETDEV_UP:
+
+		map = rcu_dereference(dev->_rx->rps_map);
+
+		pr_err("%s(%d) mmask:%x map:%x \n", __func__, __LINE__, rmnet_shs_cfg.map_mask, map ? rmnet_shs_mask_from_map(map): 0x0);
+		if (map != NULL && rmnet_shs_cfg.map_mask != rmnet_shs_mask_from_map(map)) {
+			rmnet_shs_cfg.map_mask = rmnet_shs_mask_from_map(map);
+			rmnet_shs_cfg.map_len = rmnet_shs_get_mask_len(rmnet_shs_cfg.map_mask);
+			pr_err("%s(%d) mmask:%x mlen:%x \n", __func__, __LINE__, rmnet_shs_cfg.map_mask, rmnet_shs_cfg.map_len);
+		}
+
+		if (!rmnet_shs_cfg.is_reg_dl_mrk_ind &&
+		    rmnet_shs_cfg.rmnet_shs_init_complete) {
+
+			port = rmnet_shs_cfg.port;
+			if (!port) {
+				pr_err("rmnet_shs: invalid rmnet_cfg_port\n");
+				break;
+			}
+
+			rmnet_shs_cfg.dl_mrk_ind_cb.priority = RMNET_SHS;
+			rmnet_shs_cfg.pb_mrk_ind_cb.priority = RMNET_SHS;
+			if (port->data_format & RMNET_INGRESS_FORMAT_DL_MARKER_V2) {
+				rmnet_shs_cfg.dl_mrk_ind_cb.dl_hdr_handler_v2 =
+					&rmnet_shs_dl_hdr_handler_v2;
+				rmnet_shs_cfg.dl_mrk_ind_cb.dl_trl_handler_v2 =
+					&rmnet_shs_dl_trl_handler_v2;
+				rmnet_shs_cfg.pb_mrk_ind_cb.pb_ind_handler =
+					&rmnet_shs_pb_hdr_handler;
+			}
+			rmnet_shs_cfg.rmnet_idl_ind_cb.ps_on_handler =
+					&rmnet_shs_ps_on_hdlr;
+			rmnet_shs_cfg.rmnet_idl_ind_cb.ps_off_handler =
+					&rmnet_shs_ps_off_hdlr;
+
+			ret = rmnet_map_dl_ind_register(port,
+						        &rmnet_shs_cfg.dl_mrk_ind_cb);
+			if (ret)
+				pr_err("%s(): rmnet dl_ind registration fail\n",
+				       __func__);
+
+			ret = rmnet_map_pb_ind_register(port,
+						        &rmnet_shs_cfg.pb_mrk_ind_cb);
+			if (ret)
+				pr_err("%s(): rmnet pb_ind registration fail\n",
+				       __func__);
+
+			ret = qmi_rmnet_ps_ind_register(port,
+						        &rmnet_shs_cfg.rmnet_idl_ind_cb);
+			if (ret)
+				pr_err("%s(): rmnet ps_ind registration fail\n",
+				       __func__);
+
+			/* Mark active before RCU pointer */
+			trace_rmnet_shs_high(RMNET_SHS_MODULE,
+					     RMNET_SHS_MODULE_INIT_WQ,
+					     0xDEF, 0xDEF, 0xDEF,
+					     0xDEF, NULL, NULL);
+
+			rmnet_shs_switch_disable();
+			rmnet_shs_skb_entry_enable();
+			rmnet_module_hook_register(&rmnet_shs_ll_entry_hook, 1);
+			rmnet_shs_vh_set();
+			rmnet_shs_cfg.is_reg_dl_mrk_ind = 1;
+			/* Needed so we don't mark active twice*/
+			break;
+		}
+
+		break;
+
+	default:
+		break;
+
+	}
+	return NOTIFY_DONE;
+}
+
+module_init(rmnet_shs_module_init);
+module_exit(rmnet_shs_module_exit);

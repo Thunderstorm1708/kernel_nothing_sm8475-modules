@@ -5,6 +5,20 @@ def define_shs(target, variant):
     kernel_build_variant = "{}_{}".format(target, variant)
     include_base = "../../../{}".format(native.package_name())
 
+    deps_shs = select({
+	"//build/qcom_build_extensions:qtisocrepo_true": [
+		"//soc-repo:all_headers",
+		"//soc-repo:{}/kernel/sched/walt/sched-walt".format(kernel_build_variant),
+	],
+	"//build/qcom_build_extensions:qtisocrepo_false": ["//msm-kernel:all_headers"],
+    })
+
+    kernel_build = select({
+	"//build/qcom_build_extensions:qtisocrepo_true": "//soc-repo:{}_base_kernel".format(kernel_build_variant),
+	"//build/qcom_build_extensions:qtisocrepo_false": "//msm-kernel:{}".format(kernel_build_variant),
+    })
+
+
     ddk_module(
         name = "{}_shs".format(kernel_build_variant),
         out = "rmnet_shs.ko",
@@ -28,11 +42,11 @@ def define_shs(target, variant):
             "rmnet_shs_wq_mem.c",
             "rmnet_shs_wq_mem.h",
         ],
-        kernel_build = "//vendor/nothing/pong-kernel:{}".format(kernel_build_variant),
-        deps = [
-            "//vendor/nothing/pong-kernel:all_headers",
-            "//vendor/nothing/pong-modules/qcom/opensource/datarmnet:{}_rmnet_core".format(kernel_build_variant),
-            "//vendor/nothing/pong-modules/qcom/opensource/datarmnet:rmnet_core_headers",
+	kernel_build = kernel_build,
+	deps = deps_shs + [
+		":include_headers",
+		"//vendor/qcom/opensource/datarmnet:{}_rmnet_core".format(kernel_build_variant),
+		"//vendor/qcom/opensource/datarmnet:rmnet_core_headers",
         ],
         copts = ["-Wno-misleading-indentation"],
     )

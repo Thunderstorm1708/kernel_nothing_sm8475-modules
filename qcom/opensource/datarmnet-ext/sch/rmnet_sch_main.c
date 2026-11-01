@@ -1,13 +1,6 @@
-/* Copyright (c) 2021-2022 Qualcomm Innovation Center, Inc. All rights reserved.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 and
- * only version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+// SPDX-License-Identifier: GPL-2.0-only
+/*
+ * Copyright (c) 2021-2022, 2025 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 #include <linux/module.h>
@@ -18,134 +11,253 @@
 #include <linux/skbuff.h>
 #include <linux/rtnetlink.h>
 #include <net/pkt_sched.h>
-static char*verinfo[]={"\x62\x31\x30\x66\x32\x65\x61\x32",
-"\x65\x36\x33\x37\x31\x64\x34\x30","\x37\x34\x31\x35\x39\x32\x31\x63",
-"\x61\x65\x32\x34\x34\x61\x39\x64"};module_param_array(verinfo,charp,NULL,
-(0xcb7+5769-0x221c));MODULE_PARM_DESC(verinfo,
-"\x56\x65\x72\x73\x69\x6f\x6e\x20\x6f\x66\x20\x74\x68\x65\x20\x64\x72\x69\x76\x65\x72"
-);static const char*DATARMNETf1bb41174a="\x31\x2e\x32";
-#define DATARMNETe632b2e0b0 (0xd11+230-0xdf3)
-static const u8 DATARMNET93bdeed8cb[TC_PRIO_MAX+(0xd26+209-0xdf6)]={
-(0xd18+223-0xdf4),(0xd18+223-0xdf4),(0xd18+223-0xdf4),(0xd18+223-0xdf4),
-(0xd18+223-0xdf4),(0xd18+223-0xdf4),(0xd2d+202-0xdf7),(0xd26+209-0xdf6),
-(0xd1f+216-0xdf5),(0xd18+223-0xdf4),(0xd18+223-0xdf4),(0xd18+223-0xdf4),
-(0xd18+223-0xdf4),(0xd18+223-0xdf4),(0xd18+223-0xdf4),(0xd18+223-0xdf4)};static 
-const int DATARMNET91bbdde74c[DATARMNETe632b2e0b0]={(0xbf7+4421-0x1c3c)*
-(0xdf7+2629-0x143c),(0xef7+694-0x112d)*(0xdf7+2629-0x143c),(0xef7+1142-0x132d)*
-(0xdf7+2629-0x143c),(0xeb7+1174-0x132d)*(0xdf7+2629-0x143c)};static const int 
-DATARMNET9dd1382d86[DATARMNETe632b2e0b0]={(0xd35+210-0xdff),(0xd03+244-0xdf1),
-(0xd11+230-0xdf3),(0xd1f+216-0xdf5)};static const int DATARMNET14ed95ab67[
-DATARMNETe632b2e0b0]={(0xd11+230-0xdf3),(0xd18+223-0xdf4),(0xd1f+216-0xdf5),
-(0xd26+209-0xdf6)};struct DATARMNET93da852cc2{struct qdisc_skb_head q;int 
-DATARMNET1de7b3d891;int DATARMNETf9afebb887;unsigned int DATARMNETb93c9b44d9;
-unsigned int DATARMNET04fa439380;};struct DATARMNET74e95d25df{struct 
-DATARMNET93da852cc2 DATARMNETb4180393e4[DATARMNETe632b2e0b0];};static int 
-DATARMNETdaae0b9ea8(struct DATARMNET74e95d25df*DATARMNETe823dcf978){int 
-DATARMNET70fa801d65=DATARMNETe632b2e0b0;int DATARMNET3c5d4329d8=
-DATARMNETe632b2e0b0;int DATARMNET2372d14a3d,DATARMNET713b43476b,
-DATARMNETdc41089b89=-(0xd26+209-0xdf6);for(DATARMNET2372d14a3d=(0xd2d+202-0xdf7)
-;DATARMNET2372d14a3d<DATARMNETe632b2e0b0;DATARMNET2372d14a3d++){if(
-DATARMNETe823dcf978->DATARMNETb4180393e4[DATARMNET2372d14a3d].q.qlen>
-DATARMNETe823dcf978->DATARMNETb4180393e4[DATARMNET2372d14a3d].
-DATARMNET04fa439380){DATARMNET713b43476b=DATARMNETe823dcf978->
-DATARMNETb4180393e4[DATARMNET2372d14a3d].q.qlen-DATARMNETe823dcf978->
-DATARMNETb4180393e4[DATARMNET2372d14a3d].DATARMNET04fa439380;if(
-DATARMNET713b43476b>=DATARMNETdc41089b89){DATARMNETdc41089b89=
-DATARMNET713b43476b;DATARMNET70fa801d65=DATARMNET2372d14a3d;}}if(
-DATARMNETe823dcf978->DATARMNETb4180393e4[DATARMNET2372d14a3d].q.qlen>
-DATARMNETe823dcf978->DATARMNETb4180393e4[DATARMNET2372d14a3d].
-DATARMNETb93c9b44d9)DATARMNET3c5d4329d8=DATARMNET2372d14a3d;}if(
-DATARMNET70fa801d65<DATARMNETe632b2e0b0)return DATARMNET70fa801d65;return 
-DATARMNET3c5d4329d8;}static inline void DATARMNET8c1d8c9f65(struct 
-DATARMNET74e95d25df*DATARMNETe823dcf978,int DATARMNET2372d14a3d){
-DATARMNETe823dcf978->DATARMNETb4180393e4[DATARMNET2372d14a3d].
-DATARMNET1de7b3d891=DATARMNET9dd1382d86[DATARMNET2372d14a3d];DATARMNETe823dcf978
-->DATARMNETb4180393e4[DATARMNET2372d14a3d].DATARMNETf9afebb887=
-DATARMNET91bbdde74c[DATARMNET2372d14a3d];}static inline void DATARMNET60cff0042c
-(struct DATARMNET74e95d25df*DATARMNETe823dcf978,int DATARMNET2372d14a3d,unsigned
- int DATARMNETf9d25d31ff){DATARMNETe823dcf978->DATARMNETb4180393e4[
-DATARMNET2372d14a3d].DATARMNETb93c9b44d9=DATARMNETf9d25d31ff/(0xd27+224-0xdfd)*
-DATARMNET14ed95ab67[DATARMNET2372d14a3d];DATARMNETe823dcf978->
-DATARMNETb4180393e4[DATARMNET2372d14a3d].DATARMNET04fa439380=DATARMNETe823dcf978
-->DATARMNETb4180393e4[DATARMNET2372d14a3d].DATARMNETb93c9b44d9<<
-(0xd26+209-0xdf6);}static int DATARMNET3a797cc4e9(struct sk_buff*
-DATARMNET543491eb0f,struct Qdisc*DATARMNET9b0193c8c4,struct sk_buff**
-DATARMNET6af05df5b3){struct DATARMNET74e95d25df*DATARMNETe823dcf978=qdisc_priv(
-DATARMNET9b0193c8c4);unsigned int DATARMNET5affe290b8=qdisc_pkt_len(
-DATARMNET543491eb0f);int DATARMNETba251b7c9f;int DATARMNETa9b7aedc43;struct 
-sk_buff*DATARMNET7495e55ca2;DATARMNETba251b7c9f=DATARMNET93bdeed8cb[
-DATARMNET543491eb0f->priority&TC_PRIO_MAX];if(unlikely(DATARMNET9b0193c8c4->q.
-qlen>=qdisc_dev(DATARMNET9b0193c8c4)->tx_queue_len)){DATARMNETa9b7aedc43=
-DATARMNETdaae0b9ea8(DATARMNETe823dcf978);if(DATARMNETa9b7aedc43<
-DATARMNETe632b2e0b0&&DATARMNETa9b7aedc43!=DATARMNETba251b7c9f){
-DATARMNET7495e55ca2=__qdisc_dequeue_head(&DATARMNETe823dcf978->
-DATARMNETb4180393e4[DATARMNETa9b7aedc43].q);if(likely(DATARMNET7495e55ca2)){
-DATARMNET9b0193c8c4->qstats.backlog-=qdisc_pkt_len(DATARMNET7495e55ca2);
-DATARMNET9b0193c8c4->q.qlen--;qdisc_drop(DATARMNET7495e55ca2,DATARMNET9b0193c8c4
-,DATARMNET6af05df5b3);}}else{return qdisc_drop(DATARMNET543491eb0f,
-DATARMNET9b0193c8c4,DATARMNET6af05df5b3);}}__qdisc_enqueue_tail(
-DATARMNET543491eb0f,&DATARMNETe823dcf978->DATARMNETb4180393e4[
-DATARMNETba251b7c9f].q);qdisc_update_stats_at_enqueue(DATARMNET9b0193c8c4,
-DATARMNET5affe290b8);return NET_XMIT_SUCCESS;}static u8 DATARMNETf9ac3daa83(
-struct DATARMNET74e95d25df*DATARMNETe823dcf978){int DATARMNET2372d14a3d,
-DATARMNET70fa801d65=DATARMNETe632b2e0b0;for(DATARMNET2372d14a3d=
-(0xd2d+202-0xdf7);DATARMNET2372d14a3d<DATARMNETe632b2e0b0;DATARMNET2372d14a3d++)
-{if(!DATARMNETe823dcf978->DATARMNETb4180393e4[DATARMNET2372d14a3d].q.qlen)
-continue;if(DATARMNETe823dcf978->DATARMNETb4180393e4[DATARMNET2372d14a3d].
-DATARMNET1de7b3d891<=(0xd2d+202-0xdf7)||DATARMNETe823dcf978->DATARMNETb4180393e4
-[DATARMNET2372d14a3d].DATARMNETf9afebb887<=(0xd2d+202-0xdf7)){if(
-DATARMNET2372d14a3d<DATARMNET70fa801d65)DATARMNET70fa801d65=DATARMNET2372d14a3d;
-continue;}return DATARMNET2372d14a3d;}for(DATARMNET2372d14a3d=(0xd2d+202-0xdf7);
-DATARMNET2372d14a3d<DATARMNETe632b2e0b0;DATARMNET2372d14a3d++)
-DATARMNET8c1d8c9f65(DATARMNETe823dcf978,DATARMNET2372d14a3d);return 
-DATARMNET70fa801d65;}static struct sk_buff*DATARMNET11bbc6360d(struct Qdisc*
-DATARMNET9b0193c8c4){struct DATARMNET74e95d25df*DATARMNETe823dcf978=qdisc_priv(
-DATARMNET9b0193c8c4);struct sk_buff*DATARMNET543491eb0f=NULL;u8 
-DATARMNET2372d14a3d;DATARMNET2372d14a3d=DATARMNETf9ac3daa83(DATARMNETe823dcf978)
-;if(DATARMNET2372d14a3d<DATARMNETe632b2e0b0){DATARMNET543491eb0f=
-__qdisc_dequeue_head(&DATARMNETe823dcf978->DATARMNETb4180393e4[
-DATARMNET2372d14a3d].q);if(likely(DATARMNET543491eb0f)){DATARMNETe823dcf978->
-DATARMNETb4180393e4[DATARMNET2372d14a3d].DATARMNET1de7b3d891--;
-DATARMNETe823dcf978->DATARMNETb4180393e4[DATARMNET2372d14a3d].
-DATARMNETf9afebb887-=qdisc_pkt_len(DATARMNET543491eb0f);
-qdisc_update_stats_at_dequeue(DATARMNET9b0193c8c4,DATARMNET543491eb0f);}}return 
-DATARMNET543491eb0f;}static struct sk_buff*DATARMNET5842e6aac7(struct Qdisc*
-DATARMNET9b0193c8c4){struct DATARMNET74e95d25df*DATARMNETe823dcf978=qdisc_priv(
-DATARMNET9b0193c8c4);struct sk_buff*DATARMNET543491eb0f=NULL;u8 
-DATARMNET2372d14a3d;DATARMNET2372d14a3d=DATARMNETf9ac3daa83(DATARMNETe823dcf978)
-;if(DATARMNET2372d14a3d<DATARMNETe632b2e0b0)DATARMNET543491eb0f=
-DATARMNETe823dcf978->DATARMNETb4180393e4[DATARMNET2372d14a3d].q.head;return 
-DATARMNET543491eb0f;}static int DATARMNET757a7de682(struct Qdisc*
-DATARMNET9b0193c8c4,struct nlattr*DATARMNET8bdeb8bf5c,struct netlink_ext_ack*
-DATARMNET79a1f177ed){struct DATARMNET74e95d25df*DATARMNETe823dcf978=qdisc_priv(
-DATARMNET9b0193c8c4);int DATARMNET2372d14a3d;for(DATARMNET2372d14a3d=
-(0xd2d+202-0xdf7);DATARMNET2372d14a3d<DATARMNETe632b2e0b0;DATARMNET2372d14a3d++)
-{DATARMNET8c1d8c9f65(DATARMNETe823dcf978,DATARMNET2372d14a3d);
-DATARMNET60cff0042c(DATARMNETe823dcf978,DATARMNET2372d14a3d,qdisc_dev(
-DATARMNET9b0193c8c4)->tx_queue_len);}DATARMNET9b0193c8c4->flags|=
-TCQ_F_CAN_BYPASS;return(0xd2d+202-0xdf7);}static void DATARMNET9593ab9587(struct
- Qdisc*DATARMNET9b0193c8c4){struct DATARMNET74e95d25df*DATARMNETe823dcf978=
-qdisc_priv(DATARMNET9b0193c8c4);int DATARMNET2372d14a3d;for(DATARMNET2372d14a3d=
-(0xd2d+202-0xdf7);DATARMNET2372d14a3d<DATARMNETe632b2e0b0;DATARMNET2372d14a3d++)
-{kfree_skb_list(DATARMNETe823dcf978->DATARMNETb4180393e4[DATARMNET2372d14a3d].q.
-head);DATARMNETe823dcf978->DATARMNETb4180393e4[DATARMNET2372d14a3d].q.head=NULL;
-DATARMNETe823dcf978->DATARMNETb4180393e4[DATARMNET2372d14a3d].q.tail=NULL;
-DATARMNETe823dcf978->DATARMNETb4180393e4[DATARMNET2372d14a3d].q.qlen=
-(0xd2d+202-0xdf7);DATARMNET8c1d8c9f65(DATARMNETe823dcf978,DATARMNET2372d14a3d);
-DATARMNET60cff0042c(DATARMNETe823dcf978,DATARMNET2372d14a3d,qdisc_dev(
-DATARMNET9b0193c8c4)->tx_queue_len);}}static int DATARMNET6647342968(struct 
-Qdisc*DATARMNET9b0193c8c4,unsigned int qlen){struct DATARMNET74e95d25df*
-DATARMNETe823dcf978=qdisc_priv(DATARMNET9b0193c8c4);int DATARMNET2372d14a3d;for(
-DATARMNET2372d14a3d=(0xd2d+202-0xdf7);DATARMNET2372d14a3d<DATARMNETe632b2e0b0;
-DATARMNET2372d14a3d++)DATARMNET60cff0042c(DATARMNETe823dcf978,
-DATARMNET2372d14a3d,qlen);return(0xd2d+202-0xdf7);}static struct Qdisc_ops 
-DATARMNET9afaec21de __read_mostly={.id="\x72\x6d\x6e\x65\x74\x5f\x73\x63\x68",.
-priv_size=sizeof(struct DATARMNET74e95d25df),.enqueue=DATARMNET3a797cc4e9,.
-dequeue=DATARMNET11bbc6360d,.peek=DATARMNET5842e6aac7,.init=DATARMNET757a7de682,
-.reset=DATARMNET9593ab9587,.change_tx_queue_len=DATARMNET6647342968,.owner=
-THIS_MODULE,};static int __init DATARMNETe97da0a844(void){pr_info(
-"\x73\x63\x68\x3a\x20\x69\x6e\x69\x74\x20\x28\x25\x73\x29" "\n",
-DATARMNETf1bb41174a);return register_qdisc(&DATARMNET9afaec21de);}static void 
-__exit DATARMNET1dc9099e88(void){unregister_qdisc(&DATARMNET9afaec21de);}
-MODULE_LICENSE("\x47\x50\x4c\x20\x76\x32");module_init(DATARMNETe97da0a844);
-module_exit(DATARMNET1dc9099e88);
+
+/* Insert newest first, last 4 bytes of the change id */
+static char *verinfo[] = { "b10f2ea2", "e6371d40", "7415921c", "ae244a9d" };
+module_param_array(verinfo, charp, NULL, 0444);
+MODULE_PARM_DESC(verinfo, "Version of the driver");
+
+static const char *rmnet_sch_version = "1.2";
+
+/* queue 0 has highest priority */
+#define RMNET_SCH_MAX_QUEUE 4
+
+/* Linux priority 6, 7, 8, 9 maps to queue 0, 1, 2, 3.
+ * All other priorities use queue 3 */
+static const u8 prio2queue[TC_PRIO_MAX + 1] = { 3, 3, 3, 3, 3, 3, 0, 1,
+						2, 3, 3, 3, 3, 3, 3, 3 };
+
+/* Bytes to dequeue before switching to lower priority queue */
+static const int bytes_limit[RMNET_SCH_MAX_QUEUE] = { 256 * 1024, 128 * 1024,
+						      64 * 1024, 32 * 1024 };
+
+/* Packets to dequeue before switching to lower priority queue */
+static const int pkts_limit[RMNET_SCH_MAX_QUEUE] = { 8, 6, 4, 2 };
+
+/* Queue len ratio (total 10) for each queue */
+static const int qlen_ratio[RMNET_SCH_MAX_QUEUE] = { 4, 3, 2, 1 };
+
+struct rmnet_sch_queue {
+	struct qdisc_skb_head q;
+	int pkts_quota;
+	int bytes_quota;
+	unsigned int qlen_thresh;
+	unsigned int qlen_thresh2;
+};
+
+struct rmnet_sch_priv {
+	struct rmnet_sch_queue queue[RMNET_SCH_MAX_QUEUE];
+};
+
+/*
+ * Choose a queue that exceeds qlen threshold to drop.
+ * return RMNET_SCH_MAX_QUEUE if no such queue.
+ */
+static int rmnet_sch_next_to_drop(struct rmnet_sch_priv *priv)
+{
+	int candidate = RMNET_SCH_MAX_QUEUE;
+	int candidate2 = RMNET_SCH_MAX_QUEUE;
+	int qn, diff, max = -1;
+
+	/* candidate is the queue that exceeds thresh2 the most.
+	 * candidate2 is the lowest priority queue that exceeds thresh.
+	 */
+	for (qn = 0; qn < RMNET_SCH_MAX_QUEUE; qn++) {
+		if (priv->queue[qn].q.qlen > priv->queue[qn].qlen_thresh2) {
+			diff = priv->queue[qn].q.qlen -
+			       priv->queue[qn].qlen_thresh2;
+			if (diff >= max) {
+				max = diff;
+				candidate = qn;
+			}
+		}
+		if (priv->queue[qn].q.qlen > priv->queue[qn].qlen_thresh)
+			candidate2 = qn;
+	}
+
+	if (candidate < RMNET_SCH_MAX_QUEUE)
+		return candidate;
+
+	return candidate2;
+}
+
+static inline void rmnet_sch_set_quota(struct rmnet_sch_priv *priv, int qn)
+{
+	priv->queue[qn].pkts_quota = pkts_limit[qn];
+	priv->queue[qn].bytes_quota = bytes_limit[qn];
+}
+
+static inline void rmnet_sch_set_qlen(struct rmnet_sch_priv *priv, int qn,
+				      unsigned int tx_qlen)
+{
+	priv->queue[qn].qlen_thresh = tx_qlen / 10 * qlen_ratio[qn];
+	priv->queue[qn].qlen_thresh2 = priv->queue[qn].qlen_thresh << 1;
+}
+
+static int rmnet_sch_enqueue(struct sk_buff *skb, struct Qdisc *sch,
+			     struct sk_buff **to_free)
+{
+	struct rmnet_sch_priv *priv = qdisc_priv(sch);
+	unsigned int pkt_len = qdisc_pkt_len(skb);
+	int qn_to_enq;
+	int qn_to_drop;
+	struct sk_buff *skb_to_drop;
+
+	qn_to_enq = prio2queue[skb->priority & TC_PRIO_MAX];
+
+	/* If qlen is full, try to drop one packet from the queue that
+	 * exceeds qlen threshold
+	 */
+	if (unlikely(sch->q.qlen >= qdisc_dev(sch)->tx_queue_len)) {
+		qn_to_drop = rmnet_sch_next_to_drop(priv);
+		if (qn_to_drop < RMNET_SCH_MAX_QUEUE &&
+		    qn_to_drop != qn_to_enq) {
+			skb_to_drop = __qdisc_dequeue_head(
+				&priv->queue[qn_to_drop].q);
+			if (likely(skb_to_drop)) {
+				sch->qstats.backlog -=
+					qdisc_pkt_len(skb_to_drop);
+				sch->q.qlen--;
+				qdisc_drop(skb_to_drop, sch, to_free);
+			}
+		} else {
+			return qdisc_drop(skb, sch, to_free);
+		}
+	}
+
+	__qdisc_enqueue_tail(skb, &priv->queue[qn_to_enq].q);
+	qdisc_update_stats_at_enqueue(sch, pkt_len);
+	return NET_XMIT_SUCCESS;
+}
+
+/*
+ * Next queue to dequeue. RMNET_SCH_MAX_QUEUE no data available.
+ */
+static u8 rmnet_sch_next_to_dequeue(struct rmnet_sch_priv *priv)
+{
+	int qn, candidate = RMNET_SCH_MAX_QUEUE;
+
+	for (qn = 0; qn < RMNET_SCH_MAX_QUEUE; qn++) {
+		if (!priv->queue[qn].q.qlen)
+			continue;
+		if (priv->queue[qn].pkts_quota <= 0 ||
+		    priv->queue[qn].bytes_quota <= 0) {
+			if (qn < candidate)
+				candidate = qn;
+			continue;
+		}
+		return qn;
+	}
+
+	/* Either no packet, or all queues with packets have quota consumed,
+	 * reset quota */
+	for (qn = 0; qn < RMNET_SCH_MAX_QUEUE; qn++)
+		rmnet_sch_set_quota(priv, qn);
+
+	return candidate;
+}
+
+static struct sk_buff *rmnet_sch_dequeue(struct Qdisc *sch)
+{
+	struct rmnet_sch_priv *priv = qdisc_priv(sch);
+	struct sk_buff *skb = NULL;
+	u8 qn;
+
+	qn = rmnet_sch_next_to_dequeue(priv);
+
+	if (qn < RMNET_SCH_MAX_QUEUE) {
+		skb = __qdisc_dequeue_head(&priv->queue[qn].q);
+		if (likely(skb)) {
+			priv->queue[qn].pkts_quota--;
+			priv->queue[qn].bytes_quota -= qdisc_pkt_len(skb);
+			qdisc_update_stats_at_dequeue(sch, skb);
+		}
+	}
+
+	return skb;
+}
+
+static struct sk_buff *rmnet_sch_peek(struct Qdisc *sch)
+{
+	struct rmnet_sch_priv *priv = qdisc_priv(sch);
+	struct sk_buff *skb = NULL;
+	u8 qn;
+
+	qn = rmnet_sch_next_to_dequeue(priv);
+
+	if (qn < RMNET_SCH_MAX_QUEUE)
+		skb = priv->queue[qn].q.head;
+
+	return skb;
+}
+
+static int rmnet_sch_init(struct Qdisc *sch, struct nlattr *arg,
+			  struct netlink_ext_ack *extack)
+{
+	struct rmnet_sch_priv *priv = qdisc_priv(sch);
+	int qn;
+
+	for (qn = 0; qn < RMNET_SCH_MAX_QUEUE; qn++) {
+		rmnet_sch_set_quota(priv, qn);
+		rmnet_sch_set_qlen(priv, qn, qdisc_dev(sch)->tx_queue_len);
+	}
+
+	sch->flags |= TCQ_F_CAN_BYPASS;
+
+	return 0;
+}
+
+static void rmnet_sch_reset(struct Qdisc *sch)
+{
+	struct rmnet_sch_priv *priv = qdisc_priv(sch);
+	int qn;
+
+	for (qn = 0; qn < RMNET_SCH_MAX_QUEUE; qn++) {
+		kfree_skb_list(priv->queue[qn].q.head);
+		priv->queue[qn].q.head = NULL;
+		priv->queue[qn].q.tail = NULL;
+		priv->queue[qn].q.qlen = 0;
+		rmnet_sch_set_quota(priv, qn);
+		rmnet_sch_set_qlen(priv, qn, qdisc_dev(sch)->tx_queue_len);
+	}
+
+	/* stats will be reset by qdisc_reset */
+}
+
+static int rmnet_sch_change_tx_queue_len(struct Qdisc *sch, unsigned int qlen)
+{
+	struct rmnet_sch_priv *priv = qdisc_priv(sch);
+	int qn;
+
+	for (qn = 0; qn < RMNET_SCH_MAX_QUEUE; qn++)
+		rmnet_sch_set_qlen(priv, qn, qlen);
+
+	return 0;
+}
+
+static struct Qdisc_ops rmnet_sch_qdisc_ops __read_mostly = {
+	.id = "rmnet_sch",
+	.priv_size = sizeof(struct rmnet_sch_priv),
+	.enqueue = rmnet_sch_enqueue,
+	.dequeue = rmnet_sch_dequeue,
+	.peek = rmnet_sch_peek,
+	.init = rmnet_sch_init,
+	.reset = rmnet_sch_reset,
+	.change_tx_queue_len = rmnet_sch_change_tx_queue_len,
+	.owner = THIS_MODULE,
+};
+
+static int __init rmnet_sch_module_init(void)
+{
+	pr_info("sch: init (%s)\n", rmnet_sch_version);
+	return register_qdisc(&rmnet_sch_qdisc_ops);
+}
+
+static void __exit rmnet_sch_module_exit(void)
+{
+	unregister_qdisc(&rmnet_sch_qdisc_ops);
+}
+
+MODULE_LICENSE("GPL v2");
+module_init(rmnet_sch_module_init);
+module_exit(rmnet_sch_module_exit);

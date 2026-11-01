@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
- * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
  */
 
 #include <linux/bits.h>
@@ -29,7 +29,7 @@ static void __ipa_tsp_get_supported_constrains(void)
 		ipa3_ctx->tsp.egr_ep_max = 0;
 		ipa3_ctx->tsp.egr_tc_max = 0;
 
-		IPAERR("TSP not supported. ingr_tc_max=%d egr_ep_max=%d egr_tc_max=%d\n",
+		IPAERR_BOOTUP("TSP not supported. ingr_tc_max=%d egr_ep_max=%d egr_tc_max=%d\n",
 		       ipa3_ctx->tsp.ingr_tc_max, ipa3_ctx->tsp.egr_ep_max, ipa3_ctx->tsp.egr_tc_max);
 	}
 }
@@ -46,7 +46,7 @@ int ipa_tsp_init(void)
 	 */
 	__ipa_tsp_get_supported_constrains();
 	if (!ipa3_ctx->tsp.ingr_tc_max || !ipa3_ctx->tsp.egr_ep_max || !ipa3_ctx->tsp.egr_tc_max) {
-		IPAERR("TSP not supported. ingr_tc_max=%d egr_ep_max=%d egr_tc_max=%d\n",
+		IPAERR_BOOTUP("TSP not supported. ingr_tc_max=%d egr_ep_max=%d egr_tc_max=%d\n",
 		       ipa3_ctx->tsp.ingr_tc_max, ipa3_ctx->tsp.egr_ep_max, ipa3_ctx->tsp.egr_tc_max);
 		return -EFAULT;
 	}
@@ -60,30 +60,30 @@ int ipa_tsp_init(void)
 	ipa3_ctx->tsp.egr_tc_tbl.size = ipa3_ctx->tsp.egr_tc_max * IPA_TSP_EGR_TC_SIZE;
 
 	if (!ipa3_ctx->tsp.ingr_tc_tbl.size || !ipa3_ctx->tsp.egr_ep_tbl.size || !ipa3_ctx->tsp.egr_tc_tbl.size) {
-		IPAERR("ingr_tc_tbl.size=%d egr_ep_tbl.size=%d egr_tc_tbl.size=%d\n",
+		IPAERR_BOOTUP("ingr_tc_tbl.size=%d egr_ep_tbl.size=%d egr_tc_tbl.size=%d\n",
 		       ipa3_ctx->tsp.ingr_tc_tbl.size, ipa3_ctx->tsp.egr_ep_tbl.size, ipa3_ctx->tsp.egr_tc_tbl.size);
 		return -EFAULT;
 	}
 
 	if (!ipa3_ctx->pdev || !&(ipa3_ctx->tsp.ingr_tc_tbl.phys_base)) {
-		IPAERR("ipa3_ctx->pdev=%16X &(ipa3_ctx->tsp.ingr_tc_tbl.phys_base)=%16X\n",
+		IPAERR_BOOTUP("ipa3_ctx->pdev=%16X &(ipa3_ctx->tsp.ingr_tc_tbl.phys_base)=%16X\n",
 		       ipa3_ctx->pdev, &(ipa3_ctx->tsp.ingr_tc_tbl.phys_base));
 		return -EFAULT;
 	}
-	IPAERR("ipa3_ctx->pdev=%16X &(ipa3_ctx->tsp.ingr_tc_tbl.phys_base)=%16X\n",
+	IPAERR_BOOTUP("ipa3_ctx->pdev=%16X &(ipa3_ctx->tsp.ingr_tc_tbl.phys_base)=%16X\n",
 	       ipa3_ctx->pdev, &(ipa3_ctx->tsp.ingr_tc_tbl.phys_base));
 
 	ipa3_ctx->tsp.ingr_tc_tbl.base = dma_alloc_coherent(ipa3_ctx->pdev,
 		ipa3_ctx->tsp.ingr_tc_tbl.size, &(ipa3_ctx->tsp.ingr_tc_tbl.phys_base), GFP_KERNEL);
 	if (!ipa3_ctx->tsp.ingr_tc_tbl.base) {
-		IPAERR("Failed to allocate cache memory for ingress TC TSP table.\n");
+		IPAERR_BOOTUP("Failed to allocate cache memory for ingress TC TSP table.\n");
 		return -ENOMEM;
 	}
 
 	ipa3_ctx->tsp.egr_ep_tbl.base = dma_alloc_coherent(ipa3_ctx->pdev,
 		ipa3_ctx->tsp.egr_ep_tbl.size, &(ipa3_ctx->tsp.egr_ep_tbl.phys_base), GFP_KERNEL);
 	if (!ipa3_ctx->tsp.egr_ep_tbl.base) {
-		IPAERR("Failed to allocate cache memory for egress producer TSP table.\n");
+		IPAERR_BOOTUP("Failed to allocate cache memory for egress producer TSP table.\n");
 		ret = -ENOMEM;
 		goto free_ingr;
 	}
@@ -91,7 +91,7 @@ int ipa_tsp_init(void)
 	ipa3_ctx->tsp.egr_tc_tbl.base = dma_alloc_coherent(ipa3_ctx->pdev,
 		ipa3_ctx->tsp.egr_tc_tbl.size, &(ipa3_ctx->tsp.egr_tc_tbl.phys_base), GFP_KERNEL);
 	if (!ipa3_ctx->tsp.egr_tc_tbl.base) {
-		IPAERR("Failed to allocate cache memory for egress TC TSP table.\n");
+		IPAERR_BOOTUP("Failed to allocate cache memory for egress TC TSP table.\n");
 		ret = -ENOMEM;
 		goto free_ep;
 	}
@@ -104,7 +104,7 @@ int ipa_tsp_init(void)
 		kzalloc(ipa3_ctx->tsp.egr_ep_max * sizeof(enum ipa_client_type), GFP_KERNEL);
 
 	if (ipa3_ctx->tsp.egr_ep_config == NULL) {
-		IPAERR("Failed to allocate cache memory for egress producer config.\n");
+		IPAERR_BOOTUP("Failed to allocate cache memory for egress producer config.\n");
 		ret = -ENOMEM;
 		goto free_egr;
 	}
@@ -133,7 +133,7 @@ alloc:
 			flag = GFP_ATOMIC;
 			goto alloc;
 		}
-		IPAERR("fail to alloc DMA buff of size %d\n", ipa3_ctx->tsp.qm_tlv_mem.size);
+		IPAERR_BOOTUP("fail to alloc DMA buff of size %d\n", ipa3_ctx->tsp.qm_tlv_mem.size);
 		ret = -ENOMEM;
 		goto free_ep_conf;
 	}

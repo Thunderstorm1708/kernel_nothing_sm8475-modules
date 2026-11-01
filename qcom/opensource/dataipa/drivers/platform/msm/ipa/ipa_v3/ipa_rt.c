@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2012-2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2022-2024 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
  */
 
 #include <linux/bitops.h>
@@ -2372,7 +2372,7 @@ bail:
 int ipa3_set_rt_tuple_mask(int tbl_idx, struct ipahal_reg_hash_tuple *tuple)
 {
 	if (!tuple) {
-		IPAERR_RL("bad tuple\n");
+		IPAERR_BOOTUP_RL("bad tuple\n");
 		return -EINVAL;
 	}
 
@@ -2380,19 +2380,19 @@ int ipa3_set_rt_tuple_mask(int tbl_idx, struct ipahal_reg_hash_tuple *tuple)
 		max(IPA_MEM_PART(v6_rt_num_index),
 		IPA_MEM_PART(v4_rt_num_index)) ||
 		tbl_idx < 0) {
-		IPAERR_RL("bad table index\n");
+		IPAERR_BOOTUP_RL("bad table index\n");
 		return -EINVAL;
 	}
 
 	if (tbl_idx >= IPA_MEM_PART(v4_modem_rt_index_lo) &&
 		tbl_idx <= IPA_MEM_PART(v4_modem_rt_index_hi)) {
-		IPAERR_RL("cannot configure modem v4 rt tuple by AP\n");
+		IPAERR_BOOTUP_RL("cannot configure modem v4 rt tuple by AP\n");
 		return -EINVAL;
 	}
 
 	if (tbl_idx >= IPA_MEM_PART(v6_modem_rt_index_lo) &&
 		tbl_idx <= IPA_MEM_PART(v6_modem_rt_index_hi)) {
-		IPAERR_RL("cannot configure modem v6 rt tuple by AP\n");
+		IPAERR_BOOTUP_RL("cannot configure modem v6 rt tuple by AP\n");
 		return -EINVAL;
 	}
 

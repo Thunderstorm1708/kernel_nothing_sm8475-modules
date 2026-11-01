@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
-/* Copyright (c) 2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2022-2024 Qualcomm Innovation Center, Inc. All rights reserved.
- *
- * RMNET WLAN connection management framework
- *
+/*
+ * Copyright (c) 2021, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2022-2025 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 #include <linux/types.h>
@@ -22,340 +20,772 @@
 #include "rmnet_wlan.h"
 #include "rmnet_wlan_connection.h"
 #include "rmnet_wlan_stats.h"
-#define DATARMNET5da8c68c19 ((0x16a8+1565-0x14f5))
-#define DATARMNET4d011802ef ((0xdf7+6169-0x241c))
-#define DATARMNET8fc07fbb24 ((0xeb7+1158-0x132d))
-#define DATARMNETeaf0945284 \
-	(const_ilog2(DATARMNET8fc07fbb24))
-struct DATARMNET4f49486833{struct hlist_node DATARMNETe8608dd267;struct rcu_head
- DATARMNET28bfe9e6ad;struct DATARMNET0ca9d8ead7 DATARMNET54338da2ff;struct 
-DATARMNET8d3c2559ca*DATARMNET7ed5754a5c;unsigned long DATARMNET763f2e5fac;bool 
-DATARMNET1717afebc7;};struct DATARMNETeb4a7e58d8{struct delayed_work 
-DATARMNET190b4452e8;bool DATARMNETcd94e0d3c7;};static DEFINE_SPINLOCK(
-DATARMNET820642743b);static DEFINE_HASHTABLE(DATARMNET5413d6f8ec,
-DATARMNETeaf0945284);static u32 DATARMNETf658004dbc;static struct 
-DATARMNETeb4a7e58d8 DATARMNET0b04fde883;static bool DATARMNET5f3c9ed4da(struct 
-DATARMNET0ca9d8ead7*DATARMNET75decd6f60,struct DATARMNET0ca9d8ead7*
-DATARMNET6745cad668){if(DATARMNET75decd6f60->DATARMNET0d956cc77a!=
-DATARMNET6745cad668->DATARMNET0d956cc77a)return false;if(DATARMNET75decd6f60->
-DATARMNET0d956cc77a==(0xd11+230-0xdf3))return DATARMNET75decd6f60->
-DATARMNETdfe430c2d6==DATARMNET6745cad668->DATARMNETdfe430c2d6&&
-DATARMNET75decd6f60->DATARMNET2cb607d686==DATARMNET6745cad668->
-DATARMNET2cb607d686;return!ipv6_addr_cmp(&DATARMNET75decd6f60->
-DATARMNET815cbb4bf5,&DATARMNET6745cad668->DATARMNET815cbb4bf5)&&!ipv6_addr_cmp(&
-DATARMNET75decd6f60->DATARMNETc3f31215b7,&DATARMNET6745cad668->
-DATARMNETc3f31215b7);}static bool DATARMNET64cb643bf6(struct DATARMNET4f49486833
-*DATARMNET63b1a086d5,unsigned long DATARMNET763f2e5fac){unsigned long 
-DATARMNETc2d5c71ce1;DATARMNETc2d5c71ce1=msecs_to_jiffies(DATARMNET5da8c68c19);if
-(DATARMNET763f2e5fac-DATARMNET63b1a086d5->DATARMNET763f2e5fac>
-DATARMNETc2d5c71ce1)return true;return false;}static bool DATARMNETd0a7ffc2d1(
-bool DATARMNETe78ad140cc){struct DATARMNET4f49486833*DATARMNET63b1a086d5;struct 
-hlist_node*DATARMNET0386f6f82a;unsigned long DATARMNET763f2e5fac;int 
-DATARMNET5c2fd31d7b;DATARMNET763f2e5fac=jiffies;hash_for_each_safe(
-DATARMNET5413d6f8ec,DATARMNET5c2fd31d7b,DATARMNET0386f6f82a,DATARMNET63b1a086d5,
-DATARMNETe8608dd267){if(DATARMNET63b1a086d5->DATARMNET1717afebc7)continue;if(
-DATARMNETe78ad140cc||DATARMNET64cb643bf6(DATARMNET63b1a086d5,DATARMNET763f2e5fac
-)){DATARMNET63b1a086d5->DATARMNET1717afebc7=true;hash_del_rcu(&
-DATARMNET63b1a086d5->DATARMNETe8608dd267);kfree_rcu(DATARMNET63b1a086d5,
-DATARMNET28bfe9e6ad);DATARMNETf658004dbc--;}}return!!DATARMNETf658004dbc;}static
- void DATARMNET8211acc766(struct work_struct*DATARMNET190b4452e8){struct 
-DATARMNETeb4a7e58d8*DATARMNET563f32ea64;unsigned long DATARMNETfb0677cc3c;bool 
-DATARMNET6e1c466378;DATARMNET563f32ea64=container_of(to_delayed_work(
-DATARMNET190b4452e8),struct DATARMNETeb4a7e58d8,DATARMNET190b4452e8);
-spin_lock_irqsave(&DATARMNET820642743b,DATARMNETfb0677cc3c);DATARMNET6e1c466378=
-DATARMNETd0a7ffc2d1(DATARMNET563f32ea64->DATARMNETcd94e0d3c7);if(
-DATARMNET6e1c466378){unsigned long DATARMNETf71ef1b8da;DATARMNETf71ef1b8da=
-msecs_to_jiffies(DATARMNET4d011802ef);schedule_delayed_work(&DATARMNET563f32ea64
-->DATARMNET190b4452e8,DATARMNETf71ef1b8da);}spin_unlock_irqrestore(&
-DATARMNET820642743b,DATARMNETfb0677cc3c);}static rx_handler_result_t 
-DATARMNETc9ed97754a(struct sk_buff*DATARMNET543491eb0f,uint8_t 
-DATARMNET1a901c3d09){if(skb_is_nonlinear(DATARMNET543491eb0f)&&!skb_headlen(
-DATARMNET543491eb0f)){int DATARMNETcab577d6ad=(0xd2d+202-0xdf7);if(
-DATARMNET543491eb0f->protocol==htons(ETH_P_IP)){DATARMNETcab577d6ad=sizeof(
-struct iphdr);}else if(DATARMNET543491eb0f->protocol==htons(ETH_P_IPV6)){
-DATARMNETcab577d6ad=sizeof(struct ipv6hdr);}else{DATARMNET17f6bc1be5(
-DATARMNETcea0a33786);goto DATARMNETc1174a0f45;}if(!__pskb_pull_tail(
-DATARMNET543491eb0f,DATARMNETcab577d6ad)){DATARMNET17f6bc1be5(
-DATARMNETe1f92d8061);goto DATARMNETc1174a0f45;}else{skb_reset_network_header(
-DATARMNET543491eb0f);DATARMNET17f6bc1be5(DATARMNETce7e5f4f28);}}if(
-DATARMNET543491eb0f->dev&&(DATARMNET543491eb0f->protocol==htons(ETH_P_IP))&&
-DATARMNET1a901c3d09==DATARMNET9bfbc31cd6){struct iphdr*DATARMNET86f1f2cdc9,
-DATARMNETbf6548198e;struct net_device*DATARMNET813ca18d06=NULL;struct flowi4 
-DATARMNET099aa93adc={};struct rtable*DATARMNET066b8bd537;struct neighbour*
-DATARMNET3f85732c70;int DATARMNET268a8314cf=(0xd2d+202-0xdf7);
-DATARMNET86f1f2cdc9=skb_header_pointer(DATARMNET543491eb0f,(0xd2d+202-0xdf7),
-sizeof(*DATARMNET86f1f2cdc9),&DATARMNETbf6548198e);if(!DATARMNET86f1f2cdc9){
-DATARMNET17f6bc1be5(DATARMNET15454f969d);goto DATARMNETc1174a0f45;}
-DATARMNET813ca18d06=dev_get_by_name_rcu(&init_net,DATARMNET934406764d());if(!
-DATARMNET813ca18d06){DATARMNET17f6bc1be5(DATARMNETfa4b3dd44a);goto 
-DATARMNETc1174a0f45;}DATARMNET543491eb0f->dev=DATARMNET813ca18d06;memcpy(&
-DATARMNET099aa93adc.saddr,&DATARMNET86f1f2cdc9->saddr,sizeof(__be32));memcpy(&
-DATARMNET099aa93adc.daddr,&DATARMNET86f1f2cdc9->daddr,sizeof(__be32));
-DATARMNET099aa93adc.flowi4_oif=DATARMNET813ca18d06->ifindex;DATARMNET099aa93adc.
-flowi4_flags=FLOWI_FLAG_KNOWN_NH;DATARMNET066b8bd537=ip_route_output_key(&
-init_net,&DATARMNET099aa93adc);if(IS_ERR(DATARMNET066b8bd537)){
-DATARMNET17f6bc1be5(DATARMNET72ab5e86d8);goto DATARMNETc1174a0f45;}
-DATARMNET3f85732c70=dst_neigh_lookup(&DATARMNET066b8bd537->dst,&
-DATARMNET099aa93adc.daddr);ip_rt_put(DATARMNET066b8bd537);if(!
-DATARMNET3f85732c70){DATARMNET17f6bc1be5(DATARMNET0e6bd55b8b);goto 
-DATARMNETc1174a0f45;}if(DATARMNET3f85732c70->dev!=DATARMNET543491eb0f->dev||!
-DATARMNET3f85732c70->dev->header_ops){DATARMNET17f6bc1be5(DATARMNET64aecaa865);
-neigh_release(DATARMNET3f85732c70);goto DATARMNETc1174a0f45;}DATARMNET268a8314cf
-=neigh_resolve_output(DATARMNET3f85732c70,DATARMNET543491eb0f);neigh_release(
-DATARMNET3f85732c70);if(likely(DATARMNET268a8314cf==NET_XMIT_SUCCESS||
-DATARMNET268a8314cf==NET_XMIT_CN)){DATARMNET17f6bc1be5(DATARMNETc1b437465b);}
-else{DATARMNET17f6bc1be5(DATARMNET43a65c0be7);}return RX_HANDLER_CONSUMED;}else 
-if(DATARMNET543491eb0f->dev&&(DATARMNET543491eb0f->protocol==htons(ETH_P_IPV6))
-&&DATARMNET1a901c3d09==DATARMNET9bfbc31cd6){struct ipv6hdr*DATARMNETbf55123e5b,
-DATARMNETcf1d9e2c1e;struct net_device*DATARMNET813ca18d06=NULL;struct flowi6 
-DATARMNET8fbe36a2fa={};struct neighbour*DATARMNET3f85732c70;struct dst_entry*dst
-;int DATARMNET268a8314cf=(0xd2d+202-0xdf7);DATARMNETbf55123e5b=
-skb_header_pointer(DATARMNET543491eb0f,(0xd2d+202-0xdf7),sizeof(*
-DATARMNETbf55123e5b),&DATARMNETcf1d9e2c1e);if(!DATARMNETbf55123e5b){
-DATARMNET17f6bc1be5(DATARMNET72f4fdd48a);goto DATARMNETc1174a0f45;}
-DATARMNET813ca18d06=dev_get_by_name_rcu(&init_net,DATARMNET934406764d());if(!
-DATARMNET813ca18d06){DATARMNET17f6bc1be5(DATARMNET9cff15f94d);goto 
-DATARMNETc1174a0f45;}DATARMNET543491eb0f->dev=DATARMNET813ca18d06;memcpy(&
-DATARMNET8fbe36a2fa.saddr,&DATARMNETbf55123e5b->saddr,sizeof(struct in6_addr));
-memcpy(&DATARMNET8fbe36a2fa.daddr,&DATARMNETbf55123e5b->daddr,sizeof(struct 
-in6_addr));DATARMNET8fbe36a2fa.flowi6_oif=DATARMNET813ca18d06->ifindex;
-DATARMNET8fbe36a2fa.flowi6_flags=FLOWI_FLAG_KNOWN_NH;dst=ipv6_stub->
-ipv6_dst_lookup_flow(&init_net,NULL,&DATARMNET8fbe36a2fa,NULL);if(IS_ERR(dst)){
-DATARMNET17f6bc1be5(DATARMNETbf6e6853f9);goto DATARMNETc1174a0f45;}
-DATARMNET3f85732c70=dst_neigh_lookup(dst,&DATARMNET8fbe36a2fa.daddr);dst_release
-(dst);if(!DATARMNET3f85732c70){DATARMNET17f6bc1be5(DATARMNETa0da722329);goto 
-DATARMNETc1174a0f45;}if(DATARMNET3f85732c70->dev!=DATARMNET543491eb0f->dev||!
-DATARMNET3f85732c70->dev->header_ops){DATARMNET17f6bc1be5(DATARMNET729e252fb9);
-neigh_release(DATARMNET3f85732c70);goto DATARMNETc1174a0f45;}DATARMNET268a8314cf
-=neigh_resolve_output(DATARMNET3f85732c70,DATARMNET543491eb0f);neigh_release(
-DATARMNET3f85732c70);if(likely(DATARMNET268a8314cf==NET_XMIT_SUCCESS||
-DATARMNET268a8314cf==NET_XMIT_CN)){DATARMNET17f6bc1be5(DATARMNET04311361a2);}
-else{DATARMNET17f6bc1be5(DATARMNET13bbe5f5c5);}return RX_HANDLER_CONSUMED;}else 
-if(DATARMNET543491eb0f->dev&&(DATARMNET543491eb0f->protocol==htons(ETH_P_IP))&&
-DATARMNET1a901c3d09==DATARMNET45ee632553){struct iphdr*DATARMNET86f1f2cdc9,
-DATARMNETbf6548198e;struct net_device*DATARMNET813ca18d06=NULL;struct flowi4 
-DATARMNET099aa93adc={};struct dst_entry*DATARMNETb5af46179c;struct rtable*
-DATARMNET066b8bd537;struct net_device*DATARMNET39542b437e=NULL;
-DATARMNET86f1f2cdc9=skb_header_pointer(DATARMNET543491eb0f,(0xd2d+202-0xdf7),
-sizeof(*DATARMNET86f1f2cdc9),&DATARMNETbf6548198e);if(!DATARMNET86f1f2cdc9){
-DATARMNET17f6bc1be5(DATARMNET7803c877c0);goto DATARMNETc1174a0f45;}
-DATARMNET813ca18d06=dev_get_by_name_rcu(&init_net,DATARMNETe447822105());if(!
-DATARMNET813ca18d06){DATARMNET17f6bc1be5(DATARMNET0978ff973f);goto 
-DATARMNETc1174a0f45;}memcpy(&DATARMNET099aa93adc.daddr,&DATARMNET86f1f2cdc9->
-daddr,sizeof(__be32));DATARMNET099aa93adc.flowi4_oif=DATARMNET813ca18d06->
-ifindex;DATARMNET099aa93adc.flowi4_flags=FLOWI_FLAG_KNOWN_NH;DATARMNET066b8bd537
-=ip_route_output_key(&init_net,&DATARMNET099aa93adc);if(IS_ERR(
-DATARMNET066b8bd537)){DATARMNET17f6bc1be5(DATARMNET666fc9a664);
-DATARMNET39542b437e=dev_get_by_name_rcu(&init_net,"\x64\x75\x6d\x6d\x79\x30");if
-(!DATARMNET39542b437e){DATARMNET17f6bc1be5(DATARMNET521b065310);goto 
-DATARMNETc1174a0f45;}DATARMNET099aa93adc.flowi4_oif=DATARMNET39542b437e->ifindex
-;DATARMNET099aa93adc.flowi4_flags=FLOWI_FLAG_KNOWN_NH;DATARMNET066b8bd537=
-ip_route_output_key(&init_net,&DATARMNET099aa93adc);if(IS_ERR(
-DATARMNET066b8bd537)){DATARMNET17f6bc1be5(DATARMNET8a15bcdcc7);goto 
-DATARMNETc1174a0f45;}}memcpy(&DATARMNET099aa93adc.saddr,&DATARMNET86f1f2cdc9->
-saddr,sizeof(__be32));DATARMNETb5af46179c=xfrm_lookup(&init_net,&
-DATARMNET066b8bd537->dst,flowi4_to_flowi(&DATARMNET099aa93adc),NULL,
-(0xd2d+202-0xdf7));DATARMNET066b8bd537=(struct rtable*)DATARMNETb5af46179c;if(
-IS_ERR(DATARMNET066b8bd537)){DATARMNET17f6bc1be5(DATARMNETddb1bc27cb);goto 
-DATARMNETc1174a0f45;}skb_dst_set(DATARMNET543491eb0f,DATARMNETb5af46179c);
-dst_output(&init_net,NULL,DATARMNET543491eb0f);DATARMNET17f6bc1be5(
-DATARMNETc730640bf7);return RX_HANDLER_CONSUMED;}else if(DATARMNET543491eb0f->
-dev&&(DATARMNET543491eb0f->protocol==htons(ETH_P_IPV6))&&DATARMNET1a901c3d09==
-DATARMNET45ee632553){struct ipv6hdr*DATARMNETbf55123e5b,DATARMNETcf1d9e2c1e;
-struct flowi6 DATARMNET8fbe36a2fa={};struct dst_entry*dst=NULL,*
-DATARMNETb5af46179c;struct rtable*DATARMNET066b8bd537;struct net_device*
-DATARMNET39542b437e=NULL;DATARMNETbf55123e5b=skb_header_pointer(
-DATARMNET543491eb0f,(0xd2d+202-0xdf7),sizeof(*DATARMNETbf55123e5b),&
-DATARMNETcf1d9e2c1e);if(!DATARMNETbf55123e5b){DATARMNET17f6bc1be5(
-DATARMNET0b9541c9b3);goto DATARMNETc1174a0f45;}memcpy(&DATARMNET8fbe36a2fa.saddr
-,&DATARMNETbf55123e5b->saddr,sizeof(struct in6_addr));memcpy(&
-DATARMNET8fbe36a2fa.daddr,&DATARMNETbf55123e5b->daddr,sizeof(struct in6_addr));
-dst=ipv6_stub->ipv6_dst_lookup_flow(&init_net,NULL,&DATARMNET8fbe36a2fa,NULL);if
-(IS_ERR(dst)){DATARMNET17f6bc1be5(DATARMNET0078f1d36d);DATARMNET39542b437e=
-dev_get_by_name_rcu(&init_net,"\x64\x75\x6d\x6d\x79\x30");if(!
-DATARMNET39542b437e){DATARMNET17f6bc1be5(DATARMNET7c6c30b7d2);goto 
-DATARMNETc1174a0f45;}DATARMNET8fbe36a2fa.flowi6_oif=DATARMNET39542b437e->ifindex
-;DATARMNET8fbe36a2fa.flowi6_flags=FLOWI_FLAG_KNOWN_NH;dst=ipv6_stub->
-ipv6_dst_lookup_flow(&init_net,NULL,&DATARMNET8fbe36a2fa,NULL);if(IS_ERR(dst)){
-DATARMNET17f6bc1be5(DATARMNET39d80cc483);goto DATARMNETc1174a0f45;}}
-DATARMNETb5af46179c=xfrm_lookup(&init_net,dst,flowi6_to_flowi(&
-DATARMNET8fbe36a2fa),NULL,(0xd2d+202-0xdf7));DATARMNET066b8bd537=(struct rtable*
-)DATARMNETb5af46179c;if(IS_ERR(DATARMNET066b8bd537)){DATARMNET17f6bc1be5(
-DATARMNET661bdeccd4);goto DATARMNETc1174a0f45;}skb_dst_set(DATARMNET543491eb0f,
-DATARMNETb5af46179c);dst_output(&init_net,NULL,DATARMNET543491eb0f);
-DATARMNET17f6bc1be5(DATARMNET28e7704d13);return RX_HANDLER_CONSUMED;}else if(
-DATARMNET543491eb0f->dev&&(DATARMNET543491eb0f->protocol==htons(ETH_P_IP))&&
-DATARMNET1a901c3d09==DATARMNET356f2a237e){struct iphdr*DATARMNET86f1f2cdc9,
-DATARMNETbf6548198e;struct flowi4 DATARMNET099aa93adc={};struct net_device*
-DATARMNET813ca18d06=NULL;struct dst_entry*DATARMNETb5af46179c;struct net_device*
-DATARMNET39542b437e=NULL;struct rtable*DATARMNET066b8bd537;DATARMNET86f1f2cdc9=
-skb_header_pointer(DATARMNET543491eb0f,(0xd2d+202-0xdf7),sizeof(*
-DATARMNET86f1f2cdc9),&DATARMNETbf6548198e);if(!DATARMNET86f1f2cdc9){
-DATARMNET17f6bc1be5(DATARMNET15454f969d);goto DATARMNETc1174a0f45;}
-DATARMNET813ca18d06=dev_get_by_name_rcu(&init_net,DATARMNET934406764d());if(!
-DATARMNET813ca18d06){DATARMNET17f6bc1be5(DATARMNET4c5aeeb476);goto 
-DATARMNETc1174a0f45;}memcpy(&DATARMNET099aa93adc.daddr,&DATARMNET86f1f2cdc9->
-daddr,sizeof(__be32));DATARMNET099aa93adc.flowi4_oif=DATARMNET813ca18d06->
-ifindex;DATARMNET099aa93adc.flowi4_flags=FLOWI_FLAG_KNOWN_NH;DATARMNET066b8bd537
-=ip_route_output_key(&init_net,&DATARMNET099aa93adc);if(IS_ERR(
-DATARMNET066b8bd537)){DATARMNET17f6bc1be5(DATARMNET9bdb1c4072);
-DATARMNET39542b437e=dev_get_by_name_rcu(&init_net,"\x64\x75\x6d\x6d\x79\x30");if
-(!DATARMNET39542b437e){DATARMNET17f6bc1be5(DATARMNET5abdc89190);goto 
-DATARMNETc1174a0f45;}DATARMNET099aa93adc.flowi4_oif=DATARMNET39542b437e->ifindex
-;DATARMNET099aa93adc.flowi4_flags=FLOWI_FLAG_KNOWN_NH;DATARMNET066b8bd537=
-ip_route_output_key(&init_net,&DATARMNET099aa93adc);if(IS_ERR(
-DATARMNET066b8bd537)){DATARMNET17f6bc1be5(DATARMNET101af46c1c);goto 
-DATARMNETc1174a0f45;}}memcpy(&DATARMNET099aa93adc.saddr,&DATARMNET86f1f2cdc9->
-saddr,sizeof(__be32));DATARMNETb5af46179c=xfrm_lookup(&init_net,&
-DATARMNET066b8bd537->dst,flowi4_to_flowi(&DATARMNET099aa93adc),NULL,
-(0xd2d+202-0xdf7));DATARMNET066b8bd537=(struct rtable*)DATARMNETb5af46179c;if(
-IS_ERR(DATARMNET066b8bd537)){DATARMNET17f6bc1be5(DATARMNET9a57ef32d3);goto 
-DATARMNETc1174a0f45;}skb_dst_set(DATARMNET543491eb0f,DATARMNETb5af46179c);
-dst_output(&init_net,NULL,DATARMNET543491eb0f);DATARMNET17f6bc1be5(
-DATARMNET9a940d93dc);return RX_HANDLER_CONSUMED;}else if(DATARMNET543491eb0f->
-dev&&(DATARMNET543491eb0f->protocol==htons(ETH_P_IPV6))&&DATARMNET1a901c3d09==
-DATARMNET356f2a237e){struct ipv6hdr*DATARMNETbf55123e5b,DATARMNETcf1d9e2c1e;
-struct flowi6 DATARMNET8fbe36a2fa={};struct dst_entry*dst=NULL,*
-DATARMNETb5af46179c;struct rtable*DATARMNET066b8bd537;struct net_device*
-DATARMNET39542b437e=NULL;DATARMNETbf55123e5b=skb_header_pointer(
-DATARMNET543491eb0f,(0xd2d+202-0xdf7),sizeof(*DATARMNETbf55123e5b),&
-DATARMNETcf1d9e2c1e);if(!DATARMNETbf55123e5b){DATARMNET17f6bc1be5(
-DATARMNET6b0ed53aab);goto DATARMNETc1174a0f45;}memcpy(&DATARMNET8fbe36a2fa.saddr
-,&DATARMNETbf55123e5b->saddr,sizeof(struct in6_addr));memcpy(&
-DATARMNET8fbe36a2fa.daddr,&DATARMNETbf55123e5b->daddr,sizeof(struct in6_addr));
-dst=ipv6_stub->ipv6_dst_lookup_flow(&init_net,NULL,&DATARMNET8fbe36a2fa,NULL);if
-(IS_ERR(dst)){DATARMNET17f6bc1be5(DATARMNET22ac945cae);DATARMNET39542b437e=
-dev_get_by_name_rcu(&init_net,"\x64\x75\x6d\x6d\x79\x30");if(!
-DATARMNET39542b437e){DATARMNET17f6bc1be5(DATARMNETf326b7c906);goto 
-DATARMNETc1174a0f45;}DATARMNET8fbe36a2fa.flowi6_oif=DATARMNET39542b437e->ifindex
-;DATARMNET8fbe36a2fa.flowi6_flags=FLOWI_FLAG_KNOWN_NH;dst=ipv6_stub->
-ipv6_dst_lookup_flow(&init_net,NULL,&DATARMNET8fbe36a2fa,NULL);if(IS_ERR(dst)){
-DATARMNET17f6bc1be5(DATARMNET544d78ede7);goto DATARMNETc1174a0f45;}}
-DATARMNETb5af46179c=xfrm_lookup(&init_net,dst,flowi6_to_flowi(&
-DATARMNET8fbe36a2fa),NULL,(0xd2d+202-0xdf7));DATARMNET066b8bd537=(struct rtable*
-)DATARMNETb5af46179c;if(IS_ERR(DATARMNET066b8bd537)){DATARMNET17f6bc1be5(
-DATARMNET97b44d0c09);goto DATARMNETc1174a0f45;}skb_dst_set(DATARMNET543491eb0f,
-DATARMNETb5af46179c);dst_output(&init_net,NULL,DATARMNET543491eb0f);
-DATARMNET17f6bc1be5(DATARMNETf954265acb);return RX_HANDLER_CONSUMED;}
-DATARMNETc1174a0f45:kfree_skb(DATARMNET543491eb0f);return RX_HANDLER_CONSUMED;}
-static rx_handler_result_t DATARMNET68fe094884(struct sk_buff**
-DATARMNET89946cec52){struct DATARMNET0ca9d8ead7 DATARMNETa76763310b={};struct 
-DATARMNET4f49486833*DATARMNET63b1a086d5;struct sk_buff*DATARMNET543491eb0f=*
-DATARMNET89946cec52;unsigned long DATARMNETfb0677cc3c;struct DATARMNET8d3c2559ca
- DATARMNET2d4b4cfc9e;struct DATARMNET41b426061d*DATARMNET8184934307;uint8_t 
-DATARMNET1a901c3d09=DATARMNETdcafdec32a;if(!DATARMNET543491eb0f||
-DATARMNET543491eb0f->pkt_type==PACKET_LOOPBACK)return RX_HANDLER_PASS;if(
-DATARMNET543491eb0f->protocol==htons(ETH_P_IP)){struct iphdr*DATARMNET86f1f2cdc9
-,DATARMNETbf6548198e;DATARMNET86f1f2cdc9=skb_header_pointer(DATARMNET543491eb0f,
-(0xd2d+202-0xdf7),sizeof(*DATARMNET86f1f2cdc9),&DATARMNETbf6548198e);if(!
-DATARMNET86f1f2cdc9)goto DATARMNETbf4095f79e;DATARMNET2d4b4cfc9e.
-DATARMNET0dc14167a1=DATARMNET86f1f2cdc9->saddr;DATARMNET2d4b4cfc9e.
-DATARMNET0d956cc77a=(0xd11+230-0xdf3);}else if(DATARMNET543491eb0f->protocol==
-htons(ETH_P_IPV6)){struct ipv6hdr*DATARMNETbf55123e5b,DATARMNETcf1d9e2c1e;
-DATARMNETbf55123e5b=skb_header_pointer(DATARMNET543491eb0f,(0xd2d+202-0xdf7),
-sizeof(*DATARMNETbf55123e5b),&DATARMNETcf1d9e2c1e);if(!DATARMNETbf55123e5b)goto 
-DATARMNETbf4095f79e;memcpy(&DATARMNET2d4b4cfc9e.DATARMNET5700daac01,&
-DATARMNETbf55123e5b->saddr,sizeof(DATARMNET2d4b4cfc9e.DATARMNET5700daac01));
-DATARMNET2d4b4cfc9e.DATARMNET0d956cc77a=(0xd03+244-0xdf1);}else{goto 
-DATARMNETbf4095f79e;}rcu_read_lock();DATARMNET8184934307=DATARMNETcc0a01df2a(&
-DATARMNET2d4b4cfc9e);rcu_read_unlock();if(!DATARMNET8184934307)goto 
-DATARMNETbf4095f79e;DATARMNET1a901c3d09=DATARMNET8184934307->DATARMNET7ed5754a5c
-.DATARMNET9954a624ac;if(DATARMNET1a901c3d09==DATARMNETdcafdec32a)goto 
-DATARMNETbf4095f79e;if(DATARMNET543491eb0f->dev)nf_ct_set(DATARMNET543491eb0f,
-NULL,IP_CT_UNTRACKED);if(DATARMNET543491eb0f->protocol==htons(ETH_P_IP)){struct 
-iphdr*DATARMNET86f1f2cdc9,DATARMNETbf6548198e;DATARMNET86f1f2cdc9=
-skb_header_pointer(DATARMNET543491eb0f,(0xd2d+202-0xdf7),sizeof(*
-DATARMNET86f1f2cdc9),&DATARMNETbf6548198e);if(!DATARMNET86f1f2cdc9)goto 
-DATARMNETbf4095f79e;if(DATARMNET86f1f2cdc9->protocol==IPPROTO_TCP)goto 
-DATARMNET9b3d23a43b;if(DATARMNET86f1f2cdc9->protocol!=IPPROTO_ICMP)goto 
-DATARMNETbf4095f79e;DATARMNETa76763310b.DATARMNETdfe430c2d6=DATARMNET86f1f2cdc9
-->saddr;DATARMNETa76763310b.DATARMNET2cb607d686=DATARMNET86f1f2cdc9->daddr;
-DATARMNETa76763310b.DATARMNET0d956cc77a=(0xd11+230-0xdf3);}else if(
-DATARMNET543491eb0f->protocol==htons(ETH_P_IPV6)){struct ipv6hdr*
-DATARMNETbf55123e5b,DATARMNETcf1d9e2c1e;__be16 frag_off;u8 DATARMNET65293f17c4;
-DATARMNETbf55123e5b=skb_header_pointer(DATARMNET543491eb0f,(0xd2d+202-0xdf7),
-sizeof(*DATARMNETbf55123e5b),&DATARMNETcf1d9e2c1e);if(!DATARMNETbf55123e5b)goto 
-DATARMNETbf4095f79e;DATARMNET65293f17c4=DATARMNETbf55123e5b->nexthdr;if(
-ipv6_skip_exthdr(DATARMNET543491eb0f,sizeof(*DATARMNETbf55123e5b),&
-DATARMNET65293f17c4,&frag_off)<(0xd2d+202-0xdf7))goto DATARMNETbf4095f79e;if(
-frag_off&&DATARMNET65293f17c4==NEXTHDR_FRAGMENT)goto DATARMNETbf4095f79e;if(
-DATARMNET65293f17c4==IPPROTO_TCP)goto DATARMNET9b3d23a43b;if(DATARMNET65293f17c4
-!=IPPROTO_ICMPV6)goto DATARMNETbf4095f79e;memcpy(&DATARMNETa76763310b.
-DATARMNET815cbb4bf5,&DATARMNETbf55123e5b->saddr,sizeof(DATARMNETa76763310b.
-DATARMNET815cbb4bf5));memcpy(&DATARMNETa76763310b.DATARMNETc3f31215b7,&
-DATARMNETbf55123e5b->daddr,sizeof(DATARMNETa76763310b.DATARMNETc3f31215b7));
-DATARMNETa76763310b.DATARMNET0d956cc77a=(0xd03+244-0xdf1);}else{goto 
-DATARMNETbf4095f79e;}rcu_read_lock();hash_for_each_possible_rcu(
-DATARMNET5413d6f8ec,DATARMNET63b1a086d5,DATARMNETe8608dd267,DATARMNETa76763310b.
-DATARMNET2cb607d686){if(DATARMNET63b1a086d5->DATARMNET1717afebc7)continue;if(!
-DATARMNET5f3c9ed4da(&DATARMNET63b1a086d5->DATARMNET54338da2ff,&
-DATARMNETa76763310b))continue;DATARMNET63b1a086d5->DATARMNET763f2e5fac=jiffies;
-rcu_read_unlock();goto DATARMNETbf4095f79e;}rcu_read_unlock();spin_lock_irqsave(
-&DATARMNET820642743b,DATARMNETfb0677cc3c);DATARMNET63b1a086d5=kzalloc(sizeof(*
-DATARMNET63b1a086d5),GFP_ATOMIC);if(!DATARMNET63b1a086d5){spin_unlock_irqrestore
-(&DATARMNET820642743b,DATARMNETfb0677cc3c);goto DATARMNETbf4095f79e;}
-INIT_HLIST_NODE(&DATARMNET63b1a086d5->DATARMNETe8608dd267);memcpy(&
-DATARMNET63b1a086d5->DATARMNET54338da2ff,&DATARMNETa76763310b,sizeof(
-DATARMNETa76763310b));DATARMNET63b1a086d5->DATARMNET7ed5754a5c=&
-DATARMNET8184934307->DATARMNET7ed5754a5c;hash_add_rcu(DATARMNET5413d6f8ec,&
-DATARMNET63b1a086d5->DATARMNETe8608dd267,DATARMNETa76763310b.DATARMNET2cb607d686
-);if(!DATARMNETf658004dbc){unsigned long DATARMNETf71ef1b8da;DATARMNETf71ef1b8da
-=msecs_to_jiffies(DATARMNET4d011802ef);schedule_delayed_work(&
-DATARMNET0b04fde883.DATARMNET190b4452e8,DATARMNETf71ef1b8da);}
-DATARMNETf658004dbc++;spin_unlock_irqrestore(&DATARMNET820642743b,
-DATARMNETfb0677cc3c);DATARMNETbf4095f79e:return DATARMNETc9ed97754a(
-DATARMNET543491eb0f,DATARMNET1a901c3d09);DATARMNET9b3d23a43b:DATARMNET7ca470d54b
-(DATARMNET543491eb0f,TCP_FLAG_SYN);return DATARMNETc9ed97754a(
-DATARMNET543491eb0f,DATARMNET1a901c3d09);}struct DATARMNET8d3c2559ca*
-DATARMNET07f0e0f286(struct DATARMNET0ca9d8ead7*DATARMNET54338da2ff)__must_hold(
-RCU){struct DATARMNET4f49486833*DATARMNET63b1a086d5;hash_for_each_possible_rcu(
-DATARMNET5413d6f8ec,DATARMNET63b1a086d5,DATARMNETe8608dd267,DATARMNET54338da2ff
-->DATARMNET2cb607d686){if(DATARMNET63b1a086d5->DATARMNET1717afebc7)continue;if(!
-DATARMNET5f3c9ed4da(&DATARMNET63b1a086d5->DATARMNET54338da2ff,
-DATARMNET54338da2ff))continue;return DATARMNET63b1a086d5->DATARMNET7ed5754a5c;}
-return NULL;}void DATARMNETf4e1a29dbc(void){cancel_delayed_work_sync(&
-DATARMNET0b04fde883.DATARMNET190b4452e8);DATARMNET0b04fde883.DATARMNETcd94e0d3c7
-=true;schedule_delayed_work(&DATARMNET0b04fde883.DATARMNET190b4452e8,
-(0xd2d+202-0xdf7));cancel_delayed_work_sync(&DATARMNET0b04fde883.
-DATARMNET190b4452e8);}void DATARMNET6f73df41cd(struct sk_buff*
-DATARMNET543491eb0f){int protocol=-(0xd26+209-0xdf6);struct DATARMNETe117226f58*
-DATARMNET3396919a68=rcu_dereference(DATARMNETcde6e442f5);if(!DATARMNET3396919a68
-)return;if(DATARMNET543491eb0f->protocol==htons(ETH_P_IP)){struct iphdr*
-DATARMNET86f1f2cdc9,DATARMNETbf6548198e;DATARMNET86f1f2cdc9=skb_header_pointer(
-DATARMNET543491eb0f,(0xd2d+202-0xdf7),sizeof(*DATARMNET86f1f2cdc9),&
-DATARMNETbf6548198e);if(!DATARMNET86f1f2cdc9)return;if(DATARMNET86f1f2cdc9->
-version!=DATARMNET3396919a68->DATARMNET0d956cc77a&&DATARMNET86f1f2cdc9->saddr!=
-DATARMNET3396919a68->DATARMNETdfe430c2d6&&DATARMNET86f1f2cdc9->daddr!=
-DATARMNET3396919a68->DATARMNET2cb607d686)return;protocol=DATARMNET86f1f2cdc9->
-protocol;}else if(DATARMNET543491eb0f->protocol==htons(ETH_P_IPV6)){struct 
-ipv6hdr*DATARMNETbf55123e5b,DATARMNETcf1d9e2c1e;DATARMNETbf55123e5b=
-skb_header_pointer(DATARMNET543491eb0f,(0xd2d+202-0xdf7),sizeof(*
-DATARMNETbf55123e5b),&DATARMNETcf1d9e2c1e);if(!DATARMNETbf55123e5b)return;if(
-DATARMNETbf55123e5b->version!=DATARMNET3396919a68->DATARMNET0d956cc77a&&
-ipv6_addr_cmp(&DATARMNETbf55123e5b->saddr,&DATARMNET3396919a68->
-DATARMNET815cbb4bf5)&&ipv6_addr_cmp(&DATARMNETbf55123e5b->daddr,&
-DATARMNET3396919a68->DATARMNETc3f31215b7))return;protocol=DATARMNETbf55123e5b->
-nexthdr;}if(protocol==IPPROTO_UDP){if(udp_hdr(DATARMNET543491eb0f)->source==
-DATARMNET3396919a68->DATARMNET08e913477e&&udp_hdr(DATARMNET543491eb0f)->dest==
-DATARMNET3396919a68->DATARMNETda7f7fa492)goto DATARMNET9573fcc9c6;}return;
-DATARMNET9573fcc9c6:DATARMNET543491eb0f->priority=2607612160;DATARMNET5ca94dbc3c
-(DATARMNETc2cade1d75);}static rx_handler_result_t DATARMNETd2f80b03ce(struct 
-sk_buff**DATARMNET89946cec52){struct net_device*DATARMNET00dcb79bc4;if(!
-DATARMNET89946cec52||!(*DATARMNET89946cec52)||!(*DATARMNET89946cec52)->dev)
-return RX_HANDLER_PASS;DATARMNET00dcb79bc4=(*DATARMNET89946cec52)->dev;if(!
-DATARMNETaba2beb199(DATARMNET00dcb79bc4->name,
-"\x72\x5f\x72\x6d\x6e\x65\x74\x5f\x64\x61\x74\x61",(0xd19+238-0xdfb)))return 
-DATARMNET68fe094884(DATARMNET89946cec52);if(!DATARMNETaba2beb199(
-DATARMNET00dcb79bc4->name,DATARMNETe447822105(),IFNAMSIZ))return 
-DATARMNET37a92021f9(DATARMNET89946cec52);if(!DATARMNETaba2beb199(
-DATARMNET00dcb79bc4->name,DATARMNET934406764d(),IFNAMSIZ))return 
-DATARMNET37a92021f9(DATARMNET89946cec52);return RX_HANDLER_PASS;}static const 
-struct rmnet_module_hook_register_info DATARMNET1928843de7[]={{.hooknum=
-RMNET_MODULE_HOOK_WLAN_FLOW_MATCH,.func=DATARMNET6f73df41cd,},{.hooknum=
-RMNET_MODULE_HOOK_WLAN_INGRESS_RX_HANDLER,.func=DATARMNETd2f80b03ce,},};void 
-DATARMNET333c107558(void){rmnet_module_hook_register(DATARMNET1928843de7,
-ARRAY_SIZE(DATARMNET1928843de7));}void DATARMNET4c08c7210c(void){
-rmnet_module_hook_unregister(DATARMNET1928843de7,ARRAY_SIZE(DATARMNET1928843de7)
-);}int DATARMNET9f106ed933(void){INIT_DELAYED_WORK(&DATARMNET0b04fde883.
-DATARMNET190b4452e8,DATARMNET8211acc766);return(0xd2d+202-0xdf7);}int 
-DATARMNETf56cbaa2b1(void){DATARMNETf4e1a29dbc();return(0xd2d+202-0xdf7);}
+
+/* Time to hold connection entries, in ms. 2 seconds currently */
+#define RMNET_WLAN_CONNECTION_TIMEOUT (2000)
+/* How often to run the cleaning workqueue while connection info is present,
+ * in ms.
+ */
+#define RMNET_WLAN_CONNECTION_WQ_INTERVAL (500)
+
+#define RMNET_WLAN_CONNECTION_BKTS (16)
+#define RMNET_WLAN_CONNECTION_HASH_BITS \
+	(const_ilog2(RMNET_WLAN_CONNECTION_BKTS))
+
+
+struct rmnet_wlan_connection_node {
+	struct hlist_node hash;
+	struct rcu_head rcu;
+	struct rmnet_wlan_connection_info info;
+	struct rmnet_wlan_fwd_info *fwd;
+	unsigned long ts;
+	bool dead;
+};
+
+struct rmnet_wlan_connection_work_struct {
+	struct delayed_work ws;
+	bool force_clean;
+};
+
+/* spinlock for connection hashtable protection */
+static DEFINE_SPINLOCK(rmnet_wlan_connection_lock);
+static DEFINE_HASHTABLE(rmnet_wlan_connection_hash,
+			RMNET_WLAN_CONNECTION_HASH_BITS);
+
+/* Thus number of connection objects present in the hash table */
+static u32 rmnet_wlan_connection_hash_size;
+
+/* Periodic cleaning work struct for the hashtable */
+static struct rmnet_wlan_connection_work_struct rmnet_wlan_connection_work;
+
+static bool
+rmnet_wlan_connection_info_match(struct rmnet_wlan_connection_info *i1,
+				 struct rmnet_wlan_connection_info *i2)
+{
+	if (i1->ip_proto != i2->ip_proto)
+		return false;
+
+	if (i1->ip_proto == 4)
+		return i1->v4_saddr == i2->v4_saddr &&
+		       i1->v4_daddr == i2->v4_daddr;
+
+	return !ipv6_addr_cmp(&i1->v6_saddr, &i2->v6_saddr) &&
+	       !ipv6_addr_cmp(&i1->v6_daddr, &i2->v6_daddr);
+}
+
+static bool
+rmnet_wlan_connection_node_expired(struct rmnet_wlan_connection_node *node,
+				   unsigned long ts)
+{
+	unsigned long timeout;
+
+	timeout = msecs_to_jiffies(RMNET_WLAN_CONNECTION_TIMEOUT);
+	if (ts - node->ts > timeout)
+		return true;
+
+	return false;
+}
+
+static bool rmnet_wlan_connection_hash_clean(bool force)
+{
+	struct rmnet_wlan_connection_node *node;
+	struct hlist_node *tmp;
+	unsigned long ts;
+	int bkt;
+
+	ts = jiffies;
+	hash_for_each_safe(rmnet_wlan_connection_hash, bkt, tmp, node, hash) {
+		if (node->dead)
+			/* Node is already removed, but RCU grace period has
+			 * not yet expired.
+			 */
+			continue;
+
+		if (force || rmnet_wlan_connection_node_expired(node, ts)) {
+			node->dead = true;
+			hash_del_rcu(&node->hash);
+			kfree_rcu(node, rcu);
+			rmnet_wlan_connection_hash_size--;
+		}
+	}
+
+	return !!rmnet_wlan_connection_hash_size;
+}
+
+static void rmnet_wlan_connection_work_process(struct work_struct *ws)
+{
+	struct rmnet_wlan_connection_work_struct *conn_work;
+	unsigned long flags;
+	bool should_resched;
+
+	conn_work = container_of(to_delayed_work(ws),
+				 struct rmnet_wlan_connection_work_struct,
+				 ws);
+	spin_lock_irqsave(&rmnet_wlan_connection_lock, flags);
+	should_resched =
+		rmnet_wlan_connection_hash_clean(conn_work->force_clean);
+	if (should_resched) {
+		unsigned long delay;
+
+		delay = msecs_to_jiffies(RMNET_WLAN_CONNECTION_WQ_INTERVAL);
+		schedule_delayed_work(&conn_work->ws, delay);
+	}
+
+	spin_unlock_irqrestore(&rmnet_wlan_connection_lock, flags);
+}
+
+static rx_handler_result_t rmnet_wlan_receive_skb(struct sk_buff *skb, uint8_t network_type)
+{
+	/* Only reverse rmnet packets should arrive in this function and match the check */
+	if (skb_is_nonlinear(skb) && !skb_headlen(skb)) {
+		int header_size = 0;
+
+		if (skb->protocol == htons(ETH_P_IP)) {
+			header_size = sizeof(struct iphdr);
+		} else if (skb->protocol == htons(ETH_P_IPV6)) {
+			header_size = sizeof(struct ipv6hdr);
+		} else {
+			rmnet_wlan_forward_stats_update(RMNET_F_S_PULL_PROTO_MISMATCH);
+			goto drop;
+		}
+
+		/* Headroom is already reserved in rmnet core */
+		if (!__pskb_pull_tail(skb, header_size)) {
+			rmnet_wlan_forward_stats_update(RMNET_F_S_PULL_FAILURE);
+			goto drop;
+		} else {
+			skb_reset_network_header(skb);
+			rmnet_wlan_forward_stats_update(RMNET_F_S_PULL_SUCCESS);
+		}
+	}
+
+	if (skb->dev && (skb->protocol == htons(ETH_P_IP)) &&
+	    network_type == DATA_PATH_PROXY_NET_LBO) {
+		struct iphdr *iph, __iph;
+		struct net_device *wdev = NULL;
+		struct flowi4 fl4 = {};
+		struct rtable *rt;
+		struct neighbour *n;
+		int err = 0;
+
+		iph = skb_header_pointer(skb, 0, sizeof(*iph), &__iph);
+		if (!iph) {
+			rmnet_wlan_forward_stats_update(RMNET_WLAN_F_S_NON_R0_IP_HDRP_FAIL);
+			goto drop;
+		}
+
+		wdev = dev_get_by_name_rcu(&init_net, rmnet_wlan_get_dev());
+		if (!wdev) {
+			rmnet_wlan_forward_stats_update(RMNET_WLAN_F_S_R0_IP_DEV_GET_FAIL);
+			goto drop;
+		}
+
+		skb->dev = wdev;
+		memcpy(&fl4.saddr, &iph->saddr, sizeof(__be32));
+		memcpy(&fl4.daddr, &iph->daddr, sizeof(__be32));
+		fl4.flowi4_oif = wdev->ifindex;
+		fl4.flowi4_flags = FLOWI_FLAG_KNOWN_NH;
+
+
+		rt = ip_route_output_key(&init_net, &fl4);
+		if (IS_ERR(rt)) {
+			rmnet_wlan_forward_stats_update(RMNET_WLAN_F_S_R0_IP_ROUTE_FAIL);
+			goto drop;
+		}
+
+		n = dst_neigh_lookup(&rt->dst, &fl4.daddr);
+		ip_rt_put(rt);
+		if (!n) {
+			rmnet_wlan_forward_stats_update(RMNET_WLAN_F_S_R0_IP_NEIGH_LOOKUP_FAIL);
+			goto drop;
+		}
+
+		if (n->dev != skb->dev || !n->dev->header_ops) {
+			rmnet_wlan_forward_stats_update(RMNET_WLAN_F_S_R0_IP_HARD_HEADER_FAIL);
+			neigh_release(n);
+			goto drop;
+		}
+
+		err = neigh_resolve_output(n, skb);
+
+		neigh_release(n);
+
+		if (likely(err == NET_XMIT_SUCCESS || err == NET_XMIT_CN)) {
+			rmnet_wlan_forward_stats_update(RMNET_WLAN_F_S_R0_IP_XMIT_SUCCESS);
+		} else {
+			rmnet_wlan_forward_stats_update(RMNET_WLAN_F_S_R0_IP_XMIT_DROP);
+		}
+
+		return RX_HANDLER_CONSUMED;
+	} else if (skb->dev && (skb->protocol == htons(ETH_P_IPV6)) &&
+		  network_type == DATA_PATH_PROXY_NET_LBO) {
+		struct ipv6hdr *ip6h, __ip6h;
+		struct net_device *wdev = NULL;
+		struct flowi6 fl6 = {};
+		struct neighbour *n;
+		struct dst_entry *dst;
+		int err = 0;
+
+		ip6h = skb_header_pointer(skb, 0, sizeof(*ip6h), &__ip6h);
+		if (!ip6h) {
+			rmnet_wlan_forward_stats_update(RMNET_WLAN_F_S_R0_IPV6_HDRP_FAIL);
+			goto drop;
+		}
+
+		wdev = dev_get_by_name_rcu(&init_net, rmnet_wlan_get_dev());
+		if (!wdev) {
+			rmnet_wlan_forward_stats_update(RMNET_WLAN_F_S_R0_IPV6_DEV_GET_FAIL);
+			goto drop;
+		}
+
+		skb->dev = wdev;
+		memcpy(&fl6.saddr, &ip6h->saddr, sizeof(struct in6_addr));
+		memcpy(&fl6.daddr, &ip6h->daddr, sizeof(struct in6_addr));
+		fl6.flowi6_oif = wdev->ifindex;
+		fl6.flowi6_flags = FLOWI_FLAG_KNOWN_NH;
+
+
+		dst = ipv6_stub->ipv6_dst_lookup_flow(&init_net, NULL, &fl6, NULL);
+		if (IS_ERR(dst)) {
+			rmnet_wlan_forward_stats_update(RMNET_WLAN_F_S_R0_IPV6_ROUTE_FAIL);
+			goto drop;
+		}
+
+		n = dst_neigh_lookup(dst, &fl6.daddr);
+		dst_release(dst);
+		if (!n) {
+			rmnet_wlan_forward_stats_update(RMNET_WLAN_F_S_R0_IPV6_NEIGH_LOOKUP_FAIL);
+			goto drop;
+		}
+
+		if (n->dev != skb->dev || !n->dev->header_ops) {
+			rmnet_wlan_forward_stats_update(RMNET_WLAN_F_S_R0_IPV6_HARD_HEADER_FAIL);
+			neigh_release(n);
+			goto drop;
+		}
+
+		err = neigh_resolve_output(n, skb);
+
+		neigh_release(n);
+
+		if (likely(err == NET_XMIT_SUCCESS || err == NET_XMIT_CN)) {
+			rmnet_wlan_forward_stats_update(RMNET_WLAN_F_S_R0_IPV6_XMIT_SUCCESS);
+		} else {
+			rmnet_wlan_forward_stats_update(RMNET_WLAN_F_S_R0_IPV6_XMIT_DROP);
+		}
+
+		return RX_HANDLER_CONSUMED;
+	} else if(skb->dev && (skb->protocol == htons(ETH_P_IP)) &&
+	          network_type == DATA_PATH_PROXY_NET_WWAN) {
+		/* Use xfrm to route packet to rmnet data */
+		struct iphdr *iph, __iph;
+		struct net_device *wdev = NULL;
+		struct flowi4 fl4 = {};
+		struct dst_entry *dst_xfrm;
+		struct rtable *rt;
+		struct net_device *ddev = NULL;
+
+		iph = skb_header_pointer(skb, 0, sizeof(*iph), &__iph);
+		if (!iph) {
+			rmnet_wlan_forward_stats_update(RMNET_WWAN_F_S_R0_IP_HDRP_FAIL);
+			goto drop;
+		}
+
+		wdev = dev_get_by_name_rcu(&init_net, rmnet_wwan_get_dev());
+		if (!wdev) {
+			rmnet_wlan_forward_stats_update(RMNET_WWAN_F_S_R0_IP_DEV_GET_FAIL);
+			goto drop;
+		}
+
+		memcpy(&fl4.daddr, &iph->daddr, sizeof(__be32));
+		fl4.flowi4_oif = wdev->ifindex;
+		fl4.flowi4_flags = FLOWI_FLAG_KNOWN_NH;
+
+		rt = ip_route_output_key(&init_net, &fl4);
+		if (IS_ERR(rt)) {
+			rmnet_wlan_forward_stats_update(RMNET_WWAN_F_S_R0_IP_ROUTE_FAIL);
+
+			ddev = dev_get_by_name_rcu(&init_net, "dummy0");
+			if (!ddev) {
+				rmnet_wlan_forward_stats_update(RMNET_WWAN_F_S_R0_IP_DDEV_GET_FAIL);
+				goto drop;
+			}
+
+			fl4.flowi4_oif = ddev->ifindex;
+			fl4.flowi4_flags = FLOWI_FLAG_KNOWN_NH;
+
+			rt = ip_route_output_key(&init_net, &fl4);
+			if (IS_ERR(rt)) {
+				rmnet_wlan_forward_stats_update(RMNET_WWAN_F_S_NON_R0_IP_DRT_LOOKUP_FAIL);
+				goto drop;
+			}
+		}
+		memcpy(&fl4.saddr, &iph->saddr, sizeof(__be32));
+		dst_xfrm = xfrm_lookup(&init_net, &rt->dst, flowi4_to_flowi(&fl4), NULL, 0);
+		rt = (struct rtable*) dst_xfrm;
+		if (IS_ERR(rt)) {
+			rmnet_wlan_forward_stats_update(RMNET_WWAN_F_S_NON_R0_IP_XFRM_LOOKUP_FAIL);
+			goto drop;
+		}
+
+		skb_dst_set(skb, dst_xfrm);
+		dst_output(&init_net, NULL, skb);
+		rmnet_wlan_forward_stats_update(RMNET_WWAN_F_S_NON_R0_IP_DST_OUTPUT_SUCCESS);
+
+		return RX_HANDLER_CONSUMED;
+	} else if(skb->dev && (skb->protocol == htons(ETH_P_IPV6)) &&
+			  network_type == DATA_PATH_PROXY_NET_WWAN) {
+		/* Use xfrm to route packet to rmnet data */
+		struct ipv6hdr *ip6h, __ip6h;
+		struct flowi6 fl6 = {};
+		struct dst_entry *dst = NULL, *dst_xfrm;
+		struct rtable *rt;
+		struct net_device *ddev = NULL;
+
+		ip6h = skb_header_pointer(skb, 0, sizeof(*ip6h), &__ip6h);
+		if (!ip6h) {
+			rmnet_wlan_forward_stats_update(RMNET_WWAN_F_S_NON_R0_IPV6_HDRP_FAIL);
+			goto drop;
+		}
+
+		memcpy(&fl6.saddr, &ip6h->saddr, sizeof(struct in6_addr));
+		memcpy(&fl6.daddr, &ip6h->daddr, sizeof(struct in6_addr));
+
+		dst = ipv6_stub->ipv6_dst_lookup_flow(&init_net, NULL, &fl6, NULL);
+		if (IS_ERR(dst)) {
+			rmnet_wlan_forward_stats_update(RMNET_WWAN_F_S_NON_R0_IPV6_DST_LOOKUP_FAIL);
+
+			ddev = dev_get_by_name_rcu(&init_net, "dummy0");
+			if (!ddev) {
+				rmnet_wlan_forward_stats_update(RMNET_WWAN_F_S_R0_IPV6_DDEV_GET_FAIL);
+				goto drop;
+			}
+
+			fl6.flowi6_oif = ddev->ifindex;
+			fl6.flowi6_flags = FLOWI_FLAG_KNOWN_NH;
+
+			dst = ipv6_stub->ipv6_dst_lookup_flow(&init_net, NULL, &fl6, NULL);
+			if (IS_ERR(dst)) {
+				rmnet_wlan_forward_stats_update(RMNET_WWAN_F_S_NON_R0_IPV6_DDST_LOOKUP_FAIL);
+				goto drop;
+			}
+		}
+
+		dst_xfrm = xfrm_lookup(&init_net, dst, flowi6_to_flowi(&fl6), NULL, 0);
+		rt = (struct rtable *)dst_xfrm;
+		if (IS_ERR(rt)) {
+			rmnet_wlan_forward_stats_update(RMNET_WWAN_F_S_NON_R0_IPV6_XFRM_LOOKUP_FAIL);
+			goto drop;
+		}
+
+		skb_dst_set(skb, dst_xfrm);
+		dst_output(&init_net, NULL, skb);
+		rmnet_wlan_forward_stats_update(RMNET_WWAN_F_S_NON_R0_IPV6_DST_OUTPUT_SUCCESS);
+
+		return RX_HANDLER_CONSUMED;
+
+	} else if(skb->dev && (skb->protocol == htons(ETH_P_IP)) &&
+	          network_type == DATA_PATH_PROXY_NET_WLAN) {
+		/* Use xfrm to route packet to rmnet data */
+		struct iphdr *iph, __iph;
+		struct flowi4 fl4 = {};
+		struct net_device *wdev = NULL;
+		struct dst_entry *dst_xfrm;
+		struct net_device *ddev = NULL;
+		struct rtable *rt;
+
+		iph = skb_header_pointer(skb, 0, sizeof(*iph), &__iph);
+		if (!iph) {
+			rmnet_wlan_forward_stats_update(RMNET_WLAN_F_S_NON_R0_IP_HDRP_FAIL);
+			goto drop;
+		}
+
+		wdev = dev_get_by_name_rcu(&init_net, rmnet_wlan_get_dev());
+		if (!wdev) {
+			rmnet_wlan_forward_stats_update(RMNET_WLAN_F_S_NON_R0_IP_DEV_GET_FAIL);
+			goto drop;
+		}
+
+		memcpy(&fl4.daddr, &iph->daddr, sizeof(__be32));
+		fl4.flowi4_oif = wdev->ifindex;
+		fl4.flowi4_flags = FLOWI_FLAG_KNOWN_NH;
+
+		rt = ip_route_output_key(&init_net, &fl4);
+		if (IS_ERR(rt)) {
+			rmnet_wlan_forward_stats_update(RMNET_WLAN_F_S_NON_R0_IP_RT_LOOKUP_FAIL);
+
+			ddev = dev_get_by_name_rcu(&init_net, "dummy0");
+			if (!ddev) {
+				rmnet_wlan_forward_stats_update(RMNET_WLAN_F_S_R0_IP_DDEV_GET_FAIL);
+				goto drop;
+			}
+
+			fl4.flowi4_oif = ddev->ifindex;
+			fl4.flowi4_flags = FLOWI_FLAG_KNOWN_NH;
+
+			rt = ip_route_output_key(&init_net, &fl4);
+			if (IS_ERR(rt)) {
+				rmnet_wlan_forward_stats_update(RMNET_WLAN_F_S_NON_R0_IP_DRT_LOOKUP_FAIL);
+				goto drop;
+			}
+		}
+		memcpy(&fl4.saddr, &iph->saddr, sizeof(__be32));
+		dst_xfrm = xfrm_lookup(&init_net, &rt->dst, flowi4_to_flowi(&fl4), NULL, 0);
+		rt = (struct rtable*) dst_xfrm;
+		if (IS_ERR(rt)) {
+			rmnet_wlan_forward_stats_update(RMNET_WLAN_F_S_NON_R0_IP_XFRM_LOOKUP_FAIL);
+			goto drop;
+		}
+
+		skb_dst_set(skb, dst_xfrm);
+		dst_output(&init_net, NULL, skb);
+		rmnet_wlan_forward_stats_update(RMNET_WLAN_F_S_NON_R0_IP_DST_OUTPUT_SUCCESS);
+
+		return RX_HANDLER_CONSUMED;
+	} else if(skb->dev && (skb->protocol == htons(ETH_P_IPV6)) &&
+			  network_type == DATA_PATH_PROXY_NET_WLAN) {
+		/* Use xfrm to route packet to rmnet data */
+		struct ipv6hdr *ip6h, __ip6h;
+		struct flowi6 fl6 = {};
+		struct dst_entry *dst = NULL, *dst_xfrm;
+		struct rtable *rt;
+		struct net_device *ddev = NULL;
+
+		ip6h = skb_header_pointer(skb, 0, sizeof(*ip6h), &__ip6h);
+		if (!ip6h) {
+			rmnet_wlan_forward_stats_update(RMNET_WLAN_F_S_NON_R0_IPV6_HDRP_FAIL);
+			goto drop;
+		}
+
+		memcpy(&fl6.saddr, &ip6h->saddr, sizeof(struct in6_addr));
+		memcpy(&fl6.daddr, &ip6h->daddr, sizeof(struct in6_addr));
+
+		dst = ipv6_stub->ipv6_dst_lookup_flow(&init_net, NULL, &fl6, NULL);
+		if (IS_ERR(dst)) {
+			rmnet_wlan_forward_stats_update(RMNET_WLAN_F_S_NON_R0_IPV6_DST_LOOKUP_FAIL);
+
+			ddev = dev_get_by_name_rcu(&init_net, "dummy0");
+			if (!ddev) {
+				rmnet_wlan_forward_stats_update(RMNET_WLAN_F_S_R0_IPV6_DDEV_GET_FAIL);
+				goto drop;
+			}
+
+			fl6.flowi6_oif = ddev->ifindex;
+			fl6.flowi6_flags = FLOWI_FLAG_KNOWN_NH;
+
+			dst = ipv6_stub->ipv6_dst_lookup_flow(&init_net, NULL, &fl6, NULL);
+			if (IS_ERR(dst)) {
+				rmnet_wlan_forward_stats_update(RMNET_WLAN_F_S_NON_R0_IPV6_DDST_LOOKUP_FAIL);
+				goto drop;
+			}
+		}
+
+		dst_xfrm = xfrm_lookup(&init_net, dst, flowi6_to_flowi(&fl6), NULL, 0);
+		rt = (struct rtable*) dst_xfrm;
+		if (IS_ERR(rt)) {
+			rmnet_wlan_forward_stats_update(RMNET_WLAN_F_S_NON_R0_IPV6_XFRM_LOOKUP_FAIL);
+			goto drop;
+		}
+
+		skb_dst_set(skb, dst_xfrm);
+		dst_output(&init_net, NULL, skb);
+		rmnet_wlan_forward_stats_update(RMNET_WLAN_F_S_NON_R0_IPV6_DST_OUTPUT_SUCCESS);
+
+		return RX_HANDLER_CONSUMED;
+	}
+
+drop:
+	kfree_skb(skb);
+	return RX_HANDLER_CONSUMED;
+}
+
+static rx_handler_result_t rmnet_wlan_connection_handler(struct sk_buff **pskb)
+{
+	struct rmnet_wlan_connection_info conn = {};
+	struct rmnet_wlan_connection_node *node;
+	struct sk_buff *skb = *pskb;
+	unsigned long flags;
+	struct rmnet_wlan_fwd_info fwd_info;
+	struct rmnet_wlan_fwd_info_node *fwd_info_node;
+
+	uint8_t network_type = __DATA_PATH_PROXY_NET_MAX;
+
+	if (!skb || skb->pkt_type == PACKET_LOOPBACK)
+		return RX_HANDLER_PASS;
+
+	/* Get the source address and IP type */
+	if (skb->protocol == htons(ETH_P_IP)) {
+		struct iphdr *iph, __iph;
+		iph = skb_header_pointer(skb, 0, sizeof(*iph), &__iph);
+		if (!iph)
+			goto out;
+
+		fwd_info.v4_addr = iph->saddr;
+		fwd_info.ip_proto = 4;
+	} else if(skb->protocol == htons(ETH_P_IPV6)) {
+		struct ipv6hdr *ip6h, __ip6h;
+		ip6h = skb_header_pointer(skb, 0, sizeof(*ip6h), &__ip6h);
+		if (!ip6h)
+			goto out;
+
+		memcpy(&fwd_info.v6_addr, &ip6h->saddr, sizeof(fwd_info.v6_addr));
+		fwd_info.ip_proto = 6;
+	} else {
+		goto out;
+	}
+
+	/* Get the registered fwd_node to get the type */
+	rcu_read_lock();
+	fwd_info_node = rmnet_wlan_fwd_info_find(&fwd_info);
+	rcu_read_unlock();
+	if (!fwd_info_node)
+		goto out;
+
+	network_type = fwd_info_node->fwd.net_type;
+
+	/* Invalid network type given */
+	if(network_type == __DATA_PATH_PROXY_NET_MAX) goto out;
+
+	/* replaces raw_before_defrag */
+	if (skb->dev)
+		nf_ct_set(skb, NULL, IP_CT_UNTRACKED);
+
+	if (skb->protocol == htons(ETH_P_IP)) {
+		struct iphdr *iph, __iph;
+
+		iph = skb_header_pointer(skb, 0, sizeof(*iph), &__iph);
+		if (!iph)
+			goto out;
+
+		if (iph->protocol == IPPROTO_TCP)
+			goto clamp;
+
+		if (iph->protocol != IPPROTO_ICMP)
+			goto out;
+
+		conn.v4_saddr = iph->saddr;
+		conn.v4_daddr = iph->daddr;
+		conn.ip_proto = 4;
+	} else if (skb->protocol == htons(ETH_P_IPV6)) {
+		struct ipv6hdr *ip6h, __ip6h;
+		__be16 frag_off;
+		u8 proto;
+
+		ip6h = skb_header_pointer(skb, 0, sizeof(*ip6h), &__ip6h);
+		if (!ip6h)
+			goto out;
+
+		proto = ip6h->nexthdr;
+		if (ipv6_skip_exthdr(skb, sizeof(*ip6h), &proto, &frag_off) < 0)
+			goto out;
+
+		if (frag_off && proto == NEXTHDR_FRAGMENT)
+			/* Heckin' KIIIIILL meeeee... */
+			goto out;
+
+		if (proto == IPPROTO_TCP)
+			goto clamp;
+
+		if (proto != IPPROTO_ICMPV6)
+			goto out;
+
+		memcpy(&conn.v6_saddr, &ip6h->saddr, sizeof(conn.v6_saddr));
+		memcpy(&conn.v6_daddr, &ip6h->daddr, sizeof(conn.v6_daddr));
+		conn.ip_proto = 6;
+	} else {
+		goto out;
+	}
+
+	rcu_read_lock();
+	hash_for_each_possible_rcu(rmnet_wlan_connection_hash, node, hash,
+				   conn.v4_daddr) {
+		if (node->dead)
+			continue;
+
+		if (!rmnet_wlan_connection_info_match(&node->info, &conn))
+			continue;
+
+		/* Match found. You still alive? *poke poke* */
+		/* Ah, ah, ah, ah~ Stayin' alive, stayin' alive! */
+		node->ts = jiffies;
+		rcu_read_unlock();
+		goto out;
+	}
+
+	rcu_read_unlock();
+
+	/* Make a new connection entry */
+	spin_lock_irqsave(&rmnet_wlan_connection_lock, flags);
+	node = kzalloc(sizeof(*node), GFP_ATOMIC);
+	if (!node) {
+		/* Well, that's unfortunate */
+		spin_unlock_irqrestore(&rmnet_wlan_connection_lock, flags);
+		goto out;
+	}
+
+	INIT_HLIST_NODE(&node->hash);
+	memcpy(&node->info, &conn, sizeof(conn));
+	node->fwd = &fwd_info_node->fwd;
+	hash_add_rcu(rmnet_wlan_connection_hash, &node->hash, conn.v4_daddr);
+	if (!rmnet_wlan_connection_hash_size) {
+		unsigned long delay;
+
+		delay = msecs_to_jiffies(RMNET_WLAN_CONNECTION_WQ_INTERVAL);
+		schedule_delayed_work(&rmnet_wlan_connection_work.ws, delay);
+	}
+
+	rmnet_wlan_connection_hash_size++;
+	spin_unlock_irqrestore(&rmnet_wlan_connection_lock, flags);
+
+out:
+	return rmnet_wlan_receive_skb(skb, network_type);
+
+clamp:
+	/* Clamp any received SYNs */
+	rmnet_wlan_tcp_mss_clamp(skb, TCP_FLAG_SYN);
+	return rmnet_wlan_receive_skb(skb, network_type);
+}
+
+struct rmnet_wlan_fwd_info *
+rmnet_wlan_connection_find(struct rmnet_wlan_connection_info *info)
+	__must_hold(RCU)
+{
+	struct rmnet_wlan_connection_node *node;
+
+	hash_for_each_possible_rcu(rmnet_wlan_connection_hash, node, hash,
+				   info->v4_daddr) {
+		if (node->dead)
+			continue;
+
+		if (!rmnet_wlan_connection_info_match(&node->info, info))
+			continue;
+
+		return node->fwd;
+	}
+
+	return NULL;
+}
+
+void rmnet_wlan_connection_flush(void)
+{
+	/* Purge anything old enough... */
+	cancel_delayed_work_sync(&rmnet_wlan_connection_work.ws);
+
+	rmnet_wlan_connection_work.force_clean = true;
+	schedule_delayed_work(&rmnet_wlan_connection_work.ws, 0);
+
+	/* ... and force remove all the rest. */
+	cancel_delayed_work_sync(&rmnet_wlan_connection_work.ws);
+}
+
+void rmnet_wlan_ll_tuple_match(struct sk_buff *skb)
+{
+	int protocol = -1;
+	struct rmnet_wlan_ll_tuple * tuple =
+		rcu_dereference(rmnet_wlan_ll_tuple_cache);
+
+	/* Check if something valid is cached */
+	if (!tuple) return;
+
+	/* IPv4 */
+	if (skb->protocol == htons(ETH_P_IP)) {
+		struct iphdr *iph, __iph;
+
+		iph = skb_header_pointer(skb, 0, sizeof(*iph), &__iph);
+		if(!iph) return;
+
+		if(iph->version != tuple->ip_proto &&
+		   iph->saddr != tuple->v4_saddr &&
+		   iph->daddr != tuple->v4_daddr)
+			return;
+
+		protocol = iph->protocol;
+	/* IPv6 */
+	} else if (skb->protocol == htons(ETH_P_IPV6)) {
+		struct ipv6hdr *ip6h, __ip6h;
+		ip6h = skb_header_pointer(skb, 0, sizeof(*ip6h), &__ip6h);
+		if(!ip6h) return;
+
+		if(ip6h->version != tuple->ip_proto &&
+		   ipv6_addr_cmp(&ip6h->saddr, &tuple->v6_saddr) &&
+		   ipv6_addr_cmp(&ip6h->daddr, &tuple->v6_daddr))
+			return;
+
+		protocol = ip6h->nexthdr;
+	}
+
+	/* Check that ports match and is UDP */
+	if(protocol == IPPROTO_UDP) {
+		if(udp_hdr(skb)->source == tuple->sport &&
+		   udp_hdr(skb)->dest == tuple->dport)
+			goto tx_priority;
+	}
+
+	return;
+tx_priority:
+	skb->priority = 0x9B6D0100;
+	rmnet_wlan_stats_update(RMNET_WLAN_STAT_LL_TX);
+}
+
+static rx_handler_result_t rmnet_wlan_ingress_rx_handler(struct sk_buff **pskb)
+{
+	struct net_device *device;
+
+	if (!pskb || !(*pskb) || !(*pskb)->dev)
+		return RX_HANDLER_PASS;
+
+	device = (*pskb)->dev;
+	/* Reverse devices this way please */
+	if (!rmnet_wlan_strlcmp(device->name, "r_rmnet_data", 12))
+		return rmnet_wlan_connection_handler(pskb);
+
+	/* CIWLAN goes over here */
+	if (!rmnet_wlan_strlcmp(device->name, rmnet_wwan_get_dev(), IFNAMSIZ))
+		return rmnet_wlan_rx_handler(pskb);
+
+	/* OH, you're a wlan device you say? Well, what pranksterful prankster
+	 * is naming devices on this logic-forsaken machine...
+	 */
+	if (!rmnet_wlan_strlcmp(device->name, rmnet_wlan_get_dev(), IFNAMSIZ))
+		return rmnet_wlan_rx_handler(pskb);
+
+	/* We have no interest in your devices here */
+	return RX_HANDLER_PASS;
+}
+
+static const struct rmnet_module_hook_register_info
+rmnet_wlan_module_hooks[] = {
+	{
+		.hooknum = RMNET_MODULE_HOOK_WLAN_FLOW_MATCH,
+		.func = rmnet_wlan_ll_tuple_match,
+	},
+	{
+		.hooknum = RMNET_MODULE_HOOK_WLAN_INGRESS_RX_HANDLER,
+		.func = rmnet_wlan_ingress_rx_handler,
+	},
+};
+
+void rmnet_wlan_set_hooks(void)
+{
+	rmnet_module_hook_register(rmnet_wlan_module_hooks,
+				   ARRAY_SIZE(rmnet_wlan_module_hooks));
+}
+
+void rmnet_wlan_unset_hooks(void)
+{
+	rmnet_module_hook_unregister(rmnet_wlan_module_hooks,
+				     ARRAY_SIZE(rmnet_wlan_module_hooks));
+}
+
+int rmnet_wlan_connection_init(void)
+{
+	INIT_DELAYED_WORK(&rmnet_wlan_connection_work.ws,
+			  rmnet_wlan_connection_work_process);
+	return 0;
+}
+
+int rmnet_wlan_connection_deinit(void)
+{
+	rmnet_wlan_connection_flush();
+	return 0;
+}

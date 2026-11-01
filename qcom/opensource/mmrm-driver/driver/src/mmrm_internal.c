@@ -1,31 +1,17 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2020-2021, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2024-2025, Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
-#include <linux/of.h>
 #include <linux/types.h>
 #include <linux/of_platform.h>
+#include <linux/of.h>
 
 #include "mmrm_internal.h"
 #include "mmrm_debug.h"
 
-static struct mmrm_common_data waipio_common_data[] = {
-	{
-		.key = "qcom,mmrm_clk_threshold",
-		.value = 9000,
-	},
-	{
-		.key = "qcom,mmrm_clk_mgr_scheme",
-		.value = CLK_MGR_SCHEME_SW,
-	},
-};
-
-static struct mmrm_common_data neo_common_data[] = {
-	{
-		.key = "qcom,mmrm_clk_threshold",
-		.value = 4500,
-	},
+static struct mmrm_common_data common_pt_data[] = {
 	{
 		.key = "qcom,mmrm_clk_mgr_scheme",
 		.value = CLK_MGR_SCHEME_SW,
@@ -34,7 +20,7 @@ static struct mmrm_common_data neo_common_data[] = {
 
 /*throttle client list is as per fdd & resource availability*/
 
-static struct mmrm_throttle_clients_data waipio_throttle_clients_data[] = {
+static struct mmrm_throttle_clients_data common_pt_throttle_clients_data[] = {
 	{
 		.domain = MMRM_CLIENT_DOMAIN_DISPLAY,
 		.id = 0x3d,
@@ -57,31 +43,123 @@ static struct mmrm_throttle_clients_data waipio_throttle_clients_data[] = {
 	},
 };
 
-/* no clients to throttle */
-static struct mmrm_throttle_clients_data neo_throttle_clients_data[] = {};
-
-static struct mmrm_platform_data waipio_data = {
-	.common_data = waipio_common_data,
-	.common_data_length = ARRAY_SIZE(waipio_common_data),
-	.throttle_clk_clients_data = waipio_throttle_clients_data,
-	.throttle_clk_clients_data_length = ARRAY_SIZE(waipio_throttle_clients_data),
+static struct mmrm_throttle_clients_data common_pt_throttle_clients_data_pineapple[] = {
+	{
+		.domain = MMRM_CLIENT_DOMAIN_DISPLAY,
+		.id = 0x3d,
+	},
+	{
+		.domain = MMRM_CLIENT_DOMAIN_VIDEO,
+		.id = 0x03,
+	},
+	{
+		.domain = MMRM_CLIENT_DOMAIN_CAMERA,
+		.id = 0x46,
+	},
+	{
+		.domain = MMRM_CLIENT_DOMAIN_CVP,
+		.id = 0x08,
+	},
+	{
+		.domain = MMRM_CLIENT_DOMAIN_CAMERA,
+		.id = 0x02,
+	},
 };
 
-static struct mmrm_platform_data neo_data = {
-	.common_data = neo_common_data,
-	.common_data_length = ARRAY_SIZE(neo_common_data),
-	.throttle_clk_clients_data = neo_throttle_clients_data,
-	.throttle_clk_clients_data_length = ARRAY_SIZE(neo_throttle_clients_data),
+static struct mmrm_throttle_clients_data common_pt_throttle_clients_data_sun[] = {
+	{
+		.domain = MMRM_CLIENT_DOMAIN_DISPLAY,
+		.id = 0x42,
+	},
+	{
+		.domain = MMRM_CLIENT_DOMAIN_VIDEO,
+		.id = 0x03,
+	},
+	{
+		.domain = MMRM_CLIENT_DOMAIN_CAMERA,
+		.id = 0x45,
+	},
+	{
+		.domain = MMRM_CLIENT_DOMAIN_CVP,
+		.id = 0x03,
+	},
+	{
+		.domain = MMRM_CLIENT_DOMAIN_CAMERA,
+		.id = 0x4F,
+	},
+};
+
+static struct mmrm_throttle_clients_data common_pt_throttle_clients_data_canoe[] = {
+	{
+		.domain = MMRM_CLIENT_DOMAIN_DISPLAY,
+		.id = 0x44,
+	},
+	{
+		.domain = MMRM_CLIENT_DOMAIN_VIDEO,
+		.id = 0x03,
+	},
+	{
+		.domain = MMRM_CLIENT_DOMAIN_CAMERA,
+		.id = 0x40,
+	},
+	{
+		.domain = MMRM_CLIENT_DOMAIN_CVP,
+		.id = 0x03,
+	},
+	{
+		.domain = MMRM_CLIENT_DOMAIN_CAMERA,
+		.id = 0x49,
+	},
+};
+
+static struct mmrm_platform_data commom_pt_platform_data = {
+	.common_data = common_pt_data,
+	.common_data_length = ARRAY_SIZE(common_pt_data),
+	.throttle_clk_clients_data = common_pt_throttle_clients_data,
+	.throttle_clk_clients_data_length = ARRAY_SIZE(common_pt_throttle_clients_data),
+};
+
+static struct mmrm_platform_data commom_pt_platform_data_pineapple = {
+	.common_data = common_pt_data,
+	.common_data_length = ARRAY_SIZE(common_pt_data),
+	.throttle_clk_clients_data = common_pt_throttle_clients_data_pineapple,
+	.throttle_clk_clients_data_length = ARRAY_SIZE(common_pt_throttle_clients_data_pineapple),
+};
+
+static struct mmrm_platform_data commom_pt_platform_data_sun = {
+	.common_data = common_pt_data,
+	.common_data_length = ARRAY_SIZE(common_pt_data),
+	.throttle_clk_clients_data = common_pt_throttle_clients_data_sun,
+	.throttle_clk_clients_data_length = ARRAY_SIZE(common_pt_throttle_clients_data_sun),
+};
+
+static struct mmrm_platform_data commom_pt_platform_data_canoe = {
+	.common_data = common_pt_data,
+	.common_data_length = ARRAY_SIZE(common_pt_data),
+	.throttle_clk_clients_data = common_pt_throttle_clients_data_canoe,
+	.throttle_clk_clients_data_length = ARRAY_SIZE(common_pt_throttle_clients_data_canoe),
 };
 
 static const struct of_device_id mmrm_dt_match[] = {
 	{
 		.compatible = "qcom,waipio-mmrm",
-		.data = &waipio_data,
+		.data = &commom_pt_platform_data,
 	},
 	{
-		.compatible = "qcom,neo-mmrm",
-		.data = &neo_data,
+		.compatible = "qcom,kalama-mmrm",
+		.data = &commom_pt_platform_data,
+	},
+	{
+		.compatible = "qcom,pineapple-mmrm",
+		.data = &commom_pt_platform_data_pineapple,
+	},
+	{
+		.compatible = "qcom,sun-mmrm",
+		.data = &commom_pt_platform_data_sun,
+	},
+	{
+		.compatible = "qcom,canoe-mmrm",
+		.data = &commom_pt_platform_data_canoe,
 	},
 	{},
 };
@@ -121,7 +199,6 @@ int mmrm_init(struct mmrm_driver_data *drv_data)
 		d_mpr_e("%s: init clk mgr failed\n", __func__);
 		goto err_init_clk_mgr;
 	}
-
 	return rc;
 
 err_init_clk_mgr:

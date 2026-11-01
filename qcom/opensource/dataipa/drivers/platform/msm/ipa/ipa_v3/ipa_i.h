@@ -40,10 +40,14 @@
 #include "ipa_defs.h"
 #include "ipa_opt_log.h"
 #include <linux/mailbox_client.h>
-#include <linux/mailbox/qmp.h>
+#include <linux/soc/qcom/qcom_aoss.h>
 #include <linux/rmnet_ipa_fd_ioctl.h>
 #include "ipa_uc_holb_monitor.h"
 #include <soc/qcom/minidump.h>
+#ifdef CONFIG_IPA_RTP
+#include "ipa_rtp_genl.h"
+#endif
+#include <linux/dma-buf.h>
 
 #define IPA_DEV_NAME_MAX_LEN 15
 #define DRV_NAME "ipa"
@@ -92,8 +96,8 @@
 #define IPA_HOLB_TMR_VAL_4_5 31
 #define IPA_IMM_IP_PACKET_INIT_EX_CMD_NUM (IPA5_MAX_NUM_PIPES + 1)
 
-#define IPA_Q6_FNR_START_IDX (128)
-#define IPA_Q6_FNR_IDX_CNT (68)
+#define IPA_Q6_FNR_START_IDX (64)
+#define IPA_Q6_FNR_IDX_CNT (191)
 #define IPA_Q6_FNR_END_IDX (IPA_Q6_FNR_START_IDX+IPA_Q6_FNR_IDX_CNT-1)
 #define IPA_Q6_FNR_STATS_SIZE (IPA_Q6_FNR_IDX_CNT * 16)
 #define IPA_MPM_MAX_RING_LEN 64
@@ -180,13 +184,39 @@ enum {
 				DRV_NAME " %s:%d " fmt, ## args); \
 	} while (0)
 
+#define IPADBG_BOOTUP(fmt, args...) \
+	do { \
+		pr_debug(DRV_NAME " %s:%d " fmt, __func__, __LINE__, ## args);\
+		if(ipa3_ctx) \
+			IPA_IPC_LOGGING(ipa3_ctx->logbuf_boot, \
+				DRV_NAME " %s:%d " fmt, ## args); \
+	} while (0)
+
+#define IPAERR_BOOTUP(fmt, args...) \
+	do { \
+		pr_err(DRV_NAME " %s:%d " fmt, __func__, __LINE__, ## args);\
+		if(ipa3_ctx) \
+			IPA_IPC_LOGGING(ipa3_ctx->logbuf_boot, \
+				DRV_NAME " %s:%d " fmt, ## args); \
+	} while (0)
+
+#define IPAERR_BOOTUP_RL(fmt, args...) \
+	do { \
+		pr_err_ratelimited_ipa(DRV_NAME " %s:%d " fmt, __func__,\
+		__LINE__, ## args);\
+		if (ipa3_ctx) { \
+			IPA_IPC_LOGGING(ipa3_ctx->logbuf_boot, \
+				DRV_NAME " %s:%d " fmt, ## args); \
+		} \
+	} while (0)
+
 #define IPAERR(fmt, args...) \
 	do { \
 		pr_err(DRV_NAME " %s:%d " fmt, __func__, __LINE__, ## args);\
 		if (ipa3_ctx) { \
-			IPA_IPC_LOGGING(ipa3_ctx->logbuf, \
-				DRV_NAME " %s:%d " fmt, ## args); \
 			IPA_IPC_LOGGING(ipa3_ctx->logbuf_low, \
+				DRV_NAME " %s:%d " fmt, ## args); \
+			IPA_IPC_LOGGING(ipa3_ctx->logbuf_crit, \
 				DRV_NAME " %s:%d " fmt, ## args); \
 		} \
 	} while (0)
@@ -196,9 +226,9 @@ enum {
 		pr_err_ratelimited_ipa(DRV_NAME " %s:%d " fmt, __func__,\
 		__LINE__, ## args);\
 		if (ipa3_ctx) { \
-			IPA_IPC_LOGGING(ipa3_ctx->logbuf, \
-				DRV_NAME " %s:%d " fmt, ## args); \
 			IPA_IPC_LOGGING(ipa3_ctx->logbuf_low, \
+				DRV_NAME " %s:%d " fmt, ## args); \
+			IPA_IPC_LOGGING(ipa3_ctx->logbuf_crit, \
 				DRV_NAME " %s:%d " fmt, ## args); \
 		} \
 	} while (0)
@@ -226,6 +256,23 @@ enum {
 				EVENT_LOG_NAME " %s:%d " fmt, __func__, __LINE__, ## args); \
 		ret = ipa3_send_opt_log_msg(log_buffer); \
 	} while (0)
+
+#define IPADBG_CFG(fmt, args...) \
+	do { \
+		pr_debug(DRV_NAME " %s:%d " fmt, __func__, __LINE__, ## args);\
+		if(ipa3_ctx) \
+			IPA_IPC_LOGGING(ipa3_ctx->logbuf_cfg, \
+				DRV_NAME " %s:%d " fmt, ## args); \
+	} while (0)
+
+#define IPAERR_CFG(fmt, args...) \
+	do { \
+		pr_err(DRV_NAME " %s:%d " fmt, __func__, __LINE__, ## args);\
+		if(ipa3_ctx) \
+			IPA_IPC_LOGGING(ipa3_ctx->logbuf_cfg, \
+				DRV_NAME " %s:%d " fmt, ## args); \
+	} while (0)
+
 
 #define WLAN_AMPDU_TX_EP 15
 #define WLAN_PROD_TX_EP  19
@@ -408,6 +455,8 @@ enum {
 #define IPA_GSI_CHANNEL_HALT_MAX_SLEEP 10000
 #define IPA_GSI_CHANNEL_HALT_MAX_TRY 10
 
+#define XR_IPA_UC_INIT_TIMEOUT_MSEC 100
+
 /* round addresses for closes page per SMMU requirements */
 #define IPA_SMMU_ROUND_TO_PAGE(iova, pa, size, iova_p, pa_p, size_p) \
 	do { \
@@ -443,146 +492,18 @@ enum {
 
 #define IPA_MEM_INIT_VAL 0xFFFFFFFF
 
-#ifdef CONFIG_COMPAT
-#define IPA_IOC_COAL_EVICT_POLICY32 _IOWR(IPA_IOC_MAGIC, \
-					IPA_IOCTL_COAL_EVICT_POLICY, \
-					compat_uptr_t)
-#define IPA_IOC_ADD_HDR32 _IOWR(IPA_IOC_MAGIC, \
-					IPA_IOCTL_ADD_HDR, \
-					compat_uptr_t)
-#define IPA_IOC_DEL_HDR32 _IOWR(IPA_IOC_MAGIC, \
-					IPA_IOCTL_DEL_HDR, \
-					compat_uptr_t)
-#define IPA_IOC_ADD_RT_RULE32 _IOWR(IPA_IOC_MAGIC, \
-					IPA_IOCTL_ADD_RT_RULE, \
-					compat_uptr_t)
-#define IPA_IOC_DEL_RT_RULE32 _IOWR(IPA_IOC_MAGIC, \
-					IPA_IOCTL_DEL_RT_RULE, \
-					compat_uptr_t)
-#define IPA_IOC_ADD_FLT_RULE32 _IOWR(IPA_IOC_MAGIC, \
-					IPA_IOCTL_ADD_FLT_RULE, \
-					compat_uptr_t)
-#define IPA_IOC_DEL_FLT_RULE32 _IOWR(IPA_IOC_MAGIC, \
-					IPA_IOCTL_DEL_FLT_RULE, \
-					compat_uptr_t)
-#define IPA_IOC_GET_RT_TBL32 _IOWR(IPA_IOC_MAGIC, \
-				IPA_IOCTL_GET_RT_TBL, \
-				compat_uptr_t)
-#define IPA_IOC_COPY_HDR32 _IOWR(IPA_IOC_MAGIC, \
-				IPA_IOCTL_COPY_HDR, \
-				compat_uptr_t)
-#define IPA_IOC_QUERY_INTF32 _IOWR(IPA_IOC_MAGIC, \
-				IPA_IOCTL_QUERY_INTF, \
-				compat_uptr_t)
-#define IPA_IOC_QUERY_INTF_TX_PROPS32 _IOWR(IPA_IOC_MAGIC, \
-				IPA_IOCTL_QUERY_INTF_TX_PROPS, \
-				compat_uptr_t)
-#define IPA_IOC_QUERY_INTF_RX_PROPS32 _IOWR(IPA_IOC_MAGIC, \
-					IPA_IOCTL_QUERY_INTF_RX_PROPS, \
-					compat_uptr_t)
-#define IPA_IOC_QUERY_INTF_EXT_PROPS32 _IOWR(IPA_IOC_MAGIC, \
-					IPA_IOCTL_QUERY_INTF_EXT_PROPS, \
-					compat_uptr_t)
-#define IPA_IOC_GET_HDR32 _IOWR(IPA_IOC_MAGIC, \
-				IPA_IOCTL_GET_HDR, \
-				compat_uptr_t)
-#define IPA_IOC_ALLOC_NAT_MEM32 _IOWR(IPA_IOC_MAGIC, \
-				IPA_IOCTL_ALLOC_NAT_MEM, \
-				compat_uptr_t)
-#define IPA_IOC_ALLOC_NAT_TABLE32 _IOWR(IPA_IOC_MAGIC, \
-				IPA_IOCTL_ALLOC_NAT_TABLE, \
-				compat_uptr_t)
-#define IPA_IOC_ALLOC_IPV6CT_TABLE32 _IOWR(IPA_IOC_MAGIC, \
-				IPA_IOCTL_ALLOC_IPV6CT_TABLE, \
-				compat_uptr_t)
-#define IPA_IOC_V4_INIT_NAT32 _IOWR(IPA_IOC_MAGIC, \
-				IPA_IOCTL_V4_INIT_NAT, \
-				compat_uptr_t)
-#define IPA_IOC_INIT_IPV6CT_TABLE32 _IOWR(IPA_IOC_MAGIC, \
-				IPA_IOCTL_INIT_IPV6CT_TABLE, \
-				compat_uptr_t)
-#define IPA_IOC_TABLE_DMA_CMD32 _IOWR(IPA_IOC_MAGIC, \
-				IPA_IOCTL_TABLE_DMA_CMD, \
-				compat_uptr_t)
-#define IPA_IOC_V4_DEL_NAT32 _IOWR(IPA_IOC_MAGIC, \
-				IPA_IOCTL_V4_DEL_NAT, \
-				compat_uptr_t)
-#define IPA_IOC_DEL_NAT_TABLE32 _IOWR(IPA_IOC_MAGIC, \
-				IPA_IOCTL_DEL_NAT_TABLE, \
-				compat_uptr_t)
-#define IPA_IOC_DEL_IPV6CT_TABLE32 _IOWR(IPA_IOC_MAGIC, \
-				IPA_IOCTL_DEL_IPV6CT_TABLE, \
-				compat_uptr_t)
-#define IPA_IOC_NAT_MODIFY_PDN32 _IOWR(IPA_IOC_MAGIC, \
-				IPA_IOCTL_NAT_MODIFY_PDN, \
-				compat_uptr_t)
-#define IPA_IOC_GET_NAT_OFFSET32 _IOWR(IPA_IOC_MAGIC, \
-				IPA_IOCTL_GET_NAT_OFFSET, \
-				compat_uptr_t)
-#define IPA_IOC_PULL_MSG32 _IOWR(IPA_IOC_MAGIC, \
-				IPA_IOCTL_PULL_MSG, \
-				compat_uptr_t)
-#define IPA_IOC_RM_ADD_DEPENDENCY32 _IOWR(IPA_IOC_MAGIC, \
-				IPA_IOCTL_RM_ADD_DEPENDENCY, \
-				compat_uptr_t)
-#define IPA_IOC_RM_DEL_DEPENDENCY32 _IOWR(IPA_IOC_MAGIC, \
-				IPA_IOCTL_RM_DEL_DEPENDENCY, \
-				compat_uptr_t)
-#define IPA_IOC_GENERATE_FLT_EQ32 _IOWR(IPA_IOC_MAGIC, \
-				IPA_IOCTL_GENERATE_FLT_EQ, \
-				compat_uptr_t)
-#define IPA_IOC_QUERY_RT_TBL_INDEX32 _IOWR(IPA_IOC_MAGIC, \
-				IPA_IOCTL_QUERY_RT_TBL_INDEX, \
-				compat_uptr_t)
-#define IPA_IOC_WRITE_QMAPID32  _IOWR(IPA_IOC_MAGIC, \
-				IPA_IOCTL_WRITE_QMAPID, \
-				compat_uptr_t)
-#define IPA_IOC_MDFY_FLT_RULE32 _IOWR(IPA_IOC_MAGIC, \
-				IPA_IOCTL_MDFY_FLT_RULE, \
-				compat_uptr_t)
-#define IPA_IOC_NOTIFY_WAN_UPSTREAM_ROUTE_ADD32 _IOWR(IPA_IOC_MAGIC, \
-				IPA_IOCTL_NOTIFY_WAN_UPSTREAM_ROUTE_ADD, \
-				compat_uptr_t)
-#define IPA_IOC_NOTIFY_WAN_UPSTREAM_ROUTE_DEL32 _IOWR(IPA_IOC_MAGIC, \
-				IPA_IOCTL_NOTIFY_WAN_UPSTREAM_ROUTE_DEL, \
-				compat_uptr_t)
-#define IPA_IOC_NOTIFY_WAN_EMBMS_CONNECTED32 _IOWR(IPA_IOC_MAGIC, \
-					IPA_IOCTL_NOTIFY_WAN_EMBMS_CONNECTED, \
-					compat_uptr_t)
-#define IPA_IOC_ADD_HDR_PROC_CTX32 _IOWR(IPA_IOC_MAGIC, \
-				IPA_IOCTL_ADD_HDR_PROC_CTX, \
-				compat_uptr_t)
-#define IPA_IOC_DEL_HDR_PROC_CTX32 _IOWR(IPA_IOC_MAGIC, \
-				IPA_IOCTL_DEL_HDR_PROC_CTX, \
-				compat_uptr_t)
-#define IPA_IOC_MDFY_RT_RULE32 _IOWR(IPA_IOC_MAGIC, \
-				IPA_IOCTL_MDFY_RT_RULE, \
-				compat_uptr_t)
-#define IPA_IOC_GET_NAT_IN_SRAM_INFO32 _IOWR(IPA_IOC_MAGIC, \
-				IPA_IOCTL_GET_NAT_IN_SRAM_INFO, \
-				compat_uptr_t)
-#define IPA_IOC_APP_CLOCK_VOTE32 _IOWR(IPA_IOC_MAGIC, \
-				IPA_IOCTL_APP_CLOCK_VOTE, \
-				compat_uptr_t)
-#define IPA_IOC_ADD_EoGRE_MAPPING32 _IOWR(IPA_IOC_MAGIC, \
-				IPA_IOCTL_ADD_EoGRE_MAPPING, \
-				compat_uptr_t)
-#define IPA_IOC_DEL_EoGRE_MAPPING32 _IOWR(IPA_IOC_MAGIC, \
-				IPA_IOCTL_DEL_EoGRE_MAPPING, \
-				compat_uptr_t)
-#define IPA_IOC_SET_NAT_EXC_RT_TBL_IDX32 _IOWR(IPA_IOC_MAGIC, \
-				IPA_IOCTL_SET_NAT_EXC_RT_TBL_IDX, \
-				compat_uptr_t)
-#define IPA_IOC_SET_CONN_TRACK_EXC_RT_TBL_IDX32 _IOWR(IPA_IOC_MAGIC, \
-				IPA_IOCTL_SET_CONN_TRACK_EXC_RT_TBL_IDX, \
-				compat_uptr_t)
-#endif /* #ifdef CONFIG_COMPAT */
-
 #define IPA_TZ_UNLOCK_ATTRIBUTE 0x0C0311
 
 #define MBOX_TOUT_MS 100
 
 #define IPA_RULE_CNT_MAX 512
+
+/* XR-IPA uC temp buffers sizes */
+#define TEMP_BUFF_SIZE	0x300000
+/* XR-IPA uC no. of temp buffers */
+#define NO_OF_BUFFS	0x04
+/* Max number of RTP streams supported */
+#define MAX_STREAMS 2
 
 /* miscellaneous for rmnet_ipa and qmi_service */
 enum ipa_type_mode {
@@ -906,6 +827,7 @@ struct ipa3_hdr_proc_ctx_offset_entry {
  * @type: header processing context type
  * @l2tp_params: L2TP parameters
  * @generic_params: generic proc_ctx params
+ * @rtp_params: ipa rtp proc_ctx params
  * @offset_entry: entry's offset
  * @hdr: the header
  * @cookie: cookie used for validity check
@@ -921,6 +843,7 @@ struct ipa3_hdr_proc_ctx_entry {
 	struct ipa_l2tp_hdr_proc_ctx_params l2tp_params;
 	struct ipa_eogre_hdr_proc_ctx_params eogre_params;
 	struct ipa_eth_II_to_eth_II_ex_procparams generic_params;
+	struct ipa_rtp_hdr_proc_ctx_params rtp_params;
 	struct ipa3_hdr_proc_ctx_offset_entry *offset_entry;
 	struct ipa3_hdr_entry *hdr;
 	u32 ref_cnt;
@@ -1579,6 +1502,7 @@ enum ipa3_platform_type {
 	IPA_PLAT_TYPE_MDM	= 0,
 	IPA_PLAT_TYPE_MSM	= 1,
 	IPA_PLAT_TYPE_APQ	= 2,
+	IPA_PLAT_TYPE_XR	= 3,
 };
 
 enum ipa3_config_this_ep {
@@ -1596,6 +1520,18 @@ struct ipa3_cache_recycle_stats {
 	u64 pkt_allocd;
 	u64 pkt_found;
 	u64 tot_pkt_replenished;
+};
+
+struct ipa3_opt_dpath_stats {
+	atomic_t res_req_count;
+	atomic_t res_req_succ;
+	atomic_t res_rel_count;
+	atomic_t add_flt_req_count;
+	atomic_t add_ctrl_flt_req_count;
+	atomic_t rm_flt_req_count;
+	atomic_t rm_ctrl_flt_req_count;
+	atomic_t opt_dpath_enable_count;
+	atomic_t opt_dpath_disable_count;
 };
 
 struct lan_coal_stats {
@@ -1647,6 +1583,7 @@ struct ipa3_stats {
 	u32 pipe_setup_fail_cnt;
 	struct ipa3_page_recycle_stats page_recycle_stats[3];
 	struct ipa3_cache_recycle_stats cache_recycle_stats[3];
+	struct ipa3_opt_dpath_stats opt_dpath_stats;
 	u64 page_recycle_cnt[3][IPA_PAGE_POLL_THRESHOLD_MAX];
 	atomic_t num_buff_above_thresh_for_def_pipe_notified;
 	atomic_t num_buff_above_thresh_for_coal_pipe_notified;
@@ -2014,6 +1951,7 @@ enum ipa_smmu_cb_type {
 	IPA_SMMU_CB_11AD,
 	IPA_SMMU_CB_ETH,
 	IPA_SMMU_CB_ETH1,
+	IPA_SMMU_CB_RTP,
 	IPA_SMMU_CB_MAX
 };
 
@@ -2284,6 +2222,7 @@ enum ipa_per_usb_enum_type_e {
  * @ip6_flt_tbl_lcl: where ip6 flt tables reside 1-local; 0-system
  * @power_mgmt_wq: workqueue for power management
  * @transport_power_mgmt_wq: workqueue transport related power management
+ * @xr_uc_init_wq: workqueue for uc initializations
  * @tag_process_before_gating: indicates whether to start tag process before
  *  gating IPA clocks
  * @transport_pm: transport power management related information
@@ -2298,6 +2237,9 @@ enum ipa_per_usb_enum_type_e {
  * @logbuf: ipc log buffer for high priority messages
  * @logbuf_low: ipc log buffer for low priority messages
  * @logbuf_clk: ipc log buffer for ipa clock messages
+ * @logbuf_cfg: ipc log buffer for ipa cfg messages
+ * @logbuf_bootup: ipc log buffer for ipa boot-up messages
+ * @logbuf_crit: ipc log buffer for critical messages
  * @ipa_wdi2: using wdi-2.0
  * @ipa_config_is_auto: is this AUTO use case
  * @ipa_fltrt_not_hashable: filter/route rules not hashable
@@ -2347,6 +2289,7 @@ enum ipa_per_usb_enum_type_e {
  * @ipa_gpi_event_rp_ddr: use DDR to access event RP for GPI channels
  * @rmnet_ctl_enable: enable pipe support fow low latency data
  * @rmnet_ll_enable: enable pipe support fow low latency data
+ * @ipa_config_is_iot: IOT target with older Modem
  * @gsi_fw_file_name: GSI IPA fw file name
  * @uc_fw_file_name: uC IPA fw file name
  * @eth_info: ethernet client mapping
@@ -2412,6 +2355,7 @@ struct ipa3_context {
 	struct workqueue_struct *transport_power_mgmt_wq;
 	bool tag_process_before_gating;
 	struct ipa3_transport_pm transport_pm;
+	struct workqueue_struct *xr_uc_init_wq;
 	unsigned long gsi_evt_comm_hdl;
 	u32 gsi_evt_comm_ring_rem;
 	u32 clnt_hdl_cmd;
@@ -2439,6 +2383,14 @@ struct ipa3_context {
 	bool ipa_wdi2_over_gsi;
 	bool ipa_wdi3_over_gsi;
 	bool ipa_wdi_opt_dpath;
+	atomic_t ipa_xr_wdi_flt_rsv_status;
+	struct completion ipa_xr_wdi_flt_rsrv_success;
+	u8 rtp_stream_id_cnt;
+	u32 rtp_proc_hdls[MAX_STREAMS];
+	u32 rtp_rt4_tbl_hdls[MAX_STREAMS];
+	u32 rtp_rt4_tbl_idxs[MAX_STREAMS];
+	u32 rtp_rt4_rule_hdls[MAX_STREAMS];
+	u32 rtp_flt4_rule_hdls[MAX_STREAMS];
 	bool ipa_endp_delay_wa;
 	bool lan_coal_enable;
 	bool ipa_fltrt_not_hashable;
@@ -2450,11 +2402,16 @@ struct ipa3_context {
 	void *logbuf;
 	void *logbuf_low;
 	void *logbuf_clk;
+	void *logbuf_cfg;
+	void *logbuf_boot;
+	void *logbuf_crit;
 	struct ipa3_controller *ctrl;
 	struct idr ipa_idr;
 	struct platform_device *master_pdev;
 	struct device *pdev;
 	struct device *uc_pdev;
+	struct device *rtp_pdev;
+	struct qmp *qmp;
 	spinlock_t idr_lock;
 	u32 enable_clock_scaling;
 	u32 enable_napi_chain;
@@ -2550,7 +2507,11 @@ struct ipa3_context {
 	bool lan_rx_napi_enable;
 	bool tx_napi_enable;
 	bool tx_poll;
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(6, 13, 0))
 	struct net_device generic_ndev;
+#else
+	struct net_device *generic_ndev;
+#endif
 	struct napi_struct napi_lan_rx;
 	u32 icc_num_cases;
 	u32 icc_num_paths;
@@ -2571,6 +2532,7 @@ struct ipa3_context {
 	bool ipa_gpi_event_rp_ddr;
 	bool rmnet_ctl_enable;
 	bool rmnet_ll_enable;
+	bool ipa_config_is_iot;
 	char *gsi_fw_file_name;
 	char *uc_fw_file_name;
 	struct ipa3_eth_info
@@ -2633,7 +2595,6 @@ struct ipa3_context {
 	struct ipa3_page_recycle_stats prev_low_lat_data_recycle_stats;
 	struct mutex recycle_stats_collection_lock;
 	struct mutex ssr_lock;
-	bool rmnet_napi_enable;
 	atomic_t is_suspend_mode_enabled;
 };
 
@@ -2721,6 +2682,7 @@ struct ipa3_plat_drv_res {
 	bool ulso_wa;
 	bool ipa_wdi_opt_dpath;
 	u8 coal_ipv4_id_ignore;
+	bool ipa_config_is_iot;
 };
 
 /**
@@ -3457,7 +3419,6 @@ int ipa3_tag_process(struct ipa3_desc *desc, int num_descs,
 
 int ipa3_usb_init(void);
 void ipa3_usb_exit(void);
-int ipa3_usb_register_ready_cb(void);
 
 void ipa3_q6_pre_shutdown_cleanup(void);
 void ipa3_q6_post_shutdown_cleanup(void);
@@ -3847,5 +3808,22 @@ int ipa3_update_apps_per_stats(enum ipa_per_stats_type_e stats_type, uint32_t da
 /* Periodic stats update */
 int ipa3_update_client_holb_per_stats(enum ipa_per_stats_type_e stats_type, uint32_t data);
 int ipa3_update_dma_per_stats(enum ipa_per_stats_type_e stats_type, uint32_t data);
+
+/* XR-IPA API's */
+#ifdef CONFIG_IPA_RTP
+int ipa3_uc_send_tuple_info_cmd(struct traffic_tuple_info *data, uint8_t stream_id);
+int ipa3_alloc_temp_buffs_to_uc(unsigned int size, unsigned int no_of_buffs);
+int ipa3_map_buff_to_device_addr(struct map_buffer *map_buffs);
+int ipa3_unmap_buff_from_device_addr(struct unmap_buffer *unmap_buffs);
+int ipa3_send_bitstream_buff_info(struct bitstream_buffers *data);
+int ipa3_tuple_info_cmd_to_wlan_uc(struct traffic_tuple_info *req, u32 stream_id);
+int ipa3_uc_send_remove_stream_cmd(struct remove_bitstream_buffers *data);
+int ipa3_create_hfi_send_uc(void);
+int ipa3_allocate_uc_pipes_er_tr_send_to_uc(void);
+void ipa3_free_uc_temp_buffs(unsigned int no_of_buffs);
+void ipa3_free_uc_pipes_er_tr(void);
+int ipa3_uc_send_add_bitstream_buffers_cmd(struct bitstream_buffers_to_uc *data);
+void ipa3_synx_uninitialize(void);
+#endif
 
 #endif /* _IPA3_I_H_ */

@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2020-2021, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2024, Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
-#include <linux/of.h>
 #include <linux/types.h>
 #include <linux/of_platform.h>
+#include <linux/of.h>
 
 #include "mmrm_internal.h"
 #include "mmrm_debug.h"
@@ -35,11 +36,6 @@ static int mmrm_read_clk_pltfrm_rsrc_frm_drv_data(
 
 	pdata = ddata->platform_data;
 	cres = &ddata->clk_res;
-
-	cres->threshold = mmrm_find_key_value(pdata,
-						"qcom,mmrm_clk_threshold");
-	d_mpr_h("%s: configured mmrm clk threshold %d\n",
-		__func__, cres->threshold);
 
 	cres->scheme = mmrm_find_key_value(pdata,
 					"qcom,mmrm_clk_mgr_scheme");
@@ -79,8 +75,14 @@ static int mmrm_load_mm_rail_corner_table(
 		goto err_load_corner_tbl;
 	}
 
+	if (num_corners > MMRM_VDD_LEVEL_MAX) {
+		d_mpr_e("%s: invalid number of mm rail corners\n", __func__);
+		rc = -EINVAL;
+		goto err_load_corner_tbl;
+	}
+
 	corners->corner_tbl = devm_kzalloc(&pdev->dev,
-		sizeof(*corners->corner_tbl) * num_corners, GFP_KERNEL);
+		sizeof(*corners->corner_tbl) * MMRM_VDD_LEVEL_MAX, GFP_KERNEL);
 	if (!corners->corner_tbl) {
 		d_mpr_e("%s: failed to allocate memory for corner_tbl\n",
 			__func__);
@@ -134,6 +136,16 @@ static int mmrm_load_nom_clk_src_table(
 
 	struct platform_device *pdev = cres->pdev;
 	struct nom_clk_src_set *clk_srcs = &cres->nom_clk_set;
+
+	rc = of_property_read_u32(pdev->dev.of_node, "mmrm-peak-threshold", &cres->peak_threshold);
+	if (rc < 0) {
+		d_mpr_e("%s: invalid or missing mmrm-peak-threshold DT property\n", __func__);
+		rc = -ENODEV;
+		goto err_load_clk_src_tbl;
+	}
+
+	d_mpr_h("%s: mmrm-peak-threshold threshold:%d\n",
+		__func__, cres->peak_threshold);
 
 	of_find_property(pdev->dev.of_node, "mmrm-client-info", &size_clk_src);
 	if ((size_clk_src < sizeof(*clk_srcs->clk_src_tbl)) ||

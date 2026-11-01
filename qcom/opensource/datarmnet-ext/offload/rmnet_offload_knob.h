@@ -1,18 +1,22 @@
-/* Copyright (c) 2018-2020, The Linux Foundation. All rights reserved.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 and
- * only version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+/* SPDX-License-Identifier: GPL-2.0-only */
+/*
+ * Copyright (c) 2018-2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2025 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
-#ifndef DATARMNET5833be0738
-#define DATARMNET5833be0738
+#ifndef __RMNET_OFFLOAD_KNOB_H__
+#define __RMNET_OFFLOAD_KNOB_H__
+
 #include <linux/types.h>
-enum{DATARMNETdf66588a73,DATARMNET9c85bb95a3,DATARMNET6d2ed4b822,
-DATARMNET94aa767bca,};u64 DATARMNETf1d1b8287f(u32 DATARMNET4c4a5ce272);
+
+enum {
+	RMNET_OFFLOAD_KNOB_TCP_BYTE_LIMIT,
+	RMNET_OFFLOAD_KNOB_UDP_BYTE_LIMIT,
+	RMNET_OFFLOAD_KNOB_ENGINE_MODE,
+	RMNET_OFFLOAD_KNOB_ECN_SEGMENT,
+	RMNET_OFFLOAD_KNOB_MAX,
+};
+
+u64 rmnet_offload_knob_get(u32 knob);
+
 #endif

@@ -1,18 +1,23 @@
 load(":define_offload.bzl", "define_offload")
 load("//build/kernel/kleaf:kernel.bzl", "ddk_module")
 
-package(default_visibility = ["//visibility:public"])
-
-define_offload("pineapple", "consolidate")
-define_offload("pineapple", "perf")
-
 define_offload("sun", "consolidate")
 define_offload("sun", "perf")
 
-define_offload("parrot", "consolidate")
-define_offload("parrot", "perf")
+define_offload("canoe", "consolidate")
+define_offload("canoe", "perf")
 
-define_offload("tuna", "consolidate")
-define_offload("tuna", "perf")
+define_offload("vienna", "consolidate")
+define_offload("vienna", "perf")
 
+define_offload("lahaina", "consolidate")
+define_offload("lahaina", "perf")
+
+define_offload("chora", "consolidate")
+define_offload("chora", "perf")
+
+define_offload("malabar", "consolidate")
+define_offload("malabar", "perf")
+
+define_offload("waipio", "consolidate")
 define_offload("waipio", "perf")

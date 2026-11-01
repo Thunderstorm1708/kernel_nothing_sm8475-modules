@@ -2,7 +2,7 @@
 /*
  * Copyright (c) 2018 - 2021, The Linux Foundation. All rights reserved.
  *
- * Copyright (c) 2023-2024, Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
  */
 
 #include "ipa_i.h"
@@ -184,9 +184,9 @@ static int ipa3_setup_wdi3_gsi_channel(u8 is_smmu_enabled,
 	/* setup channel ring */
 	if ((dir == IPA_WDI3_TX_DIR) || (dir == IPA_WDI3_TX1_DIR) ||
 		(dir == IPA_WDI3_TX2_DIR))
-		gsi_channel_props.dir = CHAN_DIR_FROM_GSI;
+		gsi_channel_props.dir = GSI_CHAN_DIR_FROM_GSI;
 	else
-		gsi_channel_props.dir = CHAN_DIR_TO_GSI;
+		gsi_channel_props.dir = GSI_CHAN_DIR_TO_GSI;
 
 	gsi_ep_info = ipa_get_gsi_ep_info(ep->client);
 	if (!gsi_ep_info) {
@@ -1102,7 +1102,8 @@ int ipa3_disconn_wdi3_pipes(int ipa_ep_idx_tx, int ipa_ep_idx_rx,
 	else
 		ipa3_release_wdi3_gsi_smmu_mappings(IPA_WDI3_RX2_DIR);
 
-	if (ipa3_ctx->ipa_hw_type >= IPA_HW_v4_5 && ipa3_ctx->ipa_hw_type != IPA_HW_v5_2)
+	if (ipa3_ctx->ipa_hw_type >= IPA_HW_v4_5 && ipa3_ctx->ipa_hw_type != IPA_HW_v5_2
+		&& ipa3_ctx->platform_type != IPA_PLAT_TYPE_XR)
 		ipa3_uc_debug_stats_dealloc(IPA_HW_PROTOCOL_WDI3);
 
 	ipa3_delete_dflt_flt_rules(ipa_ep_idx_rx);
@@ -1172,11 +1173,14 @@ int ipa3_enable_wdi3_pipes(int ipa_ep_idx_tx, int ipa_ep_idx_rx,
 		goto exit;
 	}
 
-	result = ipa3_enable_data_path(ipa_ep_idx_tx);
-	if (result) {
-		IPAERR("enable data path failed res=%d clnt=%d\n", result,
-			ipa_ep_idx_tx);
-		goto fail_enable_path1;
+	if (!ipa3_ctx->ipa_wdi_opt_dpath || (ipa3_ctx->ipa_wdi_opt_dpath &&
+		!atomic_read(&ipa3_ctx->stats.opt_dpath_stats.res_req_succ))) {
+		result = ipa3_enable_data_path(ipa_ep_idx_tx);
+		if (result) {
+			IPAERR("enable data path failed res=%d clnt=%d\n", result,
+				ipa_ep_idx_tx);
+			goto fail_enable_path1;
+		}
 	}
 
 	/* Enable and config HOLB TO for both tx pipes */
@@ -1197,11 +1201,14 @@ int ipa3_enable_wdi3_pipes(int ipa_ep_idx_tx, int ipa_ep_idx_rx,
 			ipa3_cfg_ep_holb(ipa_ep_idx_tx1, &holb_cfg));
 	}
 
-	/* start gsi tx channel */
-	result = gsi_start_channel(ep_tx->gsi_chan_hdl);
-	if (result) {
-		IPAERR("failed to start gsi tx channel\n");
-		goto fail_start_channel1;
+	/* start gsi tx channel if opt dpath is disabled. */
+	if (!ipa3_ctx->ipa_wdi_opt_dpath || (ipa3_ctx->ipa_wdi_opt_dpath &&
+		!atomic_read(&ipa3_ctx->stats.opt_dpath_stats.res_req_succ))) {
+		result = gsi_start_channel(ep_tx->gsi_chan_hdl);
+		if (result) {
+			IPAERR("failed to start gsi tx channel\n");
+			goto fail_start_channel1;
+		}
 	}
 
 	/* start gsi tx1 channel */
@@ -1230,7 +1237,8 @@ int ipa3_enable_wdi3_pipes(int ipa_ep_idx_tx, int ipa_ep_idx_rx,
 	ipa3_check_wdi_opt_chn_empty(ipa_ep_idx_rx);
 
 	/* start uC gsi dbg stats monitor */
-	if (ipa3_ctx->ipa_hw_type >= IPA_HW_v4_5 && ipa3_ctx->ipa_hw_type != IPA_HW_v5_2) {
+	if (ipa3_ctx->ipa_hw_type >= IPA_HW_v4_5 && ipa3_ctx->ipa_hw_type != IPA_HW_v5_2
+		&& ipa3_ctx->platform_type != IPA_PLAT_TYPE_XR) {
 		ipa3_ctx->gsi_info[IPA_HW_PROTOCOL_WDI3].ch_id_info[0].ch_id
 			= ep_rx->gsi_chan_hdl;
 		ipa3_ctx->gsi_info[IPA_HW_PROTOCOL_WDI3].ch_id_info[0].dir
@@ -1361,12 +1369,16 @@ int ipa3_disable_wdi3_pipes(int ipa_ep_idx_tx, int ipa_ep_idx_rx,
 	ipa3_check_wdi_opt_chn_empty(ipa_ep_idx_rx);
 
 	/* stop gsi tx channel */
-	result = ipa_stop_gsi_channel(ipa_ep_idx_tx);
-	if (result) {
-		IPAERR("failed to stop gsi tx channel\n");
-		result = -EFAULT;
-		goto fail;
+	if (!ipa3_ctx->ipa_wdi_opt_dpath || (ipa3_ctx->ipa_wdi_opt_dpath &&
+		!atomic_read(&ipa3_ctx->stats.opt_dpath_stats.res_req_succ))) {
+		result = ipa_stop_gsi_channel(ipa_ep_idx_tx);
+		if (result) {
+			IPAERR("failed to stop gsi tx channel\n");
+			result = -EFAULT;
+			goto fail;
+		}
 	}
+
 	/* stop gsi tx1 channel */
 	if (ipa_ep_idx_tx1 >= 0) {
 		result = ipa_stop_gsi_channel(ipa_ep_idx_tx1);
@@ -1377,7 +1389,8 @@ int ipa3_disable_wdi3_pipes(int ipa_ep_idx_tx, int ipa_ep_idx_rx,
 		}
 	}
 	/* stop uC gsi dbg stats monitor */
-	if (ipa3_ctx->ipa_hw_type >= IPA_HW_v4_5 && ipa3_ctx->ipa_hw_type != IPA_HW_v5_2) {
+	if (ipa3_ctx->ipa_hw_type >= IPA_HW_v4_5 && ipa3_ctx->ipa_hw_type != IPA_HW_v5_2
+		&& ipa3_ctx->platform_type != IPA_PLAT_TYPE_XR) {
 		ipa3_ctx->gsi_info[IPA_HW_PROTOCOL_WDI3].ch_id_info[0].ch_id
 			= 0xff;
 		ipa3_ctx->gsi_info[IPA_HW_PROTOCOL_WDI3].ch_id_info[0].dir

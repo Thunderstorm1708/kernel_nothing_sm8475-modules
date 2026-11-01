@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-only
-/* Copyright (c) 2023 Qualcomm Innovation Center, Inc. All rights reserved.
- *
- * RMNET PERF TCP framework
- *
+/*
+ * Copyright (c) 2023, 2025 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 #include <linux/types.h>
@@ -14,6 +12,7 @@
 #include <linux/hashtable.h>
 #include <linux/log2.h>
 #include <linux/workqueue.h>
+#include <linux/xarray.h>
 #include <net/ip.h>
 #include <net/inet_hashtables.h>
 #include <net/ipv6.h>
@@ -21,232 +20,679 @@
 #include <net/tcp.h>
 #include <net/sock.h>
 #include "rmnet_private.h"
+
+#include "rmnet_perf.h"
 #include "rmnet_perf_tcp.h"
-#define DATARMNET3dad3dfdc0 ((0x16a8+1565-0x14f5))
-#define DATARMNETe6309522cf ((0xdf7+6169-0x241c))
-#define DATARMNET99a2e6e390 (192000)
-#define DATARMNET714c9c3081 ((0xeb7+1158-0x132d))
-#define DATARMNET347bd5eb15 \
-	(const_ilog2(DATARMNET714c9c3081))
-enum{DATARMNETe0e37fef7a,DATARMNETf354672897,DATARMNET9cc765a89e,
-DATARMNETb03f9571a3,DATARMNET53c8cfb28e,DATARMNET74f0a28fec,DATARMNETaa18c75b61,
-};struct DATARMNET4b40fe9cd4{union{__be32 DATARMNETdfe430c2d6;struct in6_addr 
-DATARMNET815cbb4bf5;};union{__be32 DATARMNET2cb607d686;struct in6_addr 
-DATARMNETc3f31215b7;};union{struct{__be16 DATARMNET08e913477e;__be16 
-DATARMNETda7f7fa492;};u32 DATARMNET556bcfcf8f;};u8 DATARMNET0d956cc77a;};struct 
-DATARMNETddbc1e5435{struct hlist_node hash;struct rcu_head DATARMNET28bfe9e6ad;
-struct DATARMNET4b40fe9cd4 DATARMNET54338da2ff;unsigned long DATARMNET763f2e5fac
-;u32 DATARMNETfef3675ce7;u32 DATARMNET9076d335ab;u32 DATARMNET9c389f3b86;u32 
-DATARMNET9a57846b4e;u32 DATARMNETb8fc35ed64;bool DATARMNET55056146f6;u8 
-DATARMNET1717afebc7;};struct DATARMNET74cfea3d20{struct delayed_work 
-DATARMNET190b4452e8;bool DATARMNETcd94e0d3c7;};static DEFINE_SPINLOCK(
-DATARMNET8e3721c47d);static DEFINE_HASHTABLE(DATARMNET1fd012f255,
-DATARMNET347bd5eb15);static u32 DATARMNET1c62a8e2c9;static struct 
-DATARMNET74cfea3d20 DATARMNETac6535da80;static u32 DATARMNET84337b8855=
-(0xeb7+698-0x110d);module_param_named(rmnet_perf_tcp_knob0,DATARMNET84337b8855,
-uint,(0xdb7+6665-0x261c));static u64 DATARMNETeb09e391b5[DATARMNETaa18c75b61];
-module_param_array_named(rmnet_perf_tcp_stat,DATARMNETeb09e391b5,ullong,NULL,
-(0xcb7+5769-0x221c));static void DATARMNET32b91c8ae6(u32 DATARMNET248f120dd5){if
-(DATARMNET248f120dd5<DATARMNETaa18c75b61)DATARMNETeb09e391b5[DATARMNET248f120dd5
-]+=(0xd26+209-0xdf6);}static bool DATARMNETd92eab34a9(struct DATARMNETddbc1e5435
-*DATARMNET63b1a086d5,unsigned long DATARMNET763f2e5fac){unsigned long 
-DATARMNETc2d5c71ce1;DATARMNETc2d5c71ce1=msecs_to_jiffies(DATARMNET3dad3dfdc0);if
-(DATARMNET763f2e5fac-DATARMNET63b1a086d5->DATARMNET763f2e5fac>
-DATARMNETc2d5c71ce1)return true;return false;}static void DATARMNET776e08992c(
-struct rcu_head*DATARMNET5d432e897f){struct DATARMNETddbc1e5435*
-DATARMNET63b1a086d5;DATARMNET63b1a086d5=container_of(DATARMNET5d432e897f,struct 
-DATARMNETddbc1e5435,DATARMNET28bfe9e6ad);kfree(DATARMNET63b1a086d5);}static bool
- DATARMNETb8167597bc(bool DATARMNETe78ad140cc){struct DATARMNETddbc1e5435*
-DATARMNET63b1a086d5;struct hlist_node*DATARMNET0386f6f82a;unsigned long 
-DATARMNET763f2e5fac;int DATARMNET5c2fd31d7b;DATARMNET763f2e5fac=jiffies;
-hash_for_each_safe(DATARMNET1fd012f255,DATARMNET5c2fd31d7b,DATARMNET0386f6f82a,
-DATARMNET63b1a086d5,hash){if(DATARMNET63b1a086d5->DATARMNET1717afebc7)continue;
-if(DATARMNETe78ad140cc||DATARMNETd92eab34a9(DATARMNET63b1a086d5,
-DATARMNET763f2e5fac)){DATARMNET63b1a086d5->DATARMNET1717afebc7=true;hash_del_rcu
-(&DATARMNET63b1a086d5->hash);call_rcu(&DATARMNET63b1a086d5->DATARMNET28bfe9e6ad,
-DATARMNET776e08992c);DATARMNET32b91c8ae6(DATARMNET9cc765a89e);
-DATARMNET1c62a8e2c9--;}}return!!DATARMNET1c62a8e2c9;}static void 
-DATARMNETfec9085d8e(struct work_struct*DATARMNET190b4452e8){struct 
-DATARMNET74cfea3d20*DATARMNET9dd153bdf2;unsigned long DATARMNETfb0677cc3c;bool 
-DATARMNET6e1c466378;DATARMNET9dd153bdf2=container_of(to_delayed_work(
-DATARMNET190b4452e8),struct DATARMNET74cfea3d20,DATARMNET190b4452e8);
-spin_lock_irqsave(&DATARMNET8e3721c47d,DATARMNETfb0677cc3c);DATARMNET6e1c466378=
-DATARMNETb8167597bc(DATARMNET9dd153bdf2->DATARMNETcd94e0d3c7);if(
-DATARMNET6e1c466378){unsigned long DATARMNETf71ef1b8da;DATARMNETf71ef1b8da=
-msecs_to_jiffies(DATARMNETe6309522cf);schedule_delayed_work(&DATARMNET9dd153bdf2
-->DATARMNET190b4452e8,DATARMNETf71ef1b8da);}spin_unlock_irqrestore(&
-DATARMNET8e3721c47d,DATARMNETfb0677cc3c);}static bool DATARMNET2f1039220d(struct
- DATARMNET4b40fe9cd4*DATARMNETae0905b0b3,struct DATARMNET4b40fe9cd4*
-DATARMNETdb49f21565){if(DATARMNETae0905b0b3->DATARMNET0d956cc77a!=
-DATARMNETdb49f21565->DATARMNET0d956cc77a||DATARMNETae0905b0b3->
-DATARMNET08e913477e!=DATARMNETdb49f21565->DATARMNET08e913477e||
-DATARMNETae0905b0b3->DATARMNETda7f7fa492!=DATARMNETdb49f21565->
-DATARMNETda7f7fa492)return false;if(DATARMNETae0905b0b3->DATARMNET0d956cc77a==
-(0xd11+230-0xdf3))return DATARMNETae0905b0b3->DATARMNETdfe430c2d6==
-DATARMNETdb49f21565->DATARMNETdfe430c2d6&&DATARMNETae0905b0b3->
-DATARMNET2cb607d686==DATARMNETdb49f21565->DATARMNET2cb607d686;return!
-ipv6_addr_cmp(&DATARMNETae0905b0b3->DATARMNET815cbb4bf5,&DATARMNETdb49f21565->
-DATARMNET815cbb4bf5)&&!ipv6_addr_cmp(&DATARMNETae0905b0b3->DATARMNETc3f31215b7,&
-DATARMNETdb49f21565->DATARMNETc3f31215b7);}static struct DATARMNETddbc1e5435*
-DATARMNETba919c78e5(struct DATARMNET4b40fe9cd4*DATARMNET3396919a68)__must_hold(&
-DATARMNET8e3721c47d){struct DATARMNETddbc1e5435*DATARMNET63b1a086d5;if(
-DATARMNET1c62a8e2c9>=DATARMNET84337b8855)return NULL;DATARMNET63b1a086d5=kzalloc
-(sizeof(*DATARMNET63b1a086d5),GFP_ATOMIC);if(!DATARMNET63b1a086d5){
-DATARMNET32b91c8ae6(DATARMNETf354672897);return NULL;}INIT_HLIST_NODE(&
-DATARMNET63b1a086d5->hash);memcpy(&DATARMNET63b1a086d5->DATARMNET54338da2ff,
-DATARMNET3396919a68,sizeof(*DATARMNET3396919a68));DATARMNET63b1a086d5->
-DATARMNET9a57846b4e=DATARMNET99a2e6e390;DATARMNET63b1a086d5->DATARMNET763f2e5fac
-=jiffies;hash_add_rcu(DATARMNET1fd012f255,&DATARMNET63b1a086d5->hash,
-DATARMNET3396919a68->DATARMNET556bcfcf8f);DATARMNET32b91c8ae6(
-DATARMNETe0e37fef7a);if(!DATARMNET1c62a8e2c9){unsigned long DATARMNETf71ef1b8da;
-DATARMNETf71ef1b8da=msecs_to_jiffies(DATARMNETe6309522cf);schedule_delayed_work(
-&DATARMNETac6535da80.DATARMNET190b4452e8,DATARMNETf71ef1b8da);}
-DATARMNET1c62a8e2c9++;return DATARMNET63b1a086d5;}static void 
-DATARMNET11a5f0fd38(struct DATARMNETddbc1e5435*DATARMNET63b1a086d5,struct 
-sk_buff*DATARMNET543491eb0f,bool DATARMNETd147c14c0e)__must_hold(RCU){struct 
-tcphdr*DATARMNET668416551c=tcp_hdr(DATARMNET543491eb0f);struct rmnet_skb_cb*
-DATARMNET1ec4882bf7=RMNET_SKB_CB(DATARMNET543491eb0f);DATARMNET63b1a086d5->
-DATARMNET9c389f3b86=DATARMNET543491eb0f->hash;if(DATARMNETd147c14c0e){u32 
-DATARMNET9076d335ab=ntohl(DATARMNET668416551c->ack_seq);WRITE_ONCE(
-DATARMNET63b1a086d5->DATARMNET9076d335ab,DATARMNET9076d335ab);WRITE_ONCE(
-DATARMNET63b1a086d5->DATARMNETfef3675ce7,DATARMNET9076d335ab);}else{u32 
-DATARMNETfef3675ce7=ntohl(DATARMNET668416551c->seq);WRITE_ONCE(
-DATARMNET63b1a086d5->DATARMNETfef3675ce7,DATARMNETfef3675ce7);WRITE_ONCE(
-DATARMNET63b1a086d5->DATARMNET9076d335ab,DATARMNETfef3675ce7-(0xd26+209-0xdf6));
-DATARMNET1ec4882bf7->bif=(0xd2d+202-0xdf7);DATARMNET1ec4882bf7->ack_thresh=
-READ_ONCE(DATARMNET63b1a086d5->DATARMNET9a57846b4e);}}static struct 
-DATARMNETddbc1e5435*DATARMNET9f0aaf07cc(struct DATARMNET4b40fe9cd4*
-DATARMNET3396919a68,struct sk_buff*DATARMNET543491eb0f,bool DATARMNETd147c14c0e)
-__must_hold(RCU){struct DATARMNETddbc1e5435*DATARMNET63b1a086d5;unsigned long 
-DATARMNETfb0677cc3c;spin_lock_irqsave(&DATARMNET8e3721c47d,DATARMNETfb0677cc3c);
-hash_for_each_possible_rcu(DATARMNET1fd012f255,DATARMNET63b1a086d5,hash,
-DATARMNET3396919a68->DATARMNET556bcfcf8f){if(DATARMNET63b1a086d5->
-DATARMNET1717afebc7)continue;if(DATARMNET2f1039220d(&DATARMNET63b1a086d5->
-DATARMNET54338da2ff,DATARMNET3396919a68)){spin_unlock_irqrestore(&
-DATARMNET8e3721c47d,DATARMNETfb0677cc3c);return DATARMNET63b1a086d5;}}
-DATARMNET63b1a086d5=DATARMNETba919c78e5(DATARMNET3396919a68);
-spin_unlock_irqrestore(&DATARMNET8e3721c47d,DATARMNETfb0677cc3c);if(
-DATARMNET63b1a086d5)DATARMNET11a5f0fd38(DATARMNET63b1a086d5,DATARMNET543491eb0f,
-DATARMNETd147c14c0e);return DATARMNET63b1a086d5;}static struct sock*
-DATARMNETc0b5d624ae(struct DATARMNET4b40fe9cd4*DATARMNET3396919a68,struct 
-net_device*DATARMNETc96400be1e){struct net*net=dev_net(DATARMNETc96400be1e);if(
-DATARMNET3396919a68->DATARMNET0d956cc77a==(0xd11+230-0xdf3))return 
-inet_lookup_established(net,&tcp_hashinfo,DATARMNET3396919a68->
-DATARMNETdfe430c2d6,DATARMNET3396919a68->DATARMNET08e913477e,DATARMNET3396919a68
-->DATARMNET2cb607d686,DATARMNET3396919a68->DATARMNETda7f7fa492,
-DATARMNETc96400be1e->ifindex);return __inet6_lookup_established(net,&
-tcp_hashinfo,&DATARMNET3396919a68->DATARMNET815cbb4bf5,DATARMNET3396919a68->
-DATARMNET08e913477e,&DATARMNET3396919a68->DATARMNETc3f31215b7,ntohs(
-DATARMNET3396919a68->DATARMNETda7f7fa492),DATARMNETc96400be1e->ifindex,
-(0xd2d+202-0xdf7));}static void DATARMNET31a7673e56(struct DATARMNETddbc1e5435*
-DATARMNET63b1a086d5,struct sk_buff*DATARMNET543491eb0f)__must_hold(RCU){struct 
-sock*sk;if(DATARMNET543491eb0f->sk){sk=DATARMNET543491eb0f->sk;if(sk_fullsock(sk
-)){if(sk->sk_state==TCP_ESTABLISHED&&!sock_flag(sk,SOCK_DEAD)&&!sk_unhashed(sk)
-&&sk->sk_shutdown!=SHUTDOWN_MASK){inet_csk(sk)->icsk_ack.pending|=ICSK_ACK_NOW;
-DATARMNET63b1a086d5->DATARMNETb8fc35ed64++;DATARMNET32b91c8ae6(
-DATARMNET74f0a28fec);}}return;}sk=DATARMNETc0b5d624ae(&DATARMNET63b1a086d5->
-DATARMNET54338da2ff,DATARMNET543491eb0f->dev);if(!sk){struct rmnet_skb_cb*
-DATARMNET1ec4882bf7=RMNET_SKB_CB(DATARMNET543491eb0f);DATARMNET32b91c8ae6(
-DATARMNETb03f9571a3);DATARMNET63b1a086d5->DATARMNET55056146f6=true;
-DATARMNET1ec4882bf7->tethered=true;return;}if(sk_fullsock(sk)){bh_lock_sock(sk);
-if(sk->sk_state==TCP_ESTABLISHED&&!sock_flag(sk,SOCK_DEAD)&&!sk_unhashed(sk)&&sk
-->sk_shutdown!=SHUTDOWN_MASK){inet_csk(sk)->icsk_ack.pending|=ICSK_ACK_NOW;
-inet_csk_schedule_ack(sk);DATARMNET63b1a086d5->DATARMNETb8fc35ed64++;
-DATARMNET32b91c8ae6(DATARMNET53c8cfb28e);}bh_unlock_sock(sk);}sock_gen_put(sk);}
-static u32 DATARMNET62fb576113(struct sk_buff*DATARMNET543491eb0f){struct tcphdr
-*DATARMNET668416551c=tcp_hdr(DATARMNET543491eb0f);return DATARMNET543491eb0f->
-len-((u8*)DATARMNET668416551c-DATARMNET543491eb0f->data)-DATARMNET668416551c->
-doff*(0xd11+230-0xdf3);}static void DATARMNET55fda9e01e(struct 
-DATARMNETddbc1e5435*DATARMNET63b1a086d5,struct sk_buff*DATARMNET543491eb0f,bool 
-DATARMNETd147c14c0e)__must_hold(RCU){struct tcphdr*DATARMNET668416551c=tcp_hdr(
-DATARMNET543491eb0f);u32 DATARMNET26945497d8=ntohl(DATARMNET668416551c->seq);u32
- DATARMNETb1b0ee1b2d=ntohl(DATARMNET668416551c->ack_seq);u32 DATARMNETb6ff6d25f8
-=READ_ONCE(DATARMNET63b1a086d5->DATARMNETfef3675ce7);u32 DATARMNET91c1d5c029=
-READ_ONCE(DATARMNET63b1a086d5->DATARMNET9076d335ab);u32 DATARMNET9445bc443c=
-READ_ONCE(DATARMNET63b1a086d5->DATARMNET9a57846b4e);DATARMNET63b1a086d5->
-DATARMNET763f2e5fac=jiffies;if(DATARMNET63b1a086d5->DATARMNET55056146f6)return;
-if(DATARMNETd147c14c0e){if(after(DATARMNETb1b0ee1b2d,DATARMNET91c1d5c029)){u32 
-DATARMNET4e557c82d6=(0xd2d+202-0xdf7);if(DATARMNETb1b0ee1b2d>DATARMNETb6ff6d25f8
-)DATARMNET4e557c82d6=DATARMNETb1b0ee1b2d-DATARMNETb6ff6d25f8;if(
-DATARMNET4e557c82d6>DATARMNET9445bc443c)DATARMNET31a7673e56(DATARMNET63b1a086d5,
-DATARMNET543491eb0f);WRITE_ONCE(DATARMNET63b1a086d5->DATARMNET9076d335ab,
-DATARMNETb1b0ee1b2d);}}else{u32 DATARMNET4e557c82d6;if(after(DATARMNET26945497d8
-,DATARMNETb6ff6d25f8)){DATARMNET4e557c82d6=DATARMNET26945497d8-
-DATARMNET91c1d5c029;DATARMNET4e557c82d6+=DATARMNET62fb576113(DATARMNET543491eb0f
-);if(DATARMNET4e557c82d6>DATARMNET9445bc443c)DATARMNET31a7673e56(
-DATARMNET63b1a086d5,DATARMNET543491eb0f);WRITE_ONCE(DATARMNET63b1a086d5->
-DATARMNETfef3675ce7,DATARMNET26945497d8);}}}static bool DATARMNET6670717310(
-struct sk_buff*DATARMNET543491eb0f,struct DATARMNET4b40fe9cd4*
-DATARMNET3396919a68){struct tcphdr*DATARMNET668416551c;u32 DATARMNETd660a1a629;
-if(!skb_transport_header_was_set(DATARMNET543491eb0f)||DATARMNET543491eb0f->
-ip_summed==CHECKSUM_NONE)return false;DATARMNET668416551c=tcp_hdr(
-DATARMNET543491eb0f);if(DATARMNET668416551c->syn)return false;
-DATARMNETd660a1a629=DATARMNET62fb576113(DATARMNET543491eb0f);if(!
-DATARMNETd660a1a629&&DATARMNET668416551c->ack)return false;DATARMNET3396919a68->
-DATARMNET08e913477e=DATARMNET668416551c->source;DATARMNET3396919a68->
-DATARMNETda7f7fa492=DATARMNET668416551c->dest;if(DATARMNET543491eb0f->protocol==
-htons(ETH_P_IP)){struct iphdr*DATARMNET86f1f2cdc9=ip_hdr(DATARMNET543491eb0f);
-DATARMNET3396919a68->DATARMNETdfe430c2d6=DATARMNET86f1f2cdc9->saddr;
-DATARMNET3396919a68->DATARMNET2cb607d686=DATARMNET86f1f2cdc9->daddr;
-DATARMNET3396919a68->DATARMNET0d956cc77a=(0xd11+230-0xdf3);}else{struct ipv6hdr*
-DATARMNETbf55123e5b=ipv6_hdr(DATARMNET543491eb0f);memcpy(&DATARMNET3396919a68->
-DATARMNET815cbb4bf5,&DATARMNETbf55123e5b->saddr,sizeof(DATARMNETbf55123e5b->
-saddr));memcpy(&DATARMNET3396919a68->DATARMNETc3f31215b7,&DATARMNETbf55123e5b->
-daddr,sizeof(DATARMNETbf55123e5b->daddr));DATARMNET3396919a68->
-DATARMNET0d956cc77a=(0xd03+244-0xdf1);}return true;}void DATARMNET9250714999(
-struct sk_buff*DATARMNET543491eb0f){struct rmnet_skb_cb*DATARMNET1ec4882bf7=
-RMNET_SKB_CB(DATARMNET543491eb0f);struct DATARMNET4b40fe9cd4 DATARMNET3396919a68
-={};struct DATARMNETddbc1e5435*DATARMNET63b1a086d5;if(!DATARMNET6670717310(
-DATARMNET543491eb0f,&DATARMNET3396919a68))return;rcu_read_lock();
-DATARMNET63b1a086d5=DATARMNET9f0aaf07cc(&DATARMNET3396919a68,DATARMNET543491eb0f
-,false);if(!DATARMNET63b1a086d5)goto DATARMNETbf4095f79e;if(unlikely(
-DATARMNETd92eab34a9(DATARMNET63b1a086d5,jiffies)))goto DATARMNETbf4095f79e;if(
-DATARMNET63b1a086d5->DATARMNET55056146f6){DATARMNET1ec4882bf7->tethered=true;}
-else{u32 DATARMNET4e557c82d6=READ_ONCE(DATARMNET63b1a086d5->DATARMNETfef3675ce7)
--READ_ONCE(DATARMNET63b1a086d5->DATARMNET9076d335ab);DATARMNET1ec4882bf7->bif=
-DATARMNET4e557c82d6;DATARMNET1ec4882bf7->ack_thresh=READ_ONCE(
-DATARMNET63b1a086d5->DATARMNET9a57846b4e);DATARMNET1ec4882bf7->ack_forced=
-DATARMNET63b1a086d5->DATARMNETb8fc35ed64;}DATARMNETbf4095f79e:rcu_read_unlock();
-}void DATARMNETd8fdde8978(struct sk_buff*DATARMNET543491eb0f){struct 
-DATARMNET4b40fe9cd4 DATARMNET3396919a68={};struct DATARMNETddbc1e5435*
-DATARMNET63b1a086d5;if(!DATARMNET6670717310(DATARMNET543491eb0f,&
-DATARMNET3396919a68))return;rcu_read_lock();DATARMNET63b1a086d5=
-DATARMNET9f0aaf07cc(&DATARMNET3396919a68,DATARMNET543491eb0f,false);if(
-DATARMNET63b1a086d5){if(likely(!DATARMNETd92eab34a9(DATARMNET63b1a086d5,jiffies)
-))DATARMNET55fda9e01e(DATARMNET63b1a086d5,DATARMNET543491eb0f,false);}
-rcu_read_unlock();}void DATARMNET9d574e64b1(struct sk_buff*DATARMNET543491eb0f){
-struct DATARMNET4b40fe9cd4 DATARMNET3396919a68={};struct DATARMNETddbc1e5435*
-DATARMNET63b1a086d5;struct tcphdr*DATARMNET668416551c;u32 DATARMNETd660a1a629;if
-(!skb_transport_header_was_set(DATARMNET543491eb0f))return;DATARMNET668416551c=
-tcp_hdr(DATARMNET543491eb0f);if(DATARMNET668416551c->syn)return;
-DATARMNETd660a1a629=DATARMNET62fb576113(DATARMNET543491eb0f);if(
-DATARMNETd660a1a629||!DATARMNET668416551c->ack)return;DATARMNET3396919a68.
-DATARMNET08e913477e=DATARMNET668416551c->dest;DATARMNET3396919a68.
-DATARMNETda7f7fa492=DATARMNET668416551c->source;if(DATARMNET543491eb0f->protocol
-==htons(ETH_P_IP)){struct iphdr*DATARMNET86f1f2cdc9=ip_hdr(DATARMNET543491eb0f);
-DATARMNET3396919a68.DATARMNETdfe430c2d6=DATARMNET86f1f2cdc9->daddr;
-DATARMNET3396919a68.DATARMNET2cb607d686=DATARMNET86f1f2cdc9->saddr;
-DATARMNET3396919a68.DATARMNET0d956cc77a=(0xd11+230-0xdf3);}else{struct ipv6hdr*
-DATARMNETbf55123e5b=ipv6_hdr(DATARMNET543491eb0f);memcpy(&DATARMNET3396919a68.
-DATARMNET815cbb4bf5,&DATARMNETbf55123e5b->daddr,sizeof(DATARMNETbf55123e5b->
-daddr));memcpy(&DATARMNET3396919a68.DATARMNETc3f31215b7,&DATARMNETbf55123e5b->
-saddr,sizeof(DATARMNETbf55123e5b->saddr));DATARMNET3396919a68.
-DATARMNET0d956cc77a=(0xd03+244-0xdf1);}rcu_read_lock();DATARMNET63b1a086d5=
-DATARMNET9f0aaf07cc(&DATARMNET3396919a68,DATARMNET543491eb0f,true);if(
-DATARMNET63b1a086d5){if(likely(!DATARMNETd92eab34a9(DATARMNET63b1a086d5,jiffies)
-))DATARMNET55fda9e01e(DATARMNET63b1a086d5,DATARMNET543491eb0f,true);}
-rcu_read_unlock();}void DATARMNET7fa1835595(u32 DATARMNET556bcfcf8f,u32 
-DATARMNET9445bc443c){struct DATARMNETddbc1e5435*DATARMNET63b1a086d5;int 
-DATARMNET5c2fd31d7b;if(DATARMNET556bcfcf8f==(0xd2d+202-0xdf7)){if(
-DATARMNET9445bc443c==(0xd2d+202-0xdf7)){DATARMNETc03b668e4c=false;}else if(
-DATARMNET9445bc443c==(0xd26+209-0xdf6)){DATARMNETc03b668e4c=true;}return;}
-rcu_read_lock();hash_for_each_rcu(DATARMNET1fd012f255,DATARMNET5c2fd31d7b,
-DATARMNET63b1a086d5,hash){if(DATARMNET63b1a086d5->DATARMNET9c389f3b86==
-DATARMNET556bcfcf8f)WRITE_ONCE(DATARMNET63b1a086d5->DATARMNET9a57846b4e,
-DATARMNET9445bc443c);}rcu_read_unlock();}int DATARMNET7e9995246e(void){
-INIT_DELAYED_WORK(&DATARMNETac6535da80.DATARMNET190b4452e8,DATARMNETfec9085d8e);
-return(0xd2d+202-0xdf7);}void DATARMNET38bb6f2b7a(void){cancel_delayed_work_sync
-(&DATARMNETac6535da80.DATARMNET190b4452e8);DATARMNETac6535da80.
-DATARMNETcd94e0d3c7=true;schedule_delayed_work(&DATARMNETac6535da80.
-DATARMNET190b4452e8,(0xd2d+202-0xdf7));cancel_delayed_work_sync(&
-DATARMNETac6535da80.DATARMNET190b4452e8);}
+
+/* How long to hold a node, in millisecs */
+#define RMNET_PERF_QUICKACK_TIMEOUT (2000)
+/* How often to run the cleaning workqueue, in millisecs */
+#define RMNET_PERF_QUICKACK_WQ_INTERVAL (500)
+
+/* Default threshold is 192 KB of data. shsusrd can change this per flow */
+#define RMNET_PERF_QUICKACK_THRESH (192000)
+#define RMNET_PERF_QUICKACK_HASH_BKTS (16)
+#define RMNET_PERF_QUICKACK_HASH_BITS \
+	(const_ilog2(RMNET_PERF_QUICKACK_HASH_BKTS))
+
+enum {
+	RMNET_PERF_QUICKACK_STAT_NODE_ADD,
+	RMNET_PERF_QUICKACK_STAT_NODE_ADD_FAIL,
+	RMNET_PERF_QUICKACK_STAT_NODE_DEL,
+	RMNET_PERF_QUICKACK_STAT_NO_SK,
+	RMNET_PERF_QUICKACK_STAT_FORCE_RX,
+	RMNET_PERF_QUICKACK_STAT_FORCE_TX,
+	RMNET_PERF_QUICKACK_STAT_MAX,
+};
+
+struct rmnet_perf_quickack_tuple {
+	union {
+		__be32 v4_saddr;
+		struct in6_addr v6_saddr;
+	};
+	union {
+		__be32 v4_daddr;
+		struct in6_addr v6_daddr;
+	};
+	union {
+		struct {
+			__be16 sport;
+			__be16 dport;
+		};
+		u32 hash_key;
+	};
+	u8 ip_proto;
+};
+
+struct rmnet_perf_quickack_node {
+	struct hlist_node hash;
+	struct rcu_head rcu;
+	struct rmnet_perf_quickack_tuple info;
+	unsigned long ts;
+	u32 tcp_seq;
+	u32 tcp_ack;
+	u32 offload_hash;
+	u32 byte_threshold;
+	u32 quickack_count;
+	bool no_sock;
+	u8 dead;
+};
+
+struct rmnet_perf_quickack_work_struct {
+	struct delayed_work ws;
+	bool force_clean;
+};
+
+/* For quickack hash protection */
+static DEFINE_SPINLOCK(rmnet_perf_quickack_lock);
+static DEFINE_HASHTABLE(rmnet_perf_quickack_hash,
+			RMNET_PERF_QUICKACK_HASH_BITS);
+static u32 rmnet_perf_quickack_hash_size;
+
+/* Periodic cleaning work struct for the hashtable */
+static struct rmnet_perf_quickack_work_struct rmnet_perf_quickack_work;
+
+/* Maximum number of flows to support at a time */
+static u32 rmnet_perf_quickack_hash_size_param = 100;
+module_param_named(rmnet_perf_tcp_knob0, rmnet_perf_quickack_hash_size_param,
+		   uint, 0644);
+
+/* Stats Array */
+static u64 rmnet_perf_quickack_stats[RMNET_PERF_QUICKACK_STAT_MAX];
+module_param_array_named(rmnet_perf_tcp_stat, rmnet_perf_quickack_stats,
+			 ullong, NULL, 0444);
+
+static void rmnet_perf_quickack_stats_update(u32 stat)
+{
+	if (stat < RMNET_PERF_QUICKACK_STAT_MAX)
+		rmnet_perf_quickack_stats[stat] += 1;
+}
+
+static bool
+rmnet_perf_quickack_node_expired(struct rmnet_perf_quickack_node *node,
+				unsigned long ts)
+{
+	unsigned long timeout;
+
+	timeout = msecs_to_jiffies(RMNET_PERF_QUICKACK_TIMEOUT);
+	if (ts - node->ts > timeout)
+		return true;
+
+	return false;
+}
+
+static void rmnet_perf_quickack_node_free(struct rcu_head *head)
+{
+	struct rmnet_perf_quickack_node *node;
+
+	node = container_of(head, struct rmnet_perf_quickack_node, rcu);
+	kfree(node);
+}
+
+static bool rmnet_perf_quickack_hash_clean(bool force)
+{
+	struct rmnet_perf_quickack_node *node;
+	struct hlist_node *tmp;
+	unsigned long ts;
+	int bkt;
+
+	ts = jiffies;
+	hash_for_each_safe(rmnet_perf_quickack_hash, bkt, tmp, node, hash) {
+		if (node->dead)
+			/* Node already marked as removed, but not yet
+			 * purged after a grace period. Skip it.
+			 */
+			continue;
+
+		if (force || rmnet_perf_quickack_node_expired(node, ts)) {
+			node->dead = true;
+			hash_del_rcu(&node->hash);
+			call_rcu(&node->rcu, rmnet_perf_quickack_node_free);
+			rmnet_perf_quickack_stats_update(RMNET_PERF_QUICKACK_STAT_NODE_DEL);
+			rmnet_perf_quickack_hash_size--;
+		}
+	}
+
+	return !!rmnet_perf_quickack_hash_size;
+}
+
+static void rmnet_perf_quickack_work_process(struct work_struct *ws)
+{
+	struct rmnet_perf_quickack_work_struct *quickack_work;
+	unsigned long flags;
+	bool should_resched;
+
+	quickack_work = container_of(to_delayed_work(ws),
+				     struct rmnet_perf_quickack_work_struct,
+				     ws);
+	spin_lock_irqsave(&rmnet_perf_quickack_lock, flags);
+	should_resched =
+		rmnet_perf_quickack_hash_clean(quickack_work->force_clean);
+	if (should_resched) {
+		unsigned long delay;
+
+		delay = msecs_to_jiffies(RMNET_PERF_QUICKACK_WQ_INTERVAL);
+		schedule_delayed_work(&quickack_work->ws, delay);
+	}
+
+	spin_unlock_irqrestore(&rmnet_perf_quickack_lock, flags);
+}
+
+static bool
+rmnet_perf_quickack_tuple_match(struct rmnet_perf_quickack_tuple *t1,
+				struct rmnet_perf_quickack_tuple *t2)
+{
+	if (t1->ip_proto != t2->ip_proto ||
+	    t1->sport != t2->sport ||
+	    t1->dport != t2->dport)
+		return false;
+
+	if (t1->ip_proto == 4)
+		return t1->v4_saddr == t2->v4_saddr &&
+		       t1->v4_daddr == t2->v4_daddr;
+
+	return !ipv6_addr_cmp(&t1->v6_saddr, &t2->v6_saddr) &&
+	       !ipv6_addr_cmp(&t1->v6_daddr, &t2->v6_daddr);
+}
+
+static struct rmnet_perf_quickack_node *
+rmnet_perf_quickack_node_add(struct rmnet_perf_quickack_tuple *tuple)
+	__must_hold(&rmnet_perf_quickack_lock)
+{
+	struct rmnet_perf_quickack_node *node;
+
+	if (rmnet_perf_quickack_hash_size >= rmnet_perf_quickack_hash_size_param)
+		/* Max flows. Ignore */
+		return NULL;
+
+	node = kzalloc(sizeof(*node), GFP_ATOMIC);
+	if (!node) {
+		rmnet_perf_quickack_stats_update(RMNET_PERF_QUICKACK_STAT_NODE_ADD_FAIL);
+		return NULL;
+	}
+
+	INIT_HLIST_NODE(&node->hash);
+	memcpy(&node->info, tuple, sizeof(*tuple));
+	node->byte_threshold = RMNET_PERF_QUICKACK_THRESH;
+	node->ts = jiffies;
+	hash_add_rcu(rmnet_perf_quickack_hash, &node->hash, tuple->hash_key);
+	rmnet_perf_quickack_stats_update(RMNET_PERF_QUICKACK_STAT_NODE_ADD);
+	if (!rmnet_perf_quickack_hash_size) {
+		unsigned long delay;
+
+		delay = msecs_to_jiffies(RMNET_PERF_QUICKACK_WQ_INTERVAL);
+		schedule_delayed_work(&rmnet_perf_quickack_work.ws, delay);
+	}
+
+	rmnet_perf_quickack_hash_size++;
+	return node;
+}
+
+static void rmnet_perf_quickack_node_init(struct rmnet_perf_quickack_node *node,
+					  struct sk_buff *skb, bool is_tx)
+	__must_hold(RCU)
+{
+	struct tcphdr *th = tcp_hdr(skb);
+	struct rmnet_skb_cb *rmnet_cb = RMNET_SKB_CB(skb);
+
+	node->offload_hash = skb->hash;
+	if (is_tx) {
+		u32 tcp_ack = ntohl(th->ack_seq);
+
+		WRITE_ONCE(node->tcp_ack, tcp_ack);
+		/* If we're initializing on an ACK, assume no data has flowed
+		 * yet, as this is very likely the ACK finishing the handshake.
+		 * SEQ will be equal to the ACK in this case.
+		 */
+		WRITE_ONCE(node->tcp_seq, tcp_ack);
+	} else {
+		u32 tcp_seq = ntohl(th->seq);
+
+		WRITE_ONCE(node->tcp_seq, tcp_seq);
+		/* If we're initializing on DATA, assume this is the first
+		 * data packet in the flow. The ACK number is 1 less than the
+		 * sequence number, as only the handshake is complete.
+		 */
+		WRITE_ONCE(node->tcp_ack, tcp_seq - 1);
+		rmnet_cb->bif = 0;
+		rmnet_cb->ack_thresh = READ_ONCE(node->byte_threshold);
+	}
+}
+
+static struct rmnet_perf_quickack_node *
+rmnet_perf_quickack_tuple_find(struct rmnet_perf_quickack_tuple *tuple,
+			       struct sk_buff *skb, bool is_tx)
+	__must_hold(RCU)
+{
+	struct rmnet_perf_quickack_node *node;
+	unsigned long flags;
+
+	spin_lock_irqsave(&rmnet_perf_quickack_lock, flags);
+	hash_for_each_possible_rcu(rmnet_perf_quickack_hash, node, hash,
+				   tuple->hash_key) {
+		if (node->dead)
+			continue;
+
+		if (rmnet_perf_quickack_tuple_match(&node->info, tuple)) {
+			spin_unlock_irqrestore(&rmnet_perf_quickack_lock,
+					       flags);
+			return node;
+		}
+	}
+
+	/* Make a new one */
+	node = rmnet_perf_quickack_node_add(tuple);
+	spin_unlock_irqrestore(&rmnet_perf_quickack_lock, flags);
+	if (node)
+		rmnet_perf_quickack_node_init(node, skb, is_tx);
+
+	return node;
+}
+
+static struct sock *
+rmnet_perf_sk_lookup(struct rmnet_perf_quickack_tuple *tuple,
+		     struct net_device *skb_dev)
+{
+	struct net *net = dev_net(skb_dev);
+
+	if (tuple->ip_proto == 4)
+		return inet_lookup_established(net, &tcp_hashinfo,
+					       tuple->v4_saddr,
+					       tuple->sport, tuple->v4_daddr,
+					       tuple->dport, skb_dev->ifindex);
+
+	/* Interestingly, this one doesn't have a nice wrapper.
+	 *
+	 * And yes, the ntohs on dport here is intentional. The v4 wrapper
+	 * actually handles doing that for us. The lookup code REALLY does want
+	 * dport in host order ;)
+	 */
+	return __inet6_lookup_established(net, &tcp_hashinfo, &tuple->v6_saddr,
+					  tuple->sport, &tuple->v6_daddr,
+					  ntohs(tuple->dport), skb_dev->ifindex,
+					  0);
+}
+
+static void rmnet_perf_quickack_force(struct rmnet_perf_quickack_node *node,
+				      struct sk_buff *skb)
+	__must_hold(RCU)
+{
+	struct sock *sk;
+
+	if (skb->sk) {
+		/* Packet has one! Only possible on the TX path */
+		sk = skb->sk;
+
+		if (sk_fullsock(sk)) {
+			if (sk->sk_state == TCP_ESTABLISHED &&
+			    !sock_flag(sk, SOCK_DEAD) &&
+			    !sk_unhashed(sk) &&
+			    sk->sk_shutdown != SHUTDOWN_MASK) {
+				inet_csk(sk)->icsk_ack.pending |= ICSK_ACK_NOW;
+				node->quickack_count++;
+				rmnet_perf_quickack_stats_update(RMNET_PERF_QUICKACK_STAT_FORCE_TX);
+			}
+		}
+		return;
+	}
+
+	sk = rmnet_perf_sk_lookup(&node->info, skb->dev);
+	/* Note that this will take a reference to the socket. */
+	if (!sk) {
+		struct rmnet_skb_cb *rmnet_cb = RMNET_SKB_CB(skb);
+
+		/* There's no established socket on the host.
+		 * Flow is tethered, or something weird happened. Log, mark,
+		 * and avoid touching this flow anymore.
+		 */
+		rmnet_perf_quickack_stats_update(RMNET_PERF_QUICKACK_STAT_NO_SK);
+		node->no_sock = true;
+		rmnet_cb->tethered = true;
+		return;
+	}
+
+	if (sk_fullsock(sk)) {
+		bh_lock_sock(sk);
+		if (sk->sk_state == TCP_ESTABLISHED &&
+		    !sock_flag(sk, SOCK_DEAD) &&
+		    !sk_unhashed(sk) &&
+		    sk->sk_shutdown != SHUTDOWN_MASK) {
+			inet_csk(sk)->icsk_ack.pending |= ICSK_ACK_NOW;
+			inet_csk_schedule_ack(sk);
+			node->quickack_count++;
+			rmnet_perf_quickack_stats_update(RMNET_PERF_QUICKACK_STAT_FORCE_RX);
+		}
+
+		bh_unlock_sock(sk);
+	}
+	sock_gen_put(sk);
+}
+
+/* Quick and dirty payload length calculation. Note that this requires
+ * tcp_hdr(skb) to be valid, so make sure it is ;)
+ */
+static u32 rmnet_perf_tcp_payload_len(struct sk_buff *skb)
+{
+	struct tcphdr *th = tcp_hdr(skb);
+
+	return skb->len - ((u8 *)th - skb->data) - th->doff * 4;
+}
+
+static void
+rmnet_perf_quickack_node_update(struct rmnet_perf_quickack_node *node,
+				struct sk_buff *skb, bool is_tx)
+	__must_hold(RCU)
+{
+	struct tcphdr *th = tcp_hdr(skb);
+	u32 curr_seq = ntohl(th->seq);
+	u32 curr_ack = ntohl(th->ack_seq);
+	u32 node_seq = READ_ONCE(node->tcp_seq);
+	u32 node_ack = READ_ONCE(node->tcp_ack);
+	u32 byte_thresh = READ_ONCE(node->byte_threshold);
+
+	/* First off, poke the timestamp. The flow is still active. */
+	node->ts = jiffies;
+	if (node->no_sock)
+		/* Don't bother, we have nothing to update */
+		return;
+
+	if (is_tx) {
+		/* Care about the ACK */
+		if (after(curr_ack, node_ack)) {
+			u32 unacked = 0;
+
+			if (curr_ack > node_seq)
+				unacked = curr_ack - node_seq;
+
+			// trace_printk("%s(): curr_ack %lu node_ack %lu node_seq %lu unacked %lu TX %lu\n",
+			// 		__func__, curr_ack, node_ack, node_seq, unacked,
+			// 		rmnet_perf_quickack_stats[RMNET_PERF_QUICKACK_STAT_FORCE_TX]);
+			if (unacked > byte_thresh)
+				rmnet_perf_quickack_force(node, skb);
+
+			WRITE_ONCE(node->tcp_ack, curr_ack);
+		}
+	} else {
+		u32 unacked;
+
+		/* Care about the SEQ */
+		if (after(curr_seq, node_seq)) {
+			unacked = curr_seq - node_ack;
+			unacked += rmnet_perf_tcp_payload_len(skb);
+
+			// trace_printk("%s(): curr_seq %lu node_seq %lu node_ack %lu unacked %lu unacked' %lu RX %lu\n",
+			// 		__func__, curr_seq, node_seq, node_ack, unacked,
+			// 		unacked - rmnet_perf_tcp_payload_len(skb),
+			// 		rmnet_perf_quickack_stats[RMNET_PERF_QUICKACK_STAT_FORCE_RX]);
+
+			if (unacked > byte_thresh)
+				rmnet_perf_quickack_force(node, skb);
+
+			WRITE_ONCE(node->tcp_seq, curr_seq);
+		}
+	}
+}
+
+static bool
+rmnet_perf_ingress_handle_tcp_common(struct sk_buff *skb,
+				     struct rmnet_perf_quickack_tuple *tuple)
+{
+	struct tcphdr *th;
+	u32 payload_len;
+
+	/* At this point, both RSC and rmnet_offload have looked at this packet.
+	 * If they haven't been able to process this thing successfully, then
+	 * there's no use in trying on our end either ;)
+	 *
+	 * BUT WHAT IF BOTH RSC AND OFFLOAD ARE DISABLED????
+	 * Then the socket is only ever getting a stream of 1500 byte packets.
+	 * If the kernel can't handle THAT, then we have a bigger problem than
+	 * this driver could ever hope to fix.
+	 */
+	if (!skb_transport_header_was_set(skb) ||
+	    skb->ip_summed == CHECKSUM_NONE)
+		return false;
+
+	th = tcp_hdr(skb);
+	if (th->syn)
+		/* SYNs and SYN-ACKs are skipped, as we don't know if there's
+		 * even a socket to check yet (and even if there is, how much
+		 * data can these packets have~? helllloooo Fast Open that
+		 * somehow resulted in 64KB coalescing! ;)
+		 */
+		return false;
+
+	payload_len = rmnet_perf_tcp_payload_len(skb);
+	if (!payload_len && th->ack)
+		/* DL ACKs aren't counted. We only care about DL data. */
+		return false;
+
+	tuple->sport = th->source;
+	tuple->dport = th->dest;
+	if (skb->protocol == htons(ETH_P_IP)) {
+		struct iphdr *iph = ip_hdr(skb);
+
+		tuple->v4_saddr = iph->saddr;
+		tuple->v4_daddr = iph->daddr;
+		tuple->ip_proto = 4;
+	} else {
+		struct ipv6hdr *ip6h = ipv6_hdr(skb);
+
+		memcpy(&tuple->v6_saddr, &ip6h->saddr, sizeof(ip6h->saddr));
+		memcpy(&tuple->v6_daddr, &ip6h->daddr, sizeof(ip6h->daddr));
+		tuple->ip_proto = 6;
+	}
+
+	/* We will process this packet */
+	return true;
+}
+
+/* Process a TCP packet on the RMNET core */
+void rmnet_perf_ingress_handle_tcp(struct sk_buff *skb)
+{
+	struct rmnet_skb_cb *rmnet_cb = RMNET_SKB_CB(skb);
+	struct rmnet_perf_quickack_tuple tuple = {};
+	struct rmnet_perf_quickack_node *node;
+
+	if (!rmnet_perf_ingress_handle_tcp_common(skb, &tuple))
+		return;
+
+	rcu_read_lock();
+	node = rmnet_perf_quickack_tuple_find(&tuple, skb, false);
+	if (!node)
+		goto out;
+
+	if (unlikely(rmnet_perf_quickack_node_expired(node, jiffies)))
+		goto out;
+
+	/* Our one and only job here is to report statistics to shs via the
+	 * rmnet_cb struct in the skb. All actual tracking happens on the
+	 * network stack core, where the calculations will be far more
+	 * accurate as RPS has finished.
+	 */
+	if (node->no_sock) {
+		rmnet_cb->tethered = true;
+	} else {
+		u32 unacked = READ_ONCE(node->tcp_seq) -
+			      READ_ONCE(node->tcp_ack);
+
+		/* A "good enough" estimate of the bytes in flight:
+		 * How much outstatding data is there, using only values
+		 * for packets the stack has seen.
+		 * (i.e. not counting the current data we have yet to
+		 * queue to RPS)
+		 */
+		rmnet_cb->bif = unacked;
+		rmnet_cb->ack_thresh = READ_ONCE(node->byte_threshold);
+		rmnet_cb->ack_forced = node->quickack_count;
+	}
+
+out:
+	rcu_read_unlock();
+}
+
+/* Process a TCP packet on the Network stack core */
+void rmnet_perf_ingress_rx_handler_tcp(struct sk_buff *skb)
+{
+	struct rmnet_perf_quickack_tuple tuple = {};
+	struct rmnet_perf_quickack_node *node;
+
+	if (!rmnet_perf_ingress_handle_tcp_common(skb, &tuple))
+		return;
+
+	rcu_read_lock();
+	node = rmnet_perf_quickack_tuple_find(&tuple, skb, false);
+	if (node) {
+		if (likely(!rmnet_perf_quickack_node_expired(node, jiffies)))
+			rmnet_perf_quickack_node_update(node, skb, false);
+	}
+
+	rcu_read_unlock();
+}
+
+/* Check for ECN handling on this packet, and possibly drop it */
+int rmnet_perf_ingress_tcp_ecn(struct sk_buff *skb, int ip_len)
+{
+	struct rmnet_perf_ecn_node *node;
+	struct tcphdr *th, __th;
+
+	rcu_read_lock();
+	node = xa_load(rmnet_perf_get_ecn_map(), skb->hash);
+	if (!node)
+		goto skip;
+
+	node->count++;
+	th = skb_header_pointer(skb, ip_len, sizeof(*th), &__th);
+	if (!th)
+		/* Well, we tried... */
+		goto skip;
+
+	/* Avoid touching any fancy control packets here */
+	if (tcp_flag_word(th) & (TCP_FLAG_CWR | TCP_FLAG_SYN | TCP_FLAG_RST |
+				 TCP_FLAG_FIN))
+		goto skip;
+
+	if (node->count >= node->prob) {
+		node->count = 0;
+		node->drops++;
+		if (node->should_drop) {
+			kfree_skb(skb);
+			rcu_read_unlock();
+			return 1;
+		}
+
+		/* Try and set the ECN bits in the ip header. The stack expects
+		 * skb_network_header to work, so make sure it does.
+		 */
+		if (!pskb_may_pull(skb, ip_len)) {
+			/* Well, dropping it is... */
+			kfree_skb(skb);
+			rcu_read_unlock();
+			return 1;
+		}
+
+		/* You get to die another day */
+		INET_ECN_set_ce(skb);
+	}
+
+skip:
+	rcu_read_unlock();
+	return 0;
+}
+
+void rmnet_perf_egress_handle_tcp(struct sk_buff *skb)
+{
+	struct rmnet_perf_quickack_tuple tuple = {};
+	struct rmnet_perf_quickack_node *node;
+	struct tcphdr *th;
+	u32 payload_len;
+
+	/* The only case I can see where this would be the case is for
+	 * forwarded packets. In which case, we don't even have a socket
+	 * to force quickack on, so just skip everything.
+	 */
+	if (!skb_transport_header_was_set(skb))
+		return;
+
+	th = tcp_hdr(skb);
+	if (th->syn)
+		/* SYNs and SYN-ACKs are skipped for the same reason as the
+		 * ingress hook: no data at the socket yet.
+		 */
+		return;
+
+	payload_len = rmnet_perf_tcp_payload_len(skb);
+	if (payload_len || !th->ack)
+		/* We don't care about UL data, only UL ACKs */
+		return;
+
+	/* Node tuples are formatted in the DL direction. Swap SRC and DST */
+	tuple.sport = th->dest;
+	tuple.dport = th->source;
+	if (skb->protocol == htons(ETH_P_IP)) {
+		struct iphdr *iph = ip_hdr(skb);
+
+		tuple.v4_saddr = iph->daddr;
+		tuple.v4_daddr = iph->saddr;
+		tuple.ip_proto = 4;
+	} else {
+		struct ipv6hdr *ip6h = ipv6_hdr(skb);
+
+		memcpy(&tuple.v6_saddr, &ip6h->daddr, sizeof(ip6h->daddr));
+		memcpy(&tuple.v6_daddr, &ip6h->saddr, sizeof(ip6h->saddr));
+		tuple.ip_proto = 6;
+	}
+
+	rcu_read_lock();
+	node = rmnet_perf_quickack_tuple_find(&tuple, skb, true);
+	if (node) {
+		if (likely(!rmnet_perf_quickack_node_expired(node, jiffies)))
+			rmnet_perf_quickack_node_update(node, skb, true);
+	}
+
+	rcu_read_unlock();
+}
+
+void rmnet_perf_tcp_update_quickack_thresh(u32 hash_key, u32 byte_thresh)
+{
+	struct rmnet_perf_quickack_node *node;
+	int bkt;
+
+	if (hash_key == 0x0) {
+		if (byte_thresh == 0) {
+			enable_tcp = false;
+		} else if (byte_thresh == 1) {
+			enable_tcp = true;
+		}
+		return;
+	}
+
+	rcu_read_lock();
+	hash_for_each_rcu(rmnet_perf_quickack_hash, bkt, node, hash) {
+		if (node->offload_hash == hash_key)
+			WRITE_ONCE(node->byte_threshold, byte_thresh);
+	}
+
+	rcu_read_unlock();
+}
+
+int rmnet_perf_tcp_init(void)
+{
+	INIT_DELAYED_WORK(&rmnet_perf_quickack_work.ws,
+			  rmnet_perf_quickack_work_process);
+	return 0;
+}
+
+void rmnet_perf_tcp_exit(void)
+{
+	/* Force the current work struct to finish deleting anything old
+	 * enough...
+	 */
+	cancel_delayed_work_sync(&rmnet_perf_quickack_work.ws);
+
+	rmnet_perf_quickack_work.force_clean = true;
+	schedule_delayed_work(&rmnet_perf_quickack_work.ws, 0);
+
+	/* ...and force remove all the rest of the nodes */
+	cancel_delayed_work_sync(&rmnet_perf_quickack_work.ws);
+}

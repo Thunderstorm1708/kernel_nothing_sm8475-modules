@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2014-2019, The Linux Foundation. All rights reserved.
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
  */
 
 #include <linux/interrupt.h>
@@ -666,8 +667,11 @@ void ipa3_interrupts_destroy(u32 ipa_irq, struct device *ipa_dev)
 		disable_irq_wake(ipa_irq);
 		free_irq(ipa_irq, ipa_dev);
 	}
-	destroy_workqueue(ipa_interrupt_wq);
-	ipa_interrupt_wq = NULL;
+
+        if(ipa_interrupt_wq) {
+        	destroy_workqueue(ipa_interrupt_wq);
+        	ipa_interrupt_wq = NULL;
+        }
 }
 
 /**

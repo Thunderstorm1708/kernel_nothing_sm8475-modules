@@ -253,8 +253,6 @@
 #define FASTRPC_DSPSIGNAL_GROUP_SIZE 256
 /* Macro to return PDR status */
 #define IS_PDR(fl) (fl->spd && fl->spd->pdrcount != fl->spd->prevpdrcount)
-/* Macro to return SSR status */
-#define IS_SSR(fl) (fl && fl->cctx && atomic_read(&fl->cctx->teardown))
 
 #define AUDIO_PDR_SERVICE_LOCATION_CLIENT_NAME   "audio_pdr_adsp"
 #define AUDIO_PDR_ADSP_SERVICE_NAME              "avs/audio"
@@ -633,7 +631,6 @@ struct fastrpc_pool_ctx {
 	u32 pd_type;
 	bool secure;
 	bool sharedcb;
-        int usershare;
 	/* Number of context banks in the pool */
 	u32 smmucount;
 	/* Number of applications using the pool */
@@ -662,7 +659,6 @@ struct fastrpc_channel_ctx {
 	int domain_id;
 	int sesscount;
 	int vmcount;
-        int usershare;
 	u64 perms;
 	struct qcom_scm_vmperm vmperms[FASTRPC_MAX_VMIDS];
 #if !IS_ENABLED(CONFIG_QCOM_FASTRPC_TRUSTED)
@@ -836,7 +832,7 @@ struct fastrpc_user {
 	 */
 	struct fastrpc_device *device;
 #ifdef CONFIG_DEBUG_FS
-	atomic_t debugfs_file_create;
+	bool debugfs_file_create;
 	struct dentry *debugfs_file;
 	char *debugfs_buf;
 #endif
@@ -874,8 +870,6 @@ struct fastrpc_user {
 	/*mutex for process maps synchronization*/
 	struct mutex map_mutex;
 	struct mutex signal_create_mutex;
-	/* mutex for qos request synchronization */
-	struct mutex pm_qos_mutex;
 	/* Compleation object for dma invocations by client driver*/
 	struct completion dma_invoke;
 	/* Completion objects and state for dspsignals */
@@ -892,6 +886,8 @@ struct fastrpc_user {
 	atomic_t state;
 	/* Flag to indicate notif thread exit requested */
 	bool exit_notif;
+	struct kref refcount;
+	struct work_struct put_work;
 };
 
 struct fastrpc_ctrl_latency {
@@ -954,4 +950,30 @@ void fastrpc_ssr_dspsignal_cancel_wait(struct fastrpc_user *fl);
 
 /* Function to clean all SMMU mappings associated with a fastrpc user obj */
 void fastrpc_free_user(struct fastrpc_user *fl);
+
+/*
+ * fastrpc_file_get - Take a reference on the fastrpc user object
+ *
+ * Increments the reference count for the specified fastrpc user object
+ * if it is non-zero, ensuring safe access.
+ *
+ * @fl: Pointer to the fastrpc_user structure.
+ *
+ * @return: 0 on success, or -ENOENT if the object is already being freed.
+ */
+int fastrpc_file_get(struct fastrpc_user *fl);
+
+/*
+ * fastrpc_file_put - Release reference to the fastrpc user object
+ *
+ * Decrements the reference count for the specified fastrpc user object.
+ * If the reference count drops to zero, the corresponding resources are
+ * released.
+ *
+ * @fl: Pointer to the fastrpc_user structure.
+ * @worker: If true, schedules the release callback in a worker thread
+ *          (safe from interrupt context); otherwise decrements directly.
+ */
+void fastrpc_file_put(struct fastrpc_user *fl, bool worker);
+
 #endif /* __FASTRPC_SHARED_H__ */

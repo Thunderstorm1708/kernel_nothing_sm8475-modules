@@ -20,6 +20,11 @@ _target_chipset_map = {
                 "qca6750",
                 "adrastea",
         ],
+        "waipio":[
+                "qca6490",
+                "qca6750",
+		"kiwi",
+        ],
         "lahaina":[
                 "qca6490",
                 "qca6750",
@@ -31,9 +36,6 @@ _target_chipset_map = {
 	"malabar":[
 		"adrastea",
 	],
-	"waipio":[
-		"qca6490",
-	]
 }
 
 _chipset_hw_map = {
@@ -41,6 +43,7 @@ _chipset_hw_map = {
         "adrastea" : "ADRASTEA",
         "qca6750": "MOSELLE",
         "qca6490": "LITHIUM",
+        "kiwi": "BERYLLIUM",
 }
 
 _chipset_header_map = {
@@ -56,6 +59,10 @@ _chipset_header_map = {
         "api/hw/qca6490/v1",
         "cmn/hal/wifi3.0/qca6490",
     ],
+    "kiwi": [
+        "api/hw/kiwi/v1",
+        "cmn/hal/wifi3.0/kiwi",
+    ],
 }
 
 _hw_header_map = {
@@ -66,6 +73,9 @@ _hw_header_map = {
     ],
     "LITHIUM": [
         "cmn/hal/wifi3.0/li",
+    ],
+    "BERYLLIUM": [
+        "cmn/hal/wifi3.0/be",
     ],
 }
 
@@ -676,6 +686,15 @@ _conditional_srcs = {
             "cmn/dp/wifi3.0/be/dp_be_rx.c",
             "cmn/dp/wifi3.0/be/dp_be_tx.c",
             "cmn/dp/wifi3.0/dp_reo.c",
+            "cmn/dp/wifi3.0/dp_tx.c",
+            "cmn/dp/wifi3.0/dp_stats.c",
+            "cmn/dp/wifi3.0/dp_main.c",
+            "cmn/dp/wifi3.0/dp_arch_ops.c",
+            "cmn/dp/wifi3.0/dp_tx_desc.c",
+            "cmn/dp/wifi3.0/dp_rx.c",
+            "cmn/dp/wifi3.0/dp_htt.c",
+            "cmn/dp/wifi3.0/dp_peer.c",
+            "cmn/dp/wifi3.0/dp_rx_desc.c",
             "cmn/dp/wifi3.0/dp_rx_err.c",
             "cmn/hal/wifi3.0/be/hal_be_generic_api.c",
             "cmn/hal/wifi3.0/be/hal_be_reo.c",
@@ -683,6 +702,10 @@ _conditional_srcs = {
             "cmn/hal/wifi3.0/hal_srng.c",
             "cmn/hif/src/ce/ce_service_srng.c",
             "cmn/wlan_cfg/wlan_cfg.c",
+            "core/dp/txrx3.0/dp_txrx.c",
+            "cmn/target_if/dp/src/target_if_dp.c",
+            "cmn/dp/wifi3.0/dp_rx_defrag.c",
+            "cmn/dp/wifi3.0/dp_tx_flow_control.c",
         ],
     },
     "CONFIG_CM_UTF_ENABLE": {
@@ -1038,7 +1061,9 @@ _conditional_srcs = {
           "cmn/dp/wifi3.0/dp_rx_defrag.c",
           "cmn/dp/wifi3.0/dp_tx_flow_control.c",
       ],
-          False: [
+    },
+    "CONFIG_HELIUMPLUS": {
+        True: [
           "core/dp/txrx/ol_rx_pn.c",
           "core/dp/txrx/ol_rx_reorder.c",
           "core/dp/txrx/ol_rx_reorder_timeout.c",
@@ -1059,6 +1084,7 @@ _conditional_srcs = {
           "core/dp/htt/htt_fw_stats.c",
           "core/dp/htt/htt_tx.c",
           "cmn/hif/src/ce/ce_service_legacy.c",
+          "cmn/hif/src/hif_main_legacy.c",
           "core/dp/txrx/ol_tx_ll.c",
           "core/dp/htt/htt_rx_ll.c",
           "core/dp/txrx/ol_tx_throttle.c",
@@ -1076,6 +1102,12 @@ _conditional_srcs = {
         True: [
             "cmn/hal/wifi3.0/qca6490/hal_6490.c",
             "cmn/hif/src/qca6490def.c",
+        ],
+    },
+    "CONFIG_KIWI_HEADERS_DEF": {
+        True: [
+            "cmn/hal/wifi3.0/kiwi/hal_kiwi.c",
+            "cmn/hif/src/kiwidef.c",
         ],
     },
     "CONFIG_OCB_UT_FRAMEWORK": {
@@ -2087,31 +2119,44 @@ def _define_module_for_target_variant_chipset(target, variant, chipset):
     kconfig = "Kconfig"
     defconfig = ":configs/{}_defconfig_generate_{}".format(tvc, variant)
 
-    deps = ["//vendor/nothing/pong-kernel:all_headers"]
+    deps = select({
+        "//build/kernel/kleaf:socrepo_true": [
+            "//soc-repo:all_headers",
+            "//soc-repo:{}/net/wireless/cfg80211".format(tv),
+            "//soc-repo:{}/drivers/iommu/qcom_iommu_util".format(tv),
+            "//soc-repo:{}/drivers/remoteproc/rproc_qcom_common".format(tv),
+            "//soc-repo:{}/drivers/soc/qcom/qmi_helpers".format(tv),
+            "//soc-repo:{}/kernel/sched/walt/sched-walt".format(tv),
+        ],
+        "//build/kernel/kleaf:socrepo_false": ["//msm-kernel:all_headers"],
+    })
 
     if chipset == "qca6750" or chipset == "wlan" or chipset == "adrastea":
         deps += [
-            "//vendor/nothing/pong-modules/qcom/opensource/wlan/platform:{}_icnss2".format(tv),
+            "//vendor/qcom/opensource/wlan/platform:{}_icnss2".format(tv),
         ]
     else:
         deps += [
-            "//vendor/nothing/pong-modules/qcom/opensource/wlan/platform:{}_cnss2".format(tv),
+            "//vendor/qcom/opensource/wlan/platform:{}_cnss2".format(tv),
         ]
 
     deps = deps + [
-        "//vendor/nothing/pong-modules/qcom/opensource/wlan/platform:{}_cnss_prealloc".format(tv),
-        "//vendor/nothing/pong-modules/qcom/opensource/wlan/platform:{}_cnss_utils".format(tv),
-        "//vendor/nothing/pong-modules/qcom/opensource/wlan/platform:{}_cnss_nl".format(tv),
-        "//vendor/nothing/pong-modules/qcom/opensource/wlan/platform:wlan-platform-headers",
+        "//vendor/qcom/opensource/wlan/platform:{}_cnss_prealloc".format(tv),
+        "//vendor/qcom/opensource/wlan/platform:{}_cnss_utils".format(tv),
+        "//vendor/qcom/opensource/wlan/platform:{}_cnss_nl".format(tv),
+        "//vendor/qcom/opensource/wlan/platform:wlan-platform-headers",
     ]
 
-    if target != "lahaina" and target != "parrot" and target != "malabar":
+    if target != "lahaina" and target != "parrot" and target != "malabar" and target != "waipio" :
         deps = deps + [
-            "//vendor/nothing/pong-modules/qcom/opensource/dataipa:include_headers",
-            "//vendor/nothing/pong-modules/qcom/opensource/dataipa:{}_{}_ipam".format(target, variant),
+            "//vendor/qcom/opensource/dataipa:include_headers",
+            "//vendor/qcom/opensource/dataipa:{}_{}_ipam".format(target, variant),
         ]
 
-    kernel_build = "//vendor/nothing/pong-kernel:{}".format(tv)
+    kernel_build = select({
+        "//build/kernel/kleaf:socrepo_true": "//soc-repo:{}_base_kernel".format(tv),
+        "//build/kernel/kleaf:socrepo_false": "//msm-kernel:{}".format(tv),
+    })
 
     print("name= ", name)
     print("hw= ", hw)

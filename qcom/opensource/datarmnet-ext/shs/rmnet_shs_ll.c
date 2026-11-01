@@ -1,14 +1,6 @@
-/* Copyright (c) 2022-2024 Qualcomm Innovation Center, Inc. All rights reserved.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 and
- * only version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
+// SPDX-License-Identifier: GPL-2.0-only
+/*
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
  */
 
 #include <net/sock.h>
@@ -23,8 +15,11 @@
 #include <linux/ipv6.h>
 #include <linux/netdevice.h>
 #include <linux/percpu-defs.h>
+
 #include "rmnet_shs.h"
 #include "rmnet_shs_wq_genl.h"
+#include <uapi/linux/rmnet_shs.h>
+
 #include "rmnet_shs_config.h"
 #include "rmnet_shs_wq.h"
 #include "rmnet_shs_modules.h"
@@ -32,349 +27,774 @@
 #include "rmnet_trace.h"
 #include <linux/icmp.h>
 #include <linux/inet.h>
-DEFINE_HASHTABLE(DATARMNET58fe8ac797,DATARMNET25437d35fd);DEFINE_HASHTABLE(
-DATARMNET5750992efb,DATARMNET25437d35fd);DEFINE_SPINLOCK(DATARMNETd83ee17944);
-struct DATARMNETe600c5b727 DATARMNET148e775ece[DATARMNETc6782fed88];
-#define DATARMNET82243f712c (0xeb7+698-0x110d)
-#define DATARMNET832731a933(CPU) (per_cpu(softnet_data, CPU).input_pkt_queue)
-#define DATARMNET3de2536baf(CPU) (per_cpu(softnet_data, CPU).process_queue)
-#define DATARMNETd2d15e7f67(CPU) (DATARMNET832731a933(CPU).qlen + \
-DATARMNET3de2536baf(CPU).qlen)
-#define DATARMNET78ec5e8746(DATARMNETfbfdc7f27e, CPU) (per_cpu(\
-DATARMNETfbfdc7f27e, CPU).input_queue_tail)
-#define DATARMNET9c1c20df35(DATARMNETfbfdc7f27e, CPU) (per_cpu(\
-DATARMNETfbfdc7f27e, CPU).input_queue_head)
-#define DATARMNET66ead9195a(CPU) (per_cpu(softnet_data, CPU).input_queue_head)
-#define DATARMNETbb1541e65b(CPU) (per_cpu(softnet_data, CPU).input_queue_tail)
-#define DATARMNET8053357aa4 (0xeb7+1130-0x130d)
-unsigned int DATARMNETefe3dcad0a=(0xd2d+202-0xdf7);module_param(
-DATARMNETefe3dcad0a,uint,(0xdb7+6665-0x261c));MODULE_PARM_DESC(
-DATARMNETefe3dcad0a,
-"\x4c\x4c\x20\x70\x61\x63\x6b\x65\x74\x73\x20\x73\x65\x65\x6e\x20\x69\x6e\x20\x6c\x6c\x20\x72\x6d\x6e\x65\x74\x5f\x73\x68\x73"
-);unsigned int DATARMNET75ae82094a=(0xd2d+202-0xdf7);module_param(
-DATARMNET75ae82094a,uint,(0xdb7+6665-0x261c));MODULE_PARM_DESC(
-DATARMNET75ae82094a,
-"\x4c\x4c\x20\x66\x69\x6c\x74\x65\x72\x20\x63\x6f\x75\x6e\x74\x20\x73\x65\x65\x6e\x20\x69\x6e\x20\x6c\x6c\x20\x72\x6d\x6e\x65\x74\x5f\x73\x68\x73"
-);int DATARMNETf4aefff4c2(struct sk_buff*skb){int DATARMNETbd864aa442=
-(0xd2d+202-0xdf7);struct iphdr*ip4h,DATARMNETc00baf31c3;struct ipv6hdr*ip6h,
-DATARMNETcf1d9e2c1e;const struct ipv6_opt_hdr*DATARMNET7b34b7b5be;struct 
-ipv6_opt_hdr DATARMNET1688a97aa4;switch(skb->protocol){case htons(ETH_P_IP):ip4h
-=DATARMNETefcaf5fbe9(skb,(0xd2d+202-0xdf7),sizeof(*ip4h),&DATARMNETc00baf31c3);
-if(!ip4h)break;if(!ip_is_fragment(ip4h)&&(ip4h->protocol==IPPROTO_TCP||ip4h->
-protocol==IPPROTO_UDP)){DATARMNETbd864aa442=(0xd26+209-0xdf6);break;}if(ip4h->
-protocol==IPPROTO_ICMP){skb->hash=(0xd2d+202-0xdf7);skb->sw_hash=
-(0xd26+209-0xdf6);if(trace_print_icmp_rx_enabled()){char saddr[INET6_ADDRSTRLEN]
-,daddr[INET6_ADDRSTRLEN];u16 ip_proto=(0xd2d+202-0xdf7);__be16 sequence=
-(0xd2d+202-0xdf7);u8 type=(0xd2d+202-0xdf7);struct icmphdr*icmphdr,
-DATARMNET5aa29a2264;memset(saddr,(0xd2d+202-0xdf7),INET6_ADDRSTRLEN);memset(
-daddr,(0xd2d+202-0xdf7),INET6_ADDRSTRLEN);icmphdr=DATARMNETefcaf5fbe9(skb,ip4h->
-ihl*(0xd11+230-0xdf3),sizeof(*icmphdr),&DATARMNET5aa29a2264);if(!icmphdr)goto 
-DATARMNET03fd0cd6e6;if(icmphdr->type!=ICMP_ECHOREPLY&&icmphdr->type!=ICMP_ECHO)
-goto DATARMNET03fd0cd6e6;ip_proto=htons(ETH_P_IP);type=icmphdr->type;sequence=
-icmphdr->un.echo.sequence;snprintf(saddr,INET6_ADDRSTRLEN,"\x25\x70\x49\x34",&
-ip4h->saddr);snprintf(daddr,INET6_ADDRSTRLEN,"\x25\x70\x49\x34",&ip4h->daddr);
-trace_print_icmp_rx(skb,ip_proto,type,sequence,saddr,daddr);}}else if(ip4h->
-protocol==IPPROTO_ESP){skb->hash=DATARMNETaa0602144b;skb->sw_hash=
-(0xd26+209-0xdf6);}DATARMNET03fd0cd6e6:break;case htons(ETH_P_IPV6):ip6h=
-DATARMNETefcaf5fbe9(skb,(0xd2d+202-0xdf7),sizeof(*ip6h),&DATARMNETcf1d9e2c1e);if
-(!ip6h)break;if(!(ip6h->nexthdr==NEXTHDR_FRAGMENT)&&(ip6h->nexthdr==IPPROTO_TCP
-||ip6h->nexthdr==IPPROTO_UDP)){DATARMNETbd864aa442=(0xd26+209-0xdf6);break;}if(
-ip6h->nexthdr==NEXTHDR_ICMP){skb->hash=(0xd2d+202-0xdf7);skb->sw_hash=
-(0xd26+209-0xdf6);if(trace_print_icmp_rx_enabled()){char saddr[INET6_ADDRSTRLEN]
-,daddr[INET6_ADDRSTRLEN];u16 ip_proto=(0xd2d+202-0xdf7);__be16 sequence=
-(0xd2d+202-0xdf7);u8 type=(0xd2d+202-0xdf7);struct icmp6hdr*icmp6hdr,
-DATARMNETaa41336581;memset(saddr,(0xd2d+202-0xdf7),INET6_ADDRSTRLEN);memset(
-daddr,(0xd2d+202-0xdf7),INET6_ADDRSTRLEN);icmp6hdr=DATARMNETefcaf5fbe9(skb,
-sizeof(*ip6h),sizeof(*icmp6hdr),&DATARMNETaa41336581);if(!icmp6hdr)goto 
-DATARMNETf623862dd4;if(icmp6hdr->icmp6_type!=ICMPV6_ECHO_REQUEST&&icmp6hdr->
-icmp6_type!=ICMPV6_ECHO_REPLY)goto DATARMNETf623862dd4;ip_proto=htons(ETH_P_IPV6
-);type=icmp6hdr->icmp6_type;sequence=icmp6hdr->icmp6_sequence;snprintf(saddr,
-INET6_ADDRSTRLEN,"\x25\x70\x49\x36",&ip6h->saddr);snprintf(daddr,
-INET6_ADDRSTRLEN,"\x25\x70\x49\x36",&ip6h->daddr);trace_print_icmp_rx(skb,
-ip_proto,type,sequence,saddr,daddr);}}else if(ip6h->nexthdr==NEXTHDR_ESP){skb->
-hash=DATARMNETaa0602144b;skb->sw_hash=(0xd26+209-0xdf6);}else if(ip6h->nexthdr==
-NEXTHDR_FRAGMENT){if(skb->len-sizeof(struct ipv6hdr)<(int)sizeof(struct 
-ipv6_opt_hdr)){break;}DATARMNET7b34b7b5be=skb_header_pointer(skb,sizeof(struct 
-ipv6hdr),sizeof(DATARMNET1688a97aa4),&DATARMNET1688a97aa4);if(
-DATARMNET7b34b7b5be&&DATARMNET7b34b7b5be->nexthdr==NEXTHDR_ESP){skb->hash=
-DATARMNETaa0602144b;skb->sw_hash=(0xd26+209-0xdf6);}}DATARMNETf623862dd4:break;
-default:break;}DATARMNETda96251102(DATARMNETcd24fca747,DATARMNET116c96c236,
-DATARMNETbd864aa442,(0x16e8+787-0xc0c),(0x16e8+787-0xc0c),(0x16e8+787-0xc0c),skb
-,NULL);return DATARMNETbd864aa442;}int DATARMNET71b0abb49e(struct sk_buff*skb,
-struct ipv6hdr*DATARMNET5d09fca14e,struct DATARMNETbf4d34b241*
-DATARMNET54338da2ff){struct tcphdr*tp,DATARMNETd1ff6cd568;struct udphdr*up,
-DATARMNETc82d2f4e16;int DATARMNETb3ce3d0107,DATARMNETb16a9be210,
-DATARMNET5a94751027,DATARMNETad7ab41bc8,DATARMNETf13f5dee10=false;int ret=false;
-int DATARMNETd6e492a659=(0xd2d+202-0xdf7);u8 protocol;__be16 frag_off;
-DATARMNETb3ce3d0107=!DATARMNET54338da2ff->DATARMNET1819cae4a3||ipv6_addr_equal(&
-DATARMNET5d09fca14e->saddr,&DATARMNET54338da2ff->DATARMNET53d5f671f0.v6_saddr);
-DATARMNETb16a9be210=!DATARMNET54338da2ff->DATARMNETb035edcfb9||ipv6_addr_equal(&
-DATARMNET5d09fca14e->daddr,&DATARMNET54338da2ff->DATARMNETea422561ef.v6_daddr);
-DATARMNET5a94751027=!DATARMNET54338da2ff->DATARMNET8b5ace4a98||
-DATARMNET54338da2ff->proto==DATARMNET5d09fca14e->nexthdr;DATARMNETad7ab41bc8=!
-DATARMNET54338da2ff->DATARMNET5a5907dd87;DATARMNETf13f5dee10=!
-DATARMNET54338da2ff->DATARMNET1c959e10ca;protocol=DATARMNET5d09fca14e->nexthdr;
-if(DATARMNET54338da2ff->DATARMNET5a5907dd87||DATARMNET54338da2ff->
-DATARMNET1c959e10ca){DATARMNETd6e492a659=ipv6_skip_exthdr(skb,sizeof(*
-DATARMNET5d09fca14e),&protocol,&frag_off);if(DATARMNETd6e492a659<
-(0xd2d+202-0xdf7)){return false;}if(DATARMNET5d09fca14e->nexthdr==IPPROTO_TCP){
-tp=DATARMNETefcaf5fbe9(skb,DATARMNETd6e492a659,sizeof(*tp),&DATARMNETd1ff6cd568)
-;if(!tp){DATARMNETad7ab41bc8=false;DATARMNETf13f5dee10=false;}else{
-DATARMNETad7ab41bc8=!DATARMNET54338da2ff->DATARMNET5a5907dd87||tp->source==(
-DATARMNET54338da2ff->src_port);DATARMNETf13f5dee10=!DATARMNET54338da2ff->
-DATARMNET1c959e10ca||tp->dest==(DATARMNET54338da2ff->DATARMNET1e49bc75c8);}}else
- if(DATARMNET5d09fca14e->nexthdr==IPPROTO_UDP){up=DATARMNETefcaf5fbe9(skb,
-DATARMNETd6e492a659,sizeof(*up),&DATARMNETc82d2f4e16);if(!up){
-DATARMNETad7ab41bc8=false;DATARMNETf13f5dee10=false;}else{DATARMNETad7ab41bc8=!
-DATARMNET54338da2ff->DATARMNET5a5907dd87||up->source==(DATARMNET54338da2ff->
-src_port);DATARMNETf13f5dee10=!DATARMNET54338da2ff->DATARMNET1c959e10ca||up->
-dest==(DATARMNET54338da2ff->DATARMNET1e49bc75c8);}}}if((DATARMNETb3ce3d0107)&&(
-DATARMNETb16a9be210)&&(DATARMNET5a94751027)&&(DATARMNETad7ab41bc8)&&(
-DATARMNETf13f5dee10))ret=true;return ret;}int DATARMNETb9e0ebf153(struct sk_buff
-*skb,struct iphdr*skb_ip4h,struct DATARMNETbf4d34b241*DATARMNET54338da2ff){int 
-ret=false;struct tcphdr*tp,DATARMNETd1ff6cd568;struct udphdr*up,
-DATARMNETc82d2f4e16;u16 DATARMNET43b01ff41b=skb_ip4h->ihl*(0xd11+230-0xdf3);int 
-DATARMNETb3ce3d0107=!DATARMNET54338da2ff->DATARMNET1819cae4a3||skb_ip4h->saddr==
-DATARMNET54338da2ff->DATARMNET53d5f671f0.saddr;int DATARMNETb16a9be210=!
-DATARMNET54338da2ff->DATARMNETb035edcfb9||skb_ip4h->daddr==(DATARMNET54338da2ff
-->DATARMNETea422561ef.daddr);int DATARMNET5a94751027=!DATARMNET54338da2ff->
-DATARMNET8b5ace4a98||skb_ip4h->protocol==DATARMNET54338da2ff->proto;int 
-DATARMNETad7ab41bc8=!DATARMNET54338da2ff->DATARMNET5a5907dd87;int 
-DATARMNETf13f5dee10=!DATARMNET54338da2ff->DATARMNET1c959e10ca;if(
-DATARMNET54338da2ff->DATARMNET5a5907dd87||DATARMNET54338da2ff->
-DATARMNET1c959e10ca){if(skb_ip4h->protocol==IPPROTO_TCP){tp=DATARMNETefcaf5fbe9(
-skb,DATARMNET43b01ff41b,sizeof(*tp),&DATARMNETd1ff6cd568);if(!tp){
-DATARMNETad7ab41bc8=false;DATARMNETf13f5dee10=false;}else{DATARMNETad7ab41bc8=!
-DATARMNET54338da2ff->DATARMNET5a5907dd87||tp->source==(DATARMNET54338da2ff->
-src_port);DATARMNETf13f5dee10=!DATARMNET54338da2ff->DATARMNET1c959e10ca||tp->
-dest==(DATARMNET54338da2ff->DATARMNET1e49bc75c8);}}else if(skb_ip4h->protocol==
-IPPROTO_UDP){up=DATARMNETefcaf5fbe9(skb,DATARMNET43b01ff41b,sizeof(*up),&
-DATARMNETc82d2f4e16);if(!up){DATARMNETad7ab41bc8=false;DATARMNETf13f5dee10=false
-;}else{DATARMNETad7ab41bc8=!DATARMNET54338da2ff->DATARMNET5a5907dd87||up->source
-==(DATARMNET54338da2ff->src_port);DATARMNETf13f5dee10=!DATARMNET54338da2ff->
-DATARMNET1c959e10ca||up->dest==(DATARMNET54338da2ff->DATARMNET1e49bc75c8);}}}if(
-(DATARMNETb3ce3d0107)&&(DATARMNETb16a9be210)&&(DATARMNET5a94751027)&&(
-DATARMNETad7ab41bc8)&&(DATARMNETf13f5dee10))ret=true;rm_err(
-"\x53\x48\x53\x5f\x4c\x4c\x3a\x20\x56\x34\x20\x73\x61\x64\x64\x72\x20\x6d\x61\x74\x63\x68\x20\x25\x75\x20\x64\x61\x64\x64\x72\x20\x6d\x61\x74\x63\x68\x20\x25\x75\x2c\x20\x70\x72\x6f\x74\x6f\x20\x6d\x61\x74\x63\x68\x20\x25\x75\x2c\x20\x73\x72\x63\x20\x70\x6f\x72\x74\x20\x25\x75\x2c\x20\x64\x65\x73\x74\x20\x70\x6f\x72\x74\x20\x6d\x61\x74\x63\x68\x20\x25\x75\x20\x20\x70\x72\x6f\x74\x6f\x20\x25\x75" "\n"
-,DATARMNETb3ce3d0107,DATARMNETb16a9be210,DATARMNET5a94751027,DATARMNETad7ab41bc8
-,DATARMNETf13f5dee10,skb_ip4h->protocol);return ret;}int DATARMNET8fc45abdc4(
-struct DATARMNET0331d6732d*DATARMNET63b1a086d5,struct DATARMNET0331d6732d*
-DATARMNET82190d5ee0){struct DATARMNETbf4d34b241*DATARMNET54338da2ff=&
-DATARMNET63b1a086d5->DATARMNET54338da2ff;struct DATARMNETbf4d34b241*
-DATARMNET099bdc749a=&DATARMNET82190d5ee0->DATARMNET54338da2ff;int 
-DATARMNET10f1c9f8db=DATARMNET54338da2ff->DATARMNET602389fe52==
-DATARMNET099bdc749a->DATARMNET602389fe52;int DATARMNETb3ce3d0107,
-DATARMNETb16a9be210,DATARMNET5a94751027,DATARMNETad7ab41bc8,DATARMNETf13f5dee10=
-false;if(DATARMNET54338da2ff->seq&&DATARMNET099bdc749a->seq&&(
-DATARMNET54338da2ff->seq==DATARMNET099bdc749a->seq)){return true;}
-DATARMNETb3ce3d0107=(!DATARMNET54338da2ff->DATARMNET1819cae4a3&&!
-DATARMNET099bdc749a->DATARMNET1819cae4a3)||(DATARMNET54338da2ff->
-DATARMNET1819cae4a3&&DATARMNET099bdc749a->DATARMNET1819cae4a3&&(
-DATARMNET54338da2ff->DATARMNET602389fe52==(0xd11+230-0xdf3))?(
-DATARMNET54338da2ff->DATARMNET53d5f671f0.saddr==DATARMNET099bdc749a->
-DATARMNET53d5f671f0.saddr):ipv6_addr_equal(&DATARMNET099bdc749a->
-DATARMNET53d5f671f0.v6_saddr,&DATARMNET54338da2ff->DATARMNET53d5f671f0.v6_saddr)
-);DATARMNETb16a9be210=(!DATARMNET54338da2ff->DATARMNETb035edcfb9&&!
-DATARMNET099bdc749a->DATARMNETb035edcfb9)||(DATARMNET54338da2ff->
-DATARMNETb035edcfb9&&DATARMNET099bdc749a->DATARMNETb035edcfb9&&(
-DATARMNET54338da2ff->DATARMNET602389fe52==(0xd11+230-0xdf3))?(
-DATARMNET54338da2ff->DATARMNETea422561ef.daddr==DATARMNET099bdc749a->
-DATARMNETea422561ef.daddr):ipv6_addr_equal(&DATARMNET099bdc749a->
-DATARMNETea422561ef.v6_daddr,&DATARMNET54338da2ff->DATARMNETea422561ef.v6_daddr)
-);DATARMNET5a94751027=(!DATARMNET54338da2ff->DATARMNET8b5ace4a98&&!
-DATARMNET099bdc749a->DATARMNET8b5ace4a98)||(DATARMNET54338da2ff->
-DATARMNET8b5ace4a98&&DATARMNET099bdc749a->DATARMNET8b5ace4a98&&
-DATARMNET54338da2ff->proto==DATARMNET099bdc749a->proto);DATARMNETad7ab41bc8=(!
-DATARMNET54338da2ff->DATARMNET5a5907dd87&&!DATARMNET099bdc749a->
-DATARMNET5a5907dd87)||(DATARMNET54338da2ff->DATARMNET5a5907dd87&&
-DATARMNET099bdc749a->DATARMNET5a5907dd87&&DATARMNET54338da2ff->src_port==
-DATARMNET099bdc749a->src_port);DATARMNETf13f5dee10=(!DATARMNET54338da2ff->
-DATARMNET1c959e10ca&&!DATARMNET099bdc749a->DATARMNET1c959e10ca)||(
-DATARMNET54338da2ff->DATARMNET1c959e10ca&&DATARMNET099bdc749a->
-DATARMNET1c959e10ca&&DATARMNET54338da2ff->DATARMNET1e49bc75c8==
-DATARMNET099bdc749a->DATARMNET1e49bc75c8);rm_err(
-"\x53\x48\x53\x5f\x4c\x4c\x3a\x20\x6d\x61\x74\x63\x68\x20\x72\x65\x73\x75\x6c\x74\x20\x73\x61\x64\x72\x20\x6d\x61\x74\x63\x68\x20\x25\x75\x20\x64\x61\x64\x64\x72\x20\x6d\x61\x74\x63\x68\x20\x25\x75\x2c\x20\x70\x72\x6f\x74\x6f\x20\x6d\x61\x74\x63\x68\x20\x25\x75\x2c\x20\x73\x72\x63\x20\x70\x6f\x72\x74\x20\x25\x75\x2c\x20\x64\x65\x73\x74\x20\x70\x6f\x72\x74\x20\x6d\x61\x74\x63\x68\x20\x25\x75\x20\x20\x76\x65\x72\x73\x69\x6f\x6e\x6d\x61\x74\x63\x68\x20\x25\x75" "\n"
-,DATARMNETb3ce3d0107,DATARMNETb16a9be210,DATARMNET5a94751027,DATARMNETad7ab41bc8
-,DATARMNETf13f5dee10,DATARMNET10f1c9f8db);return(DATARMNET10f1c9f8db&&
-DATARMNETb3ce3d0107&&DATARMNETb16a9be210&&DATARMNET5a94751027&&
-DATARMNETad7ab41bc8&&DATARMNETf13f5dee10);}int DATARMNETe24386452c(struct 
-sk_buff*skb){struct iphdr*ip4h,DATARMNETc00baf31c3;struct ipv6hdr*ip6h,
-DATARMNETcf1d9e2c1e;struct DATARMNET0331d6732d*node_p;struct hlist_node*tmp;int 
-ret=false;spin_lock_bh(&DATARMNETd83ee17944);switch(skb->protocol){case htons(
-ETH_P_IP):ip4h=DATARMNETefcaf5fbe9(skb,(0xd2d+202-0xdf7),sizeof(*ip4h),&
-DATARMNETc00baf31c3);if(!ip4h){break;}hash_for_each_possible_safe(
-DATARMNET5750992efb,node_p,tmp,list,ip4h->saddr){if(DATARMNETb9e0ebf153(skb,ip4h
-,&node_p->DATARMNET54338da2ff)){ret=true;break;}}break;case htons(ETH_P_IPV6):
-ip6h=DATARMNETefcaf5fbe9(skb,(0xd2d+202-0xdf7),sizeof(*ip6h),&
-DATARMNETcf1d9e2c1e);if(!ip6h){break;}hash_for_each_possible_safe(
-DATARMNET5750992efb,node_p,tmp,list,ip6h->saddr.in6_u.u6_addr32[
-(0xd2d+202-0xdf7)]){if(DATARMNET71b0abb49e(skb,ip6h,&node_p->DATARMNET54338da2ff
-)){ret=true;break;}}break;default:break;}spin_unlock_bh(&DATARMNETd83ee17944);
-rm_err(
-"\x53\x48\x53\x5f\x4c\x4c\x3a\x20\x50\x61\x63\x6b\x65\x74\x20\x46\x69\x6c\x74\x65\x72\x20\x63\x68\x65\x63\x6b\x65\x64\x20\x61\x6e\x61\x6c\x79\x7a\x65\x64\x20\x72\x65\x74\x3a\x20\x25\x64"
-,ret);return ret;}void DATARMNETd52d50282d(struct DATARMNET0331d6732d*
-DATARMNET63b1a086d5){struct DATARMNET0331d6732d*DATARMNET9a739c7d8b;struct 
-hlist_node*tmp;struct DATARMNET6c78e47d24*DATARMNETd2a694d52a=NULL;unsigned long
- bkt;int i=(0xd2d+202-0xdf7);spin_lock_bh(&DATARMNETd83ee17944);
-hash_for_each_safe(DATARMNET5750992efb,bkt,tmp,DATARMNET9a739c7d8b,list){i++;if(
-DATARMNET8fc45abdc4(DATARMNET9a739c7d8b,DATARMNET63b1a086d5)){rm_err(
-"\x53\x48\x53\x5f\x4c\x4c\x3a\x20\x25\x73" "\n",
-"\x46\x69\x6c\x74\x65\x72\x20\x61\x6c\x72\x65\x61\x64\x79\x20\x69\x6e\x73\x74\x61\x6c\x6c\x65\x64\x2c\x20\x44\x75\x70\x20\x46\x69\x6c\x74\x65\x72"
-);hash_del_rcu(&DATARMNET9a739c7d8b->list);kfree(DATARMNET9a739c7d8b);break;}}
-spin_unlock_bh(&DATARMNETd83ee17944);spin_lock_bh(&DATARMNETfbdbab2ef6);
-list_for_each_entry(DATARMNETd2a694d52a,&DATARMNET9825511866,DATARMNET6de26f0feb
-){if(DATARMNETd2a694d52a->DATARMNET63b1a086d5&&!DATARMNETd2a694d52a->
-DATARMNET63b1a086d5->DATARMNET80eb31d7b8){DATARMNETd2a694d52a->
-DATARMNET63b1a086d5->DATARMNET80eb31d7b8=DATARMNET64165df74d;}}spin_unlock_bh(&
-DATARMNETfbdbab2ef6);kfree(DATARMNET63b1a086d5);DATARMNETecc0627c70.
-DATARMNET110549da6f--;DATARMNET75ae82094a--;rm_err(
-"\x53\x48\x53\x5f\x4c\x4c\x3a\x20\x25\x73",
-"\x20\x55\x6e\x69\x6e\x73\x74\x61\x6c\x6c\x65\x64\x20\x4c\x4c\x20\x66\x69\x6c\x74\x65\x72"
-);}void DATARMNET1e918c8e0d(struct DATARMNET0331d6732d*DATARMNET63b1a086d5){
-struct DATARMNETbf4d34b241*DATARMNET54338da2ff=&DATARMNET63b1a086d5->
-DATARMNET54338da2ff;pr_info(
-"\x53\x48\x53\x5f\x4c\x4c\x3a\x20\x70\x72\x6f\x74\x6f\x20\x76\x61\x6c\x69\x64\x20\x25\x75\x20\x73\x72\x63\x20\x61\x64\x64\x72\x20\x76\x61\x6c\x69\x64\x20\x25\x75\x2c\x20\x64\x65\x73\x74\x20\x61\x64\x64\x72\x20\x76\x61\x6c\x69\x64\x20\x25\x75\x2c\x20\x64\x65\x73\x74\x20\x70\x6f\x72\x74\x20\x76\x61\x6c\x69\x64\x20\x25\x75\x2c\x20\x73\x72\x63\x70\x6f\x72\x74\x20\x76\x61\x6c\x69\x64\x20\x25\x75\x2c\x20\x69\x70\x20\x76\x65\x72\x73\x69\x6f\x6e\x20\x25\x75\x20\x73\x65\x71\x20\x25\x75" "\n"
-,DATARMNET54338da2ff->DATARMNET8b5ace4a98,DATARMNET54338da2ff->
-DATARMNET1819cae4a3,DATARMNET54338da2ff->DATARMNETb035edcfb9,DATARMNET54338da2ff
-->DATARMNET1c959e10ca,DATARMNET54338da2ff->DATARMNET5a5907dd87,
-DATARMNET54338da2ff->DATARMNET602389fe52,DATARMNET54338da2ff->seq);pr_info(
-"\x53\x48\x53\x5f\x4c\x4c\x3a\x20\x69\x6e\x66\x6f\x2d\x3e\x69\x70\x5f\x76\x65\x72\x73\x69\x6f\x6e\x20\x25\x75" "\n"
-,DATARMNET54338da2ff->DATARMNET602389fe52);pr_info(
-"\x53\x48\x53\x5f\x4c\x4c\x3a\x20\x69\x6e\x66\x6f\x2d\x3e\x70\x72\x6f\x74\x6f\x20\x25\x75" "\n"
-,DATARMNET54338da2ff->proto);pr_info(
-"\x53\x48\x53\x5f\x4c\x4c\x3a\x20\x69\x6e\x66\x6f\x2d\x3e\x64\x65\x73\x74\x5f\x70\x6f\x72\x74\x20\x25\x75" "\n"
-,DATARMNET54338da2ff->DATARMNET1e49bc75c8);pr_info(
-"\x53\x48\x53\x5f\x4c\x4c\x3a\x20\x69\x6e\x66\x6f\x2d\x3e\x73\x72\x63\x5f\x70\x6f\x72\x74\x20\x25\x75" "\n"
-,DATARMNET54338da2ff->src_port);pr_info(
-"\x53\x48\x53\x5f\x4c\x4c\x3a\x20\x69\x6e\x66\x6f\x2d\x3e\x64\x65\x73\x74\x5f\x61\x64\x64\x72\x5f\x76\x61\x6c\x69\x64\x20\x25\x75" "\n"
-,DATARMNET54338da2ff->DATARMNETb035edcfb9);pr_info(
-"\x53\x48\x53\x5f\x4c\x4c\x3a\x20\x69\x6e\x66\x6f\x2d\x3e\x73\x72\x63\x5f\x61\x64\x64\x72\x5f\x76\x61\x6c\x69\x64\x20\x25\x75" "\n"
-,DATARMNET54338da2ff->DATARMNET1819cae4a3);pr_info(
-"\x53\x48\x53\x5f\x4c\x4c\x3a\x20\x69\x6e\x66\x6f\x2d\x3e\x73\x65\x71\x20\x25\x75" "\n"
-,DATARMNET54338da2ff->seq);if(DATARMNET54338da2ff->DATARMNET602389fe52==
-(0xd11+230-0xdf3)&&(DATARMNET54338da2ff->DATARMNETb035edcfb9)&&(
-DATARMNET54338da2ff->DATARMNET1819cae4a3)){pr_info(
-"\x4e\x65\x77\x20\x66\x6c\x6f\x77\x20\x69\x6e\x66\x6f\x2d\x3e\x64\x65\x73\x74\x5f\x61\x64\x64\x72\x5f\x76\x61\x6c\x69\x64\x20\x25\x75" "\n"
-,DATARMNET54338da2ff->DATARMNETea422561ef.daddr);pr_info(
-"\x4e\x65\x77\x20\x66\x6c\x6f\x77\x20\x69\x6e\x66\x6f\x2d\x3e\x73\x72\x63\x5f\x61\x64\x64\x72\x5f\x76\x61\x6c\x69\x64\x20\x25\x75" "\n"
-,DATARMNET54338da2ff->DATARMNET53d5f671f0.saddr);}if(DATARMNET54338da2ff->
-DATARMNET602389fe52==(0xd03+244-0xdf1)&&(DATARMNET54338da2ff->
-DATARMNETb035edcfb9)&&(DATARMNET54338da2ff->DATARMNET1819cae4a3)){pr_info(
-"\x4e\x65\x77\x20\x66\x6c\x6f\x77\x20\x69\x6e\x66\x6f\x2d\x3e\x64\x65\x73\x74\x5f\x61\x64\x64\x72\x5f\x76\x61\x6c\x69\x64\x20\x25\x75\x20\x25\x75\x20\x25\x75\x20\x25\x75" "\n"
-,DATARMNET63b1a086d5->DATARMNET54338da2ff.DATARMNETea422561ef.v6_daddr.in6_u.
-u6_addr32[(0xd18+223-0xdf4)],DATARMNET63b1a086d5->DATARMNET54338da2ff.
-DATARMNETea422561ef.v6_daddr.in6_u.u6_addr32[(0xd1f+216-0xdf5)],
-DATARMNET63b1a086d5->DATARMNET54338da2ff.DATARMNETea422561ef.v6_daddr.in6_u.
-u6_addr32[(0xd26+209-0xdf6)],DATARMNET63b1a086d5->DATARMNET54338da2ff.
-DATARMNETea422561ef.v6_daddr.in6_u.u6_addr32[(0xd2d+202-0xdf7)]);pr_info(
-"\x4e\x65\x77\x20\x66\x6c\x6f\x77\x20\x69\x6e\x66\x6f\x2d\x3e\x73\x72\x63\x5f\x61\x64\x64\x72\x5f\x76\x61\x6c\x69\x64\x20\x20\x25\x75\x20\x25\x75\x20\x25\x75\x20\x25\x75" "\n"
-,DATARMNET63b1a086d5->DATARMNET54338da2ff.DATARMNET53d5f671f0.v6_saddr.in6_u.
-u6_addr32[(0xd18+223-0xdf4)],DATARMNET63b1a086d5->DATARMNET54338da2ff.
-DATARMNET53d5f671f0.v6_saddr.in6_u.u6_addr32[(0xd1f+216-0xdf5)],
-DATARMNET63b1a086d5->DATARMNET54338da2ff.DATARMNET53d5f671f0.v6_saddr.in6_u.
-u6_addr32[(0xd26+209-0xdf6)],DATARMNET63b1a086d5->DATARMNET54338da2ff.
-DATARMNET53d5f671f0.v6_saddr.in6_u.u6_addr32[(0xd2d+202-0xdf7)]);}}void 
-DATARMNET2ac305d296(struct DATARMNET0331d6732d*DATARMNET63b1a086d5){struct 
-DATARMNET0331d6732d*DATARMNET9a739c7d8b;struct DATARMNET6c78e47d24*
-DATARMNETd2a694d52a=NULL;unsigned long bkt;int i=(0xd2d+202-0xdf7);spin_lock_bh(
-&DATARMNETd83ee17944);hash_for_each(DATARMNET5750992efb,bkt,DATARMNET9a739c7d8b,
-list){i++;if(DATARMNET8fc45abdc4(DATARMNET9a739c7d8b,DATARMNET63b1a086d5)){kfree
-(DATARMNET63b1a086d5);spin_unlock_bh(&DATARMNETd83ee17944);rm_err(
-"\x53\x48\x53\x5f\x4c\x4c\x3a\x20\x25\x73",
-"\x20\x44\x75\x70\x20\x66\x69\x6c\x74\x65\x72\x20\x73\x65\x65\x6e\x20\x6d\x61\x74\x63\x68\x20\x73\x65\x65\x6e\x2c\x20\x6e\x6f\x20\x69\x6e\x73\x74\x61\x6c\x6c"
-);return;}}if(DATARMNETecc0627c70.DATARMNET110549da6f>=DATARMNET82243f712c){
-kfree(DATARMNET63b1a086d5);spin_unlock_bh(&DATARMNETd83ee17944);
-DATARMNET68d84e7b98[DATARMNET62807647a4]++;rm_err(
-"\x53\x48\x53\x5f\x4c\x4c\x3a\x20\x25\x73" "\n",
-"\x49\x6e\x73\x74\x61\x6c\x6c\x65\x64\x20\x4c\x4c\x20\x66\x69\x6c\x74\x65\x72\x20\x66\x61\x69\x6c\x65\x64\x3a\x20\x4d\x61\x78\x20\x72\x65\x61\x63\x68\x65\x64"
-);return;}DATARMNETecc0627c70.DATARMNET110549da6f++;DATARMNET75ae82094a++;if(
-DATARMNET756bdd424a)DATARMNET1e918c8e0d(DATARMNET63b1a086d5);hash_add(
-DATARMNET5750992efb,&DATARMNET63b1a086d5->list,DATARMNET63b1a086d5->
-DATARMNET54338da2ff.DATARMNET53d5f671f0.saddr);spin_unlock_bh(&
-DATARMNETd83ee17944);rm_err("\x53\x48\x53\x5f\x4c\x4c\x3a\x20\x25\x73" "\n",
-"\x53\x65\x74\x74\x69\x6e\x67\x20\x6c\x6f\x77\x20\x6c\x61\x74\x65\x6e\x63\x79\x20\x66\x6c\x6f\x77\x20\x63\x68\x65\x63\x6b\x20\x66\x6f\x72\x20\x61\x6c\x6c\x20\x66\x6c\x6f\x77\x73"
-);spin_lock_bh(&DATARMNETfbdbab2ef6);list_for_each_entry(DATARMNETd2a694d52a,&
-DATARMNET9825511866,DATARMNET6de26f0feb){if(DATARMNETd2a694d52a->
-DATARMNET63b1a086d5&&!DATARMNETd2a694d52a->DATARMNET63b1a086d5->
-DATARMNET80eb31d7b8){DATARMNETd2a694d52a->DATARMNET63b1a086d5->
-DATARMNET80eb31d7b8=DATARMNET64165df74d;}}spin_unlock_bh(&DATARMNETfbdbab2ef6);
-rm_err("\x53\x48\x53\x5f\x4c\x4c\x3a\x20\x25\x73" "\n",
-"\x49\x6e\x73\x74\x61\x6c\x6c\x65\x64\x20\x4c\x4c\x20\x66\x69\x6c\x74\x65\x72");
-}void DATARMNET337eca0417(struct sk_buff*skb,struct DATARMNET63d7680df2*
-DATARMNET63b1a086d5){u32 DATARMNET1fcbf046ec=(0xd2d+202-0xdf7);u8 map=
-(0xd2d+202-0xdf7),DATARMNET0258668025=(0xd2d+202-0xdf7);u16 index;if(!
-DATARMNET63b1a086d5->DATARMNETfbbec4c537){map=DATARMNETecc0627c70.map_mask;
-DATARMNET0258668025=DATARMNETecc0627c70.map_len;index=DATARMNET63b1a086d5->
-map_index;}else{map=DATARMNET63b1a086d5->DATARMNETfbbec4c537;DATARMNET0258668025
-=DATARMNET63b1a086d5->DATARMNETa59ce1fd2d;index=DATARMNET63b1a086d5->map_index;}
-if(map){DATARMNET1fcbf046ec=DATARMNET8532ab3089(index,DATARMNET0258668025,
-DATARMNET63b1a086d5->hash,(0xd2d+202-0xdf7));skb->hash=DATARMNET1fcbf046ec;}}int
- DATARMNETf5821256ad(struct sk_buff*skb,struct rmnet_shs_clnt_s*
-DATARMNET0bf01e7c6f){struct DATARMNET63d7680df2*node_p;struct hlist_node*tmp;int
- map=DATARMNETecc0627c70.map_mask;int DATARMNETb925972e2a=DATARMNET3874292c18;
-int map_cpu;u32 hash;u8 is_match_found=(0xd2d+202-0xdf7);struct 
-DATARMNETe600c5b727*DATARMNETa4055affd5;struct rmnet_priv*priv;
-DATARMNETefe3dcad0a++;hash=skb_get_hash(skb);if(!(DATARMNET0bf01e7c6f->config&
-RMNET_SHS_STMP_ALL)&&!DATARMNETf4aefff4c2(skb)){DATARMNETe767554e6e(skb);return
-(0xd2d+202-0xdf7);}spin_lock_bh(&DATARMNETd83ee17944);do{
-hash_for_each_possible_safe(DATARMNET58fe8ac797,node_p,tmp,list,hash){if(hash!=
-node_p->hash)continue;is_match_found=(0xd26+209-0xdf6);node_p->map_cpu=
-DATARMNET3874292c18;node_p->map_index=DATARMNET04e8d1b862(node_p->map_cpu,map);
-break;}if(is_match_found)break;if(DATARMNETb925972e2a<(0xd2d+202-0xdf7)){
-DATARMNET68d84e7b98[DATARMNETa1f9420686]++;break;}if(atomic_long_read(&
-DATARMNETecc0627c70.DATARMNET64bb8a8f57)>DATARMNETbfe31ef643){
-DATARMNET68d84e7b98[DATARMNETe6e77f9f03]++;break;}node_p=kzalloc(sizeof(*node_p)
-,GFP_ATOMIC);if(!node_p){DATARMNET68d84e7b98[DATARMNET394acaf558]++;break;}
-atomic_long_inc(&DATARMNETecc0627c70.DATARMNET64bb8a8f57);node_p->
-DATARMNETfbbec4c537=DATARMNET0bf01e7c6f->map_mask;node_p->DATARMNETa59ce1fd2d=
-DATARMNETecc0627c70.map_mask;node_p->dev=skb->dev;node_p->hash=skb->hash;node_p
-->map_cpu=DATARMNETb925972e2a;node_p->DATARMNET80eb31d7b8=(0xd26+209-0xdf6);
-node_p->map_index=DATARMNET04e8d1b862(node_p->map_cpu,map);node_p->map_cpu=
-raw_smp_processor_id();node_p->map_index=DATARMNET04e8d1b862(node_p->map_cpu,map
-);INIT_LIST_HEAD(&node_p->DATARMNET04c88b8191);DATARMNET44459105b4(skb,node_p);
-DATARMNET350f55bfca(node_p);map_cpu=node_p->map_cpu;DATARMNETa4055affd5=&
-DATARMNET148e775ece[map_cpu];priv=netdev_priv(node_p->dev);if(!priv){rm_err(
-"\x53\x48\x53\x5f\x4c\x4c\x3a\x20\x70\x72\x69\x76\x20\x66\x6f\x72\x20\x6e\x65\x74\x64\x65\x76\x20\x69\x73\x20\x6e\x75\x6c\x6c\x20\x66\x6f\x72\x20\x68\x61\x73\x68\x20\x30\x78\x25\x78"
-,node_p->hash);DATARMNET68d84e7b98[DATARMNETf5157a9b85]++;}else{node_p->
-DATARMNET341ea38662->mux_id=priv->mux_id;rm_err(
-"\x53\x48\x53\x5f\x4c\x4c\x3a\x20\x6d\x75\x78\x20\x69\x64\x20\x66\x6f\x72\x20\x68\x61\x73\x68\x20\x30\x78\x25\x78\x20\x69\x73\x20\x25\x64"
-,node_p->hash,node_p->DATARMNET341ea38662->mux_id);}DATARMNET3e37ad2816(node_p,&
-DATARMNETa4055affd5->DATARMNET3dc4262f53);hash_add_rcu(DATARMNET58fe8ac797,&
-node_p->list,skb->hash);is_match_found=(0xd26+209-0xdf6);break;}while(
-(0xd2d+202-0xdf7));spin_unlock_bh(&DATARMNETd83ee17944);if(is_match_found){
-DATARMNET337eca0417(skb,node_p);if(!node_p->DATARMNETd986107d55&&
-DATARMNET362b15f941(raw_smp_processor_id())){if(DATARMNETd2d15e7f67(
-raw_smp_processor_id())<DATARMNET8053357aa4&&DATARMNETdc7bead533(
-raw_smp_processor_id(),(0x2495+531-0x1708))){skb->hash=(0xd2d+202-0xdf7);skb->
-sw_hash=(0xd26+209-0xdf6);}else if(!node_p->DATARMNETd986107d55){node_p->
-DATARMNETd986107d55=DATARMNETbb52958049;node_p->map_cpu=DATARMNETb925972e2a;
-node_p->map_index=DATARMNET04e8d1b862(node_p->map_cpu,map);}}else if(node_p->
-DATARMNETd986107d55!=DATARMNET46a17e3ec5){if(!DATARMNET362b15f941(
-raw_smp_processor_id())){if(DATARMNETd2d15e7f67(raw_smp_processor_id())<
-DATARMNET8053357aa4&&DATARMNETdc7bead533(raw_smp_processor_id(),12000)){skb->
-hash=(0xd2d+202-0xdf7);skb->sw_hash=(0xd26+209-0xdf6);}else{node_p->
-DATARMNETd986107d55=DATARMNET46a17e3ec5;node_p->map_cpu=DATARMNETb925972e2a;
-node_p->map_index=DATARMNET04e8d1b862(node_p->map_cpu,map);}}}if(skb_shinfo(skb)
-->gso_segs){node_p->DATARMNET11930c5df8+=skb_shinfo(skb)->gso_segs;
-DATARMNET0997c5650d[node_p->map_cpu].DATARMNET4133fc9428++;node_p->
-DATARMNETae4b27456e.DATARMNET35234676d4+=skb_shinfo(skb)->gso_segs;}else{node_p
-->DATARMNET11930c5df8+=(0xd26+209-0xdf6);DATARMNET0997c5650d[node_p->map_cpu].
-DATARMNET4133fc9428++;node_p->DATARMNETae4b27456e.DATARMNET35234676d4++;}node_p
-->DATARMNETa8940e4a7b+=(0xd26+209-0xdf6);node_p->DATARMNET3ecedac168+=
-RMNET_SKB_CB(skb)->coal_bytes;node_p->DATARMNETce5f56eab9+=RMNET_SKB_CB(skb)->
-coal_bufsize;if(skb->priority==55834)node_p->DATARMNET1743c92e66++;node_p->
-DATARMNET2594c418db+=skb->len;}DATARMNETe767554e6e(skb);return(0xd2d+202-0xdf7);
-}void DATARMNET44499733f2(void){u8 DATARMNET0e4304d903;for(DATARMNET0e4304d903=
-(0xd2d+202-0xdf7);DATARMNET0e4304d903<DATARMNETc6782fed88;DATARMNET0e4304d903++)
-INIT_LIST_HEAD(&DATARMNET148e775ece[DATARMNET0e4304d903].DATARMNET3dc4262f53);}
-void DATARMNET90fe3a4b56(void){struct DATARMNET0331d6732d*DATARMNET63b1a086d5;
-struct hlist_node*tmp;unsigned long bkt;rm_err("\x25\x73",
-"\x53\x48\x53\x5f\x4c\x4c\x3a\x20\x44\x65\x2d\x69\x6e\x69\x74\x20\x4c\x4c\x20\x62\x6f\x6f\x6b\x2d\x6b\x65\x65\x70\x69\x6e\x67"
-);spin_lock_bh(&DATARMNETd83ee17944);hash_for_each_safe(DATARMNET58fe8ac797,bkt,
-tmp,DATARMNET63b1a086d5,list){hash_del_rcu(&DATARMNET63b1a086d5->list);}
-hash_for_each_safe(DATARMNET5750992efb,bkt,tmp,DATARMNET63b1a086d5,list){
-hash_del_rcu(&DATARMNET63b1a086d5->list);kfree(DATARMNET63b1a086d5);
-DATARMNETecc0627c70.DATARMNET110549da6f--;DATARMNET75ae82094a--;}spin_unlock_bh(
-&DATARMNETd83ee17944);rm_err("\x25\x73",
-"\x53\x48\x53\x5f\x4c\x4c\x3a\x20\x44\x65\x2d\x69\x6e\x69\x74\x20\x4c\x4c\x20\x62\x6f\x6f\x6b\x2d\x6b\x65\x65\x70\x69\x6e\x67\x20\x65\x78\x69\x74"
-);}
+
+
+DEFINE_HASHTABLE(rmnet_shs_ll_ht, RMNET_SHS_HT_SIZE);
+DEFINE_HASHTABLE(rmnet_shs_ll_filter_ht, RMNET_SHS_HT_SIZE);
+DEFINE_SPINLOCK(rmnet_shs_ll_ht_splock);
+struct rmnet_shs_cpu_node_s rmnet_shs_ll_cpu_node_tbl[MAX_CPUS];
+#define MAX_LL_FILTERS 100
+#define GET_IQUEUE(CPU) (per_cpu(softnet_data, CPU).input_pkt_queue)
+#define GET_PQUEUE(CPU) (per_cpu(softnet_data, CPU).process_queue)
+#define GET_QLEN(CPU) (GET_IQUEUE(CPU).qlen + GET_PQUEUE(CPU).qlen)
+#define GET_QTAIL(SD, CPU) (per_cpu(SD, CPU).input_queue_tail)
+#define GET_QHEAD(SD, CPU) (per_cpu(SD, CPU).input_queue_head)
+#define GET_QHEADS(CPU) (per_cpu(softnet_data, CPU).input_queue_head)
+#define GET_QTAILS(CPU) (per_cpu(softnet_data, CPU).input_queue_tail)
+#define MAX_LL_CORE_BACKLOG 20
+
+unsigned int rmnet_shs_ll_pkts = 0;
+module_param(rmnet_shs_ll_pkts, uint, 0644);
+MODULE_PARM_DESC(rmnet_shs_ll_pkts, "LL packets seen in ll rmnet_shs");
+
+unsigned int rmnet_shs_filter_count = 0;
+module_param(rmnet_shs_filter_count, uint, 0644);
+MODULE_PARM_DESC(rmnet_shs_filter_count, "LL filter count seen in ll rmnet_shs");
+
+/* Evaluates the incoming transport protocol of the incoming skb. Determines
+ * if the skb transport protocol will be supported by SHS module
+ */
+int rmnet_shs_is_ll_skb_stamping_reqd(struct sk_buff *skb)
+{
+	int ret_val = 0;
+	struct iphdr *ip4h, __ip4h;
+	struct ipv6hdr *ip6h, __ip6h;
+	const struct ipv6_opt_hdr *ptr;
+	struct ipv6_opt_hdr v6hdr;
+
+	/* SHS will ignore ICMP and frag pkts completely */
+	switch (skb->protocol) {
+	case htons(ETH_P_IP):
+		ip4h = rmnet_shs_header_ptr(skb, 0, sizeof(*ip4h), &__ip4h);
+		if (!ip4h)
+			break;
+
+		if (!ip_is_fragment(ip4h) &&
+		    (ip4h->protocol == IPPROTO_TCP ||
+		     ip4h->protocol == IPPROTO_UDP)) {
+			ret_val = 1;
+			break;
+		}
+
+		/* RPS logic is skipped if RPS hash is 0 while sw_hash
+		 * is set as active and packet is processed on the same
+		 * CPU as the initial caller.
+		 *
+		 * No longer put ICMP on phy core when moving to perf core
+		 */
+		if (ip4h->protocol == IPPROTO_ICMP) {
+			skb->hash = 0;
+			skb->sw_hash = 1;
+
+			if (trace_print_icmp_rx_enabled()) {
+				char saddr[INET6_ADDRSTRLEN], daddr[INET6_ADDRSTRLEN];
+				u16 ip_proto = 0;
+				__be16 sequence = 0;
+				u8 type = 0;
+				struct icmphdr *icmphdr, __icmphdr;
+
+				memset(saddr, 0, INET6_ADDRSTRLEN);
+				memset(daddr, 0, INET6_ADDRSTRLEN);
+
+				icmphdr = rmnet_shs_header_ptr(skb, ip4h->ihl * 4,
+							       sizeof(*icmphdr), &__icmphdr);
+				if (!icmphdr)
+					goto skip_trace_print_icmp4_rx;
+
+				if (icmphdr->type != ICMP_ECHOREPLY &&
+				    icmphdr->type != ICMP_ECHO)
+					goto skip_trace_print_icmp4_rx;
+
+				ip_proto = htons(ETH_P_IP);
+				type = icmphdr->type;
+				sequence = icmphdr->un.echo.sequence;
+				snprintf(saddr, INET6_ADDRSTRLEN, "%pI4", &ip4h->saddr);
+				snprintf(daddr, INET6_ADDRSTRLEN, "%pI4", &ip4h->daddr);
+
+				trace_print_icmp_rx(skb, ip_proto, type, sequence, saddr, daddr);
+			}
+		} else if (ip4h->protocol == IPPROTO_ESP) {
+			/* Pin to core 0 if ESP protocol */
+			skb->hash = DEFAULT_PIN_HASH;
+			skb->sw_hash = 1;
+		}
+skip_trace_print_icmp4_rx:
+		break;
+
+	case htons(ETH_P_IPV6):
+		ip6h = rmnet_shs_header_ptr(skb, 0, sizeof(*ip6h), &__ip6h);
+		if (!ip6h)
+			break;
+
+		if (!(ip6h->nexthdr == NEXTHDR_FRAGMENT) &&
+		    (ip6h->nexthdr == IPPROTO_TCP ||
+		     ip6h->nexthdr == IPPROTO_UDP)) {
+				ret_val =  1;
+				break;
+		}
+
+		/* RPS logic is skipped if RPS hash is 0 while sw_hash
+		 * is set as active and packet is processed on the same
+		 * CPU as the initial caller.
+		 *
+		 * No longer put ICMP on phy core when moving to perf core
+		 */
+		if (ip6h->nexthdr == NEXTHDR_ICMP) {
+			skb->hash = 0;
+			skb->sw_hash = 1;
+
+			if (trace_print_icmp_rx_enabled()) {
+				char saddr[INET6_ADDRSTRLEN], daddr[INET6_ADDRSTRLEN];
+				u16 ip_proto = 0;
+				__be16 sequence = 0;
+				u8 type = 0;
+				struct icmp6hdr *icmp6hdr, __icmp6hdr;
+
+				memset(saddr, 0, INET6_ADDRSTRLEN);
+				memset(daddr, 0, INET6_ADDRSTRLEN);
+
+				icmp6hdr = rmnet_shs_header_ptr(skb, sizeof(*ip6h),
+								sizeof(*icmp6hdr), &__icmp6hdr);
+				if (!icmp6hdr)
+					goto skip_trace_print_icmp6_rx;
+
+				if (icmp6hdr->icmp6_type != ICMPV6_ECHO_REQUEST &&
+				    icmp6hdr->icmp6_type != ICMPV6_ECHO_REPLY)
+					goto skip_trace_print_icmp6_rx;
+
+				ip_proto = htons(ETH_P_IPV6);
+				type = icmp6hdr->icmp6_type;
+				sequence = icmp6hdr->icmp6_sequence;
+				snprintf(saddr, INET6_ADDRSTRLEN, "%pI6", &ip6h->saddr);
+				snprintf(daddr, INET6_ADDRSTRLEN, "%pI6", &ip6h->daddr);
+
+				trace_print_icmp_rx(skb, ip_proto, type, sequence, saddr, daddr);
+			}
+		} else  if (ip6h->nexthdr == NEXTHDR_ESP) {
+			skb->hash = DEFAULT_PIN_HASH;
+			skb->sw_hash = 1;
+		} else if (ip6h->nexthdr == NEXTHDR_FRAGMENT) {
+			if (skb->len - sizeof(struct ipv6hdr) < (int)sizeof(struct ipv6_opt_hdr)) {
+			/* skb too small to contain another header */
+				break;
+			}
+			/* Check if frag header has ESP nextheader. If packet has more headers before
+			 * ESP header this would fail. Ex Frag, Encap, ESP Chain */
+			ptr = skb_header_pointer(skb, sizeof(struct ipv6hdr), sizeof(v6hdr), &v6hdr);
+			if (ptr && ptr->nexthdr == NEXTHDR_ESP) {
+				skb->hash = DEFAULT_PIN_HASH;
+				skb->sw_hash = 1;
+			}
+		}
+
+skip_trace_print_icmp6_rx:
+		break;
+
+	default:
+		break;
+	}
+
+	SHS_TRACE_LOW(RMNET_SHS_SKB_STAMPING, RMNET_SHS_SKB_STAMPING_END,
+			    ret_val, 0xDEF, 0xDEF, 0xDEF, skb, NULL);
+
+	return ret_val;
+}
+
+/* Evaluates if a v6 skb matches the v6 filter passed in *info */
+int ipv6_packet_match(struct sk_buff *skb, struct ipv6hdr *skb_ip6h, struct rmnet_shs_wq_flow_info  *info)
+{
+	struct tcphdr *tp, __tp;
+	struct udphdr *up, __up;
+	int saddmatch, daddmatch, protomatch, src_port_match, dest_port_match = false;
+	int ret = false;
+	int v6len = 0;
+	u8 protocol;
+	__be16 frag_off;
+
+	saddmatch = !info->src_addr_valid;
+	if (info->src_addr_valid)
+		saddmatch = !ipv6_masked_addr_cmp(&skb_ip6h->saddr, &info->src_ip_addr_mask.v6_mask,
+						  &info->src_ip_addr.v6_saddr);
+
+	daddmatch = !info->dest_addr_valid;
+	if (info->dest_addr_valid)
+		daddmatch = !ipv6_masked_addr_cmp(&skb_ip6h->daddr, &info->dest_ip_addr_mask.v6_mask,
+						  &info->dest_ip_addr.v6_daddr);
+
+	protomatch = !info->proto_valid || info->proto == skb_ip6h->nexthdr;
+
+	src_port_match = !info->src_port_valid ;
+	dest_port_match = !info->dest_port_valid;
+	protocol = skb_ip6h->nexthdr;
+
+	if (info->src_port_valid || info->dest_port_valid) {
+		v6len = ipv6_skip_exthdr(skb, sizeof(*skb_ip6h), &protocol, &frag_off);
+		if (v6len < 0) {
+			/* Cant find transport header */
+			return false;
+		}
+		if (skb_ip6h->nexthdr == IPPROTO_TCP) {
+			tp = rmnet_shs_header_ptr(skb, v6len, sizeof(*tp), &__tp);
+			if (!tp) {
+				src_port_match = false;
+				dest_port_match = false;
+			} else {
+				if (info->src_port_valid)
+					src_port_match = ntohs(info->src_port) <= ntohs(tp->source) &&
+							 ntohs(tp->source) <= ntohs(info->src_port_max);
+
+				if (info->dest_port_valid)
+					dest_port_match = ntohs(info->dest_port) <= ntohs(tp->dest) &&
+							  ntohs(tp->dest) <= ntohs(info->dest_port_max);
+			}
+		} else if (skb_ip6h->nexthdr == IPPROTO_UDP) {
+			up = rmnet_shs_header_ptr(skb, v6len, sizeof(*up), &__up);
+			if (!up) {
+				src_port_match = false;
+				dest_port_match = false;
+			} else {
+				if (info->src_port_valid)
+					src_port_match = ntohs(info->src_port) <= ntohs(up->source) &&
+							 ntohs(up->source) <= ntohs(info->dest_port_max);
+
+				if (info->dest_port_valid)
+					dest_port_match = ntohs(info->dest_port) <= ntohs(up->dest) &&
+							  ntohs(up->dest) <= ntohs(info->dest_port_max);
+			}
+		}
+	}
+
+	if ((saddmatch) && (daddmatch) && (protomatch) && (src_port_match) && (dest_port_match))
+	   ret =  true;
+
+	return ret;
+}
+
+/* Evaluates if a v4 skb matches the v4 filter passed in *info */
+int ipv4_packet_match(struct sk_buff *skb, struct iphdr *skb_ip4h, struct rmnet_shs_wq_flow_info  *info)
+{
+	int ret = false;
+	struct tcphdr *tp, __tp;
+	struct udphdr *up, __up;
+	u16 v4ip_len = skb_ip4h->ihl * 4;
+
+	int saddmatch = !info->src_addr_valid;
+	int daddmatch = !info->dest_addr_valid;
+	int protomatch = !info->proto_valid || skb_ip4h->protocol == info->proto;
+	int src_port_match = !info->src_port_valid ;
+	int dest_port_match = !info->dest_port_valid;
+
+	if (info->src_addr_valid)
+		saddmatch = !((skb_ip4h->saddr ^ info->src_ip_addr.saddr) & info->src_ip_addr_mask.mask);
+
+	if (info->dest_addr_valid)
+		daddmatch = !((skb_ip4h->daddr ^ info->dest_ip_addr.daddr) & info->dest_ip_addr_mask.mask);
+
+	if (info->src_port_valid || info->dest_port_valid) {
+		if (skb_ip4h->protocol == IPPROTO_TCP) {
+			tp = rmnet_shs_header_ptr(skb, v4ip_len, sizeof(*tp), &__tp);
+			if (!tp) {
+				src_port_match = false;
+				dest_port_match = false;
+			} else {
+				if (info->src_port_valid)
+					src_port_match = ntohs(info->src_port) <= ntohs(tp->source) &&
+							 ntohs(tp->source) <= ntohs(info->src_port_max);
+
+				if (info->dest_port_valid)
+					dest_port_match = ntohs(info->dest_port) <= ntohs(tp->dest) &&
+							  ntohs(tp->dest) <= ntohs(info->dest_port_max);
+			}
+		} else if (skb_ip4h->protocol == IPPROTO_UDP) {
+			up = rmnet_shs_header_ptr(skb, v4ip_len, sizeof(*up), &__up);
+			if (!up) {
+				src_port_match = false;
+				dest_port_match = false;
+			} else {
+				if (info->src_port_valid)
+					src_port_match = ntohs(info->src_port) <= ntohs(up->source) &&
+							 ntohs(up->source) <= ntohs(info->src_port_max);
+
+				if (info->dest_port_valid)
+					dest_port_match = ntohs(info->dest_port) <= ntohs(up->dest) &&
+							  ntohs(up->dest) <= ntohs(info->dest_port_max);
+			}
+		}
+	}
+	if ((saddmatch) && (daddmatch) && (protomatch) && (src_port_match) && (dest_port_match))
+	   ret =  true;
+
+	rm_err("SHS_LL: V4 saddr match %u daddr match %u, proto match %u, src port %u, dest port match %u  proto %u\n",
+	       saddmatch, daddmatch, protomatch, src_port_match, dest_port_match, skb_ip4h->protocol);
+	return ret;
+}
+
+/* Evaluates if two filters match identical things, to prevent dup filter additions.*/
+int rmnet_shs_is_identical_filter(struct rmnet_shs_wq_flow_node  *node, struct rmnet_shs_wq_flow_node  *node2)
+{
+	struct rmnet_shs_wq_flow_info  *info = &node->info;
+	struct rmnet_shs_wq_flow_info  *info2 = &node2->info;
+
+	int versionmatch = info->ip_version == info2->ip_version;
+	int saddmatch, daddmatch, protomatch, src_port_match, dest_port_match = false;
+
+	/* Sequence match superscedes contents */
+	if (info->seq && info2->seq && (info->seq == info2->seq)) {
+		return true;
+	}
+
+	/* Saddr matches between filters if both are not matchign for addr and/or address match*/
+	if (!info->src_addr_valid && !info2->src_addr_valid) {
+		saddmatch = 1;
+	} else if (info->src_addr_valid && info2->src_addr_valid) {
+		if (info->ip_version == 4) {
+			__be32 s1 = info->src_ip_addr.saddr & info->src_ip_addr_mask.mask;
+			__be32 s2 = info2->src_ip_addr.saddr & info2->src_ip_addr_mask.mask;
+
+			saddmatch = s1 == s2;
+		} else {
+			struct in6_addr s1;
+			struct in6_addr s2;
+			int i;
+
+			for (i = 0; i < 4; i++) {
+				s1.s6_addr32[i] = info->src_ip_addr.v6_saddr.s6_addr32[i] &
+						  info->src_ip_addr_mask.v6_mask.s6_addr32[i];
+				s2.s6_addr32[i] = info2->src_ip_addr.v6_saddr.s6_addr32[i] &
+						  info2->src_ip_addr_mask.v6_mask.s6_addr32[i];
+			}
+
+			saddmatch = ipv6_addr_equal(&s1, &s2);
+		}
+	} else {
+		saddmatch = 0;
+	}
+
+	if (!info->dest_addr_valid && !info2->dest_addr_valid) {
+		daddmatch = 1;
+	} else if (info->dest_addr_valid && info2->dest_addr_valid) {
+		if (info->ip_version == 4) {
+			__be32 d1 = info->dest_ip_addr.daddr & info->dest_ip_addr_mask.mask;
+			__be32 d2 = info2->dest_ip_addr.daddr & info2->dest_ip_addr_mask.mask;
+
+			daddmatch = d1 == d2;
+		} else {
+			struct in6_addr d1;
+			struct in6_addr d2;
+			int i;
+
+			for (i = 0; i < 4; i++) {
+				d1.s6_addr32[i] = info->dest_ip_addr.v6_daddr.s6_addr32[i] &
+						  info->dest_ip_addr_mask.v6_mask.s6_addr32[i];
+				d2.s6_addr32[i] = info2->dest_ip_addr.v6_daddr.s6_addr32[i] &
+						  info2->dest_ip_addr_mask.v6_mask.s6_addr32[i];
+			}
+
+			daddmatch = ipv6_addr_equal(&d1, &d2);
+		}
+	} else {
+		daddmatch = 0;
+	}
+
+	protomatch = (!info->proto_valid  && !info2->proto_valid) ||
+					(info->proto_valid  && info2->proto_valid && info->proto == info2->proto);
+
+	src_port_match = (!info->src_port_valid  && !info2->src_port_valid) ||
+					(info->src_port_valid  && info2->src_port_valid &&
+					info->src_port == info2->src_port &&
+					info->src_port_max == info2->src_port_max);
+
+	dest_port_match = (!info->dest_port_valid  && !info2->dest_port_valid) ||
+					(info->dest_port_valid  && info2->dest_port_valid &&
+					info->dest_port == info2->dest_port &&
+					info->dest_port_max == info2->dest_port_max);
+
+	rm_err("SHS_LL: match result sadr match %u daddr match %u, proto match %u, src port %u, dest port match %u  versionmatch %u\n",
+           saddmatch, daddmatch, protomatch,src_port_match, dest_port_match, versionmatch);
+	return (versionmatch && saddmatch && daddmatch  && protomatch && src_port_match && dest_port_match);
+
+}
+
+/* Evaluates the incoming skb against all installed filters
+ * if the filter matches with the SKB then true is returned.
+ */
+int rmnet_shs_is_filter_match(struct sk_buff *skb)
+{
+	struct iphdr *ip4h, __ip4h;
+	struct ipv6hdr *ip6h, __ip6h;
+	struct rmnet_shs_wq_flow_node *node_p;
+	struct hlist_node *tmp;
+	int ret = false;
+
+	spin_lock_bh(&rmnet_shs_ll_ht_splock);
+	/* SHS will ignore ICMP and frag pkts completely */
+	switch (skb->protocol) {
+	case htons(ETH_P_IP):
+		ip4h = rmnet_shs_header_ptr(skb, 0, sizeof(*ip4h), &__ip4h);
+		if (!ip4h) {
+			break;
+		}
+		hash_for_each_possible_safe(rmnet_shs_ll_filter_ht, node_p, tmp, list, ip4h->saddr) {
+			if (ipv4_packet_match(skb, ip4h, &node_p->info)) {
+				ret = true;
+				break;
+			}
+		}
+		break;
+	case htons(ETH_P_IPV6):
+		ip6h = rmnet_shs_header_ptr(skb, 0, sizeof(*ip6h), &__ip6h);
+		if (!ip6h) {
+			break;
+		}
+
+		hash_for_each_possible_safe(rmnet_shs_ll_filter_ht, node_p, tmp, list, ip6h->saddr.in6_u.u6_addr32[0]) {
+			if (ipv6_packet_match(skb, ip6h, &node_p->info)) {
+				ret = true;
+				break;
+			}
+
+		}
+		break;
+	default:
+		break;
+	}
+	spin_unlock_bh(&rmnet_shs_ll_ht_splock);
+	rm_err("SHS_LL: Packet Filter checked analyzed ret: %d", ret);
+	return ret;
+}
+
+/* Uninstalls a LL flow filter contained by node */
+void rmnet_shs_remove_llflow(struct rmnet_shs_wq_flow_node  *node)
+{
+	struct rmnet_shs_wq_flow_node  *temp_node;
+	struct hlist_node *tmp;
+	struct rmnet_shs_wq_hstat_s *hnode = NULL;
+	unsigned long bkt;
+	bool found = false;
+
+	spin_lock_bh(&rmnet_shs_ll_ht_splock);
+	hash_for_each_safe(rmnet_shs_ll_filter_ht, bkt, tmp, temp_node, list)
+	{
+		if (rmnet_shs_is_identical_filter(temp_node, node)) {
+			rm_err("SHS_LL: %s\n", "Filter already installed, Dup Filter");
+			hash_del_rcu(&temp_node->list);
+			kfree(temp_node);
+			found = true;
+			break;
+		}
+	}
+	spin_unlock_bh(&rmnet_shs_ll_ht_splock);
+
+	if (!found) {
+		/* No matching filter was found. Just free our GENL node
+		 * and return.
+		 */
+		kfree(node);
+		return;
+	}
+
+	spin_lock_bh(&rmnet_shs_hstat_tbl_lock);
+	list_for_each_entry(hnode, &rmnet_shs_wq_hstat_tbl, hstat_node_id) {
+		if (hnode->node && hnode->node->low_latency != RMNET_SHS_TRUE_LOW_LATENCY) {
+			hnode->node->low_latency= RMNET_SHS_LOW_LATENCY_CHECK;
+		}
+	}
+	spin_unlock_bh(&rmnet_shs_hstat_tbl_lock);
+	/* Free the genl node allocated at genl recv */
+	kfree(node);
+	rmnet_shs_cfg.num_filters--;
+	rmnet_shs_filter_count--;
+
+	rm_err("SHS_LL: %s", " Uninstalled LL filter");
+}
+
+void rmnet_shs_print_llflow(struct rmnet_shs_wq_flow_node  *node)
+{
+	struct rmnet_shs_wq_flow_info  *info = &node->info;
+
+	pr_info("SHS_LL: proto valid %u src addr valid %u, dest addr valid %u, dest port valid %u, srcport valid %u, ip version %u seq %u\n",
+		info->proto_valid, info->src_addr_valid, info->dest_addr_valid,
+		info->dest_port_valid, info->src_port_valid, info->ip_version, info->seq);
+
+	pr_info("SHS_LL: info->ip_version %u\n", info->ip_version );
+	pr_info("SHS_LL: info->proto %u\n", info->proto );
+	pr_info("SHS_LL: info->dest_port %u\n", info->dest_port );
+	pr_info("SHS_LL: info->src_port %u\n", info->src_port );
+	pr_info("SHS_LL: info->dest_port_max %u\n", info->dest_port_max);
+	pr_info("SHS_LL: info->src_port_max %u\n", info->src_port_max);
+	pr_info("SHS_LL: info->dest_addr_valid %u\n", info->dest_addr_valid);
+	pr_info("SHS_LL: info->src_addr_valid %u\n", info->src_addr_valid);
+	pr_info("SHS_LL: info->seq %u\n", info->seq);
+
+	if (info->ip_version == 4 && (info->dest_addr_valid) && (info->src_addr_valid )) {
+		pr_info("New flow info->dest_addr %pI4/%pI4\n",
+			&info->dest_ip_addr.daddr,
+			&info->dest_ip_addr_mask.mask);
+		pr_info("New flow info->src_addr %pI4/%pI4\n",
+			&info->src_ip_addr.saddr,
+			&info->src_ip_addr_mask.mask);
+	}
+
+	if (info->ip_version == 6 && (info->dest_addr_valid) && (info->src_addr_valid )) {
+		pr_info("New flow info->dest_addr %pI6/%pI6\n",
+			&node->info.dest_ip_addr.v6_daddr,
+			&node->info.dest_ip_addr_mask.v6_mask);
+		pr_info("New flow info->src_addr %pI6/%pI6\n",
+			&node->info.src_ip_addr.v6_saddr,
+			&node->info.src_ip_addr_mask.v6_mask);
+	}
+}
+
+/* Installs a LL flow filter contained by node */
+void rmnet_shs_add_llflow(struct rmnet_shs_wq_flow_node  *node)
+{
+	struct rmnet_shs_wq_flow_node  *temp_node;
+	struct rmnet_shs_wq_hstat_s *hnode = NULL;
+	unsigned long bkt;
+	int i = 0;
+
+	spin_lock_bh(&rmnet_shs_ll_ht_splock);
+	hash_for_each(rmnet_shs_ll_filter_ht, bkt, temp_node, list)
+	{
+		i++;
+		if (rmnet_shs_is_identical_filter(temp_node, node)) {
+			kfree(node);
+			spin_unlock_bh(&rmnet_shs_ll_ht_splock);
+			rm_err("SHS_LL: %s", " Dup filter seen match seen, no install");
+			return;
+		}
+	}
+
+	if (rmnet_shs_cfg.num_filters >= MAX_LL_FILTERS) {
+		kfree(node);
+		spin_unlock_bh(&rmnet_shs_ll_ht_splock);
+        rmnet_shs_crit_err[RMNET_SHS_MAX_LL_FILTERS]++;
+        rm_err("SHS_LL: %s\n", "Installed LL filter failed: Max reached");
+		return;
+	}
+	rmnet_shs_cfg.num_filters++;
+	rmnet_shs_filter_count++;
+
+	if (rmnet_shs_debug)
+		rmnet_shs_print_llflow(node);
+	/* Room for improvement if hash is not just the src address 1st int for v6 */
+	hash_add(rmnet_shs_ll_filter_ht, &node->list, node->info.src_ip_addr.saddr);
+	spin_unlock_bh(&rmnet_shs_ll_ht_splock);
+
+	/* Mark all flows to check if filter is a match on next packet */
+	rm_err("SHS_LL: %s\n", "Setting low latency flow check for all flows");
+	spin_lock_bh(&rmnet_shs_hstat_tbl_lock);
+	list_for_each_entry(hnode, &rmnet_shs_wq_hstat_tbl, hstat_node_id) {
+		if (hnode->node && hnode->node->low_latency != RMNET_SHS_TRUE_LOW_LATENCY) {
+			hnode->node->low_latency = RMNET_SHS_LOW_LATENCY_CHECK;
+		}
+
+	}
+	spin_unlock_bh(&rmnet_shs_hstat_tbl_lock);
+	rm_err("SHS_LL: %s\n", "Installed LL filter");
+}
+
+void rmnet_shs_ll_stamp(struct sk_buff *skb, struct rmnet_shs_skbn_s *node)
+{
+	u32 hash2stamp = 0; /* the default value of skb->hash*/
+	u8 map = 0, maplen = 0;
+	u16 index;
+
+	if (!node->custom_map) {
+		map = rmnet_shs_cfg.map_mask;
+		maplen = rmnet_shs_cfg.map_len;
+		index = node->map_index;
+	} else {
+		map = node->custom_map;
+		maplen = node->custom_len;
+		index = node->map_index;
+	}
+	if (map) {
+		hash2stamp = rmnet_shs_form_hash(index,
+						 maplen,
+						 node->hash, 0);
+	    skb->hash = hash2stamp;
+	}
+}
+
+int rmnet_shs_ll_handler(struct sk_buff *skb, struct rmnet_shs_clnt_s *clnt_cfg)
+{
+	struct rmnet_shs_skbn_s *node_p;
+	struct hlist_node *tmp;
+	int map = rmnet_shs_cfg.map_mask;
+	int ll_cpu = rmnet_shs_ll_flow_cpu;
+	int map_cpu;
+	u32 hash;
+	u8 is_match_found = 0;
+	struct rmnet_shs_cpu_node_s *cpu_node_tbl_p;
+	struct rmnet_priv *priv;
+
+	rmnet_shs_ll_pkts++;
+
+	hash = skb_get_hash(skb) ^ RMNET_SHS_TRUE_LOW_LATENCY;
+	/*deliver non TCP/UDP packets right away*/
+	/* If stmp all is set break and don't check reqd */
+	if (!(clnt_cfg->config & RMNET_SHS_STMP_ALL) &&
+	    !rmnet_shs_is_ll_skb_stamping_reqd(skb)) {
+		rmnet_shs_deliver_skb(skb);
+		return 0;
+	}
+
+	spin_lock_bh(&rmnet_shs_ll_ht_splock);
+	do {
+
+		hash_for_each_possible_safe(rmnet_shs_ll_ht, node_p, tmp, list,
+					    hash) {
+			if (hash != node_p->hash)
+				continue;
+			is_match_found = 1;
+			node_p->map_cpu = rmnet_shs_ll_flow_cpu;
+			node_p->map_index = rmnet_shs_idx_from_cpu(node_p->map_cpu, map);
+			break;
+		}
+		if (is_match_found)
+			break;
+
+		if (ll_cpu < 0) {
+			rmnet_shs_crit_err[RMNET_SHS_RPS_MASK_CHANGE]++;
+			break;
+		}
+
+		if (atomic_long_read(&rmnet_shs_cfg.num_flows) > MAX_FLOWS) {
+			rmnet_shs_crit_err[RMNET_SHS_MAX_FLOWS]++;
+			break;
+		}
+
+		node_p = kzalloc(sizeof(*node_p), GFP_ATOMIC);
+
+		if (!node_p) {
+			rmnet_shs_crit_err[RMNET_SHS_MAIN_MALLOC_ERR]++;
+			break;
+		}
+
+		atomic_long_inc(&rmnet_shs_cfg.num_flows);
+
+		node_p->custom_map = clnt_cfg->map_mask;
+		node_p->custom_len = rmnet_shs_cfg.map_mask;
+		node_p->dev = skb->dev;
+		node_p->hash = skb->hash ^ RMNET_SHS_TRUE_LOW_LATENCY;
+		node_p->map_cpu = ll_cpu;
+		node_p->low_latency = RMNET_SHS_TRUE_LOW_LATENCY;
+		node_p->map_index = rmnet_shs_idx_from_cpu(node_p->map_cpu, map);
+		node_p->map_cpu = raw_smp_processor_id();
+
+		INIT_LIST_HEAD(&node_p->node_id);
+		/* Set ip header / transport header / transport proto */
+		rmnet_shs_get_update_skb_hdr_info(skb, node_p);
+		node_p->l4s = rmnet_shs_is_skb_l4s(skb);
+		node_p->ecn_capable = rmnet_shs_is_skb_ecn_capable(skb);
+		/* Workqueue utilizes some of the values from above
+		 * initializations . Therefore, we need to request
+		 * for memory (to workqueue) after the above initializations
+		 */
+		rmnet_shs_wq_create_new_flow(node_p);
+		map_cpu = node_p->map_cpu;
+		cpu_node_tbl_p = &rmnet_shs_ll_cpu_node_tbl[map_cpu];
+		/* Set mux id */
+		priv = netdev_priv(node_p->dev);
+		if (!priv) {
+			rm_err("SHS_LL: priv for netdev is null for hash 0x%x", node_p->hash);
+			rmnet_shs_crit_err[RMNET_SHS_NETDEV_ERR]++;
+		} else {
+			node_p->hstats->mux_id = priv->mux_id;
+			rm_err("SHS_LL: mux id for hash 0x%x is %d",
+			       node_p->hash, node_p->hstats->mux_id);
+		}
+		rmnet_shs_cpu_node_add(node_p, &cpu_node_tbl_p->node_list_id);
+		hash_add_rcu(rmnet_shs_ll_ht, &node_p->list, node_p->hash);
+		is_match_found = 1;
+		break;
+
+	} while (0);
+	spin_unlock_bh(&rmnet_shs_ll_ht_splock);
+
+	if (is_match_found) {
+        /* Put on same core if backlog is super low until  it isnt then
+         * never do that again unless we moved to gold core and backlog
+         * is again super small.
+         * State 0 RMNET_SHS_LL_SAME_CORE_SILVER = Same core eligible silver
+         * State 1 RMNET_SHS_LL_SILVER_GOLD_NW = No longer same core eligible on silver but ok on gold
+         * State 0 RMNET_SHS_LL_SAME_CORE_GOLD = Same core eligible gold
+         * State 2 RMNET_SHS_LL_SPLIT_ALWAY = No longer same core eligible on silver and gold
+          * */
+		rmnet_shs_ll_stamp(skb, node_p);
+		if (!node_p->ll_flag &&
+		    rmnet_shs_is_lpwr_cpu(raw_smp_processor_id()))  {
+			if (GET_QLEN(raw_smp_processor_id()) <  MAX_LL_CORE_BACKLOG ) {
+				skb->hash = 0;
+				skb->sw_hash = 1;
+			} else if (!node_p->ll_flag) {
+				node_p->ll_flag = RMNET_SHS_LL_SILVER_GOLD_NW;
+				node_p->map_cpu = ll_cpu;
+				node_p->map_index = rmnet_shs_idx_from_cpu(node_p->map_cpu, map);
+			}
+		} else if (node_p->ll_flag != RMNET_SHS_LL_SAME_CORE_GOLD){
+			if (!rmnet_shs_is_lpwr_cpu(raw_smp_processor_id()))  {
+				if (GET_QLEN(raw_smp_processor_id()) < MAX_LL_CORE_BACKLOG) {
+				skb->hash = 0;
+				skb->sw_hash = 1;
+
+				} else {
+					node_p->ll_flag = RMNET_SHS_LL_SAME_CORE_GOLD;
+					node_p->map_cpu = ll_cpu;
+					node_p->map_index = rmnet_shs_idx_from_cpu(node_p->map_cpu, map);
+				}
+			}
+		}
+
+		if (skb_shinfo(skb)->gso_segs) {
+			node_p->num_skb += skb_shinfo(skb)->gso_segs;
+		} else {
+			node_p->num_skb += 1;
+		}
+		node_p->num_coal_skb += 1;
+		node_p->hw_coal_bytes += RMNET_SKB_CB(skb)->coal_bytes;
+		node_p->hw_coal_bufsize += RMNET_SKB_CB(skb)->coal_bufsize;
+		if (skb->priority == 0xda1a)
+			node_p->num_ll_skb++;
+
+		if (!node_p->l4s)
+			node_p->l4s = rmnet_shs_is_skb_l4s(skb);
+
+		if (!node_p->ecn_capable)
+			node_p->ecn_capable = rmnet_shs_is_skb_ecn_capable(skb);
+
+		node_p->num_skb_bytes += skb->len;
+	}
+
+	rmnet_shs_deliver_skb(skb);
+	return 0;
+}
+
+void rmnet_shs_ll_init(void)
+{
+	u8 num_cpu;
+
+	for (num_cpu = 0; num_cpu < MAX_CPUS; num_cpu++)
+		INIT_LIST_HEAD(&rmnet_shs_ll_cpu_node_tbl[num_cpu].node_list_id);
+}
+
+void rmnet_shs_ll_deinit(void)
+{
+	struct rmnet_shs_wq_flow_node  *node;
+	struct hlist_node *tmp;
+	unsigned long bkt;
+
+	rm_err("%s", "SHS_LL: De-init LL book-keeping");
+	spin_lock_bh(&rmnet_shs_ll_ht_splock);
+	hash_for_each_safe(rmnet_shs_ll_filter_ht, bkt, tmp, node, list)
+	{
+		hash_del_rcu(&node->list);
+		kfree(node);
+	        rmnet_shs_cfg.num_filters--;
+		rmnet_shs_filter_count--;
+	}
+	spin_unlock_bh(&rmnet_shs_ll_ht_splock);
+	rm_err("%s", "SHS_LL: De-init LL book-keeping exit");
+
+}

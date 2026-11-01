@@ -138,7 +138,11 @@ TRACE_EVENT(
 	),
 
 	TP_fast_assign(
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 10, 0)
 		__assign_str(name);
+#else
+		__assign_str(name, skb->dev->name);
+#endif
 		__entry->skbaddr = skb;
 		__entry->protocol = ntohs(skb->protocol);
 		__entry->len = skb->len;
@@ -271,7 +275,11 @@ TRACE_EVENT(
 	),
 
 	TP_fast_assign(
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 10, 0)
 		__assign_str(name);
+#else
+		__assign_str(name, skb->dev->name);
+#endif
 		__entry->skbaddr = skb;
 		__entry->protocol = ntohs(skb->protocol);
 		__entry->len = skb->len;
@@ -394,7 +402,7 @@ TRACE_EVENT(
 /* This part must be outside protection */
 #ifndef IPA_TRACE_INCLUDE_PATH
 #ifdef CONFIG_IPA_VENDOR_DLKM
-#define IPA_TRACE_INCLUDE_PATH ../../../../sm8450-modules/qcom/opensource/dataipa/drivers/platform/msm/ipa/ipa_v3
+#define IPA_TRACE_INCLUDE_PATH ../../../../vendor/qcom/opensource/dataipa/drivers/platform/msm/ipa/ipa_v3
 #else
 #define IPA_TRACE_INCLUDE_PATH ../../techpack/dataipa/drivers/platform/msm/ipa/ipa_v3
 #endif

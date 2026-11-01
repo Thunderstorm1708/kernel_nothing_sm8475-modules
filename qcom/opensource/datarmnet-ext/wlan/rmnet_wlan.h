@@ -1,61 +1,112 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
-/* Copyright (c) 2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2022-2023 Qualcomm Innovation Center, Inc. All rights reserved.
- *
- * RMNET WLAN handler framework
- *
+/*
+ * Copyright (c) 2021, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2022-2023, 2025 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
-#ifndef DATARMNETc7bc459123
-#define DATARMNETc7bc459123
+#ifndef __RMNET_WLAN_H__
+#define __RMNET_WLAN_H__
+
 #include <linux/types.h>
 #include <net/genetlink.h>
 #include <linux/netdevice.h>
 #include <linux/in6.h>
-struct DATARMNETb89ecedefc{union{__be16 DATARMNETf0d9de7e2f;__be32 
-DATARMNET906b2ee561;};u8 DATARMNET0d956cc77a;u8 DATARMNET4924e79411;};struct 
-DATARMNET8d3c2559ca{struct net_device*DATARMNET57656f6f2f;union{__be32 
-DATARMNET0dc14167a1;struct in6_addr DATARMNET5700daac01;};u8 DATARMNET0d956cc77a
-;u8 DATARMNET9954a624ac;};struct DATARMNET41b426061d{struct hlist_node 
-DATARMNETe8608dd267;struct rcu_head DATARMNET28bfe9e6ad;struct notifier_block 
-DATARMNET272c159b3c;char DATARMNET852d4d00e2[IFNAMSIZ];struct 
-DATARMNET8d3c2559ca DATARMNET7ed5754a5c;};struct DATARMNETe117226f58{union{
-__be32 DATARMNETdfe430c2d6;struct in6_addr DATARMNET815cbb4bf5;};union{__be32 
-DATARMNET2cb607d686;struct in6_addr DATARMNETc3f31215b7;};__be16 
-DATARMNET08e913477e;__be16 DATARMNETda7f7fa492;u8 DATARMNET0d956cc77a;};enum{
-DATARMNET356f2a237e,DATARMNET45ee632553,DATARMNET9bfbc31cd6,DATARMNETdcafdec32a,
-};rx_handler_result_t DATARMNET37a92021f9(struct sk_buff**DATARMNET89946cec52);
-void DATARMNET7ca470d54b(struct sk_buff*DATARMNET543491eb0f,u32 
-DATARMNET1464100e7a);int DATARMNET4899053671(struct sk_buff*DATARMNET543491eb0f,
-struct DATARMNET8d3c2559ca*DATARMNET2d4b4cfc9e);bool DATARMNET4eafcdee07(struct 
-DATARMNETb89ecedefc*DATARMNET3396919a68);int DATARMNET53f12a0f7d(struct 
-DATARMNETb89ecedefc*DATARMNETcadc2ef9aa,u32 DATARMNETef77661260,struct genl_info
-*DATARMNET54338da2ff);int DATARMNET07f6485c9b(struct DATARMNETb89ecedefc*
-DATARMNETcadc2ef9aa,u32 DATARMNETef77661260,struct genl_info*DATARMNET54338da2ff
-);int DATARMNETe14c875532(struct sk_buff**DATARMNET89946cec52,struct genl_family
-*DATARMNET4a4aca7220,struct genl_info*DATARMNET54338da2ff);int 
-DATARMNET97b2388e63(char*DATARMNET852d4d00e2,struct genl_info*
-DATARMNET54338da2ff);int DATARMNETa903cd5994(char*DATARMNET852d4d00e2,struct 
-genl_info*DATARMNET54338da2ff);int DATARMNET92e5468fc5(char*DATARMNET852d4d00e2,
-struct genl_info*DATARMNET54338da2ff);int DATARMNET9d7bb9a63d(char*
-DATARMNET852d4d00e2,struct genl_info*DATARMNET54338da2ff);int 
-DATARMNET947eb110d2(struct DATARMNET8d3c2559ca*DATARMNET2d4b4cfc9e,struct 
-genl_info*DATARMNET54338da2ff);int DATARMNETb8b35fdc18(struct 
-DATARMNET8d3c2559ca*DATARMNET2d4b4cfc9e,struct genl_info*DATARMNET54338da2ff);
-int DATARMNET8d5a5a7047(__be16 DATARMNETf0d9de7e2f,struct genl_info*
-DATARMNET54338da2ff);int DATARMNETc97c6a4265(__be16 DATARMNETf0d9de7e2f,struct 
-genl_info*DATARMNET54338da2ff);bool DATARMNETa8b2566e6a(struct sk_buff*
-DATARMNET543491eb0f,struct DATARMNETb89ecedefc*DATARMNET3396919a68,int 
-DATARMNET611d08d671);int DATARMNET59b8376224(__be16 DATARMNETf0d9de7e2f,struct 
-genl_info*DATARMNET54338da2ff);int DATARMNET0b12e969c5(__be16 
-DATARMNETf0d9de7e2f,struct genl_info*DATARMNET54338da2ff);bool 
-DATARMNET0a4704e5e0(struct DATARMNETb89ecedefc*DATARMNET3396919a68);int 
-DATARMNET078f6bd384(void);void DATARMNETfae36afa03(void);char*
-DATARMNET934406764d(void);char*DATARMNETe447822105(void);struct 
-DATARMNET41b426061d*DATARMNETcc0a01df2a(struct DATARMNET8d3c2559ca*
-DATARMNET54338da2ff);int DATARMNET4c1c11d8a5(struct DATARMNETe117226f58*
-DATARMNET3396919a68);int DATARMNET56fde5181e(void);extern struct 
-DATARMNETe117226f58*DATARMNETcde6e442f5;int DATARMNETaba2beb199(const char*
-DATARMNETf6f1ac8bbf,const char*DATARMNET8faed3a82a,size_t DATARMNET1dfbbc30a5);
-#endif
+#include <uapi/linux/rmnet_wlan.h>
 
+struct rmnet_wlan_fwd_info {
+	struct net_device *fwd_dev;
+	union {
+		__be32 v4_addr;
+		struct in6_addr v6_addr;
+	};
+	u8 ip_proto;
+	u8 net_type;
+};
+
+struct rmnet_wlan_fwd_info_node {
+	struct hlist_node hash;
+	struct rcu_head rcu;
+	struct notifier_block nb;
+	char dev_name[IFNAMSIZ];
+	struct rmnet_wlan_fwd_info fwd;
+};
+
+/* Low Latency Address Info Structure */
+struct rmnet_wlan_ll_tuple {
+	union {
+		__be32 v4_saddr;
+		struct in6_addr v6_saddr;
+	};
+	union {
+		__be32 v4_daddr;
+		struct in6_addr v6_daddr;
+	};
+	__be16 sport;
+	__be16 dport;
+	u8 ip_proto;
+};
+
+rx_handler_result_t rmnet_wlan_rx_handler(struct sk_buff **pskb);
+
+/* TCP clamping api. Clamps mss to 1140 for packets matching the tcp flags */
+void rmnet_wlan_tcp_mss_clamp(struct sk_buff *skb, u32 tcp_flags);
+
+/* Pass on an SKB to a FWD device */
+int rmnet_wlan_deliver_skb(struct sk_buff *skb,
+			   struct rmnet_wlan_fwd_info *fwd_info);
+
+/* Is this tuple present in our list? */
+bool rmnet_wlan_tuple_present(struct rmnet_wlan_tuple *tuple);
+
+/* Tuple add/delete interface */
+int rmnet_wlan_add_tuples(struct rmnet_wlan_tuple *tuples, u32 tuple_count,
+			  struct genl_info *info);
+int rmnet_wlan_del_tuples(struct rmnet_wlan_tuple *tuples, u32 tuple_count,
+			  struct genl_info *info);
+int rmnet_wlan_get_tuples(struct sk_buff **pskb, struct genl_family *fam,
+			  struct genl_info *info);
+
+/* Device interface */
+int rmnet_wlan_set_device(char *dev_name, struct genl_info *info);
+int rmnet_wlan_unset_device(char *dev_name, struct genl_info *info);
+
+int rmnet_wwan_set_device(char *dev_name, struct genl_info *info);
+int rmnet_wwan_unset_device(char *dev_name, struct genl_info *info);
+
+/* Forwarding information interface */
+int rmnet_wlan_add_fwd_info(struct rmnet_wlan_fwd_info *fwd_info,
+			    struct genl_info *info);
+int rmnet_wlan_del_fwd_info(struct rmnet_wlan_fwd_info *fwd_info,
+			    struct genl_info *info);
+
+/* UDP Encap interface */
+int rmnet_wlan_set_encap_port(__be16 port, struct genl_info *info);
+int rmnet_wlan_unset_encap_port(__be16 port, struct genl_info *info);
+bool rmnet_wlan_udp_encap_check(struct sk_buff *skb,
+				struct rmnet_wlan_tuple *tuple,
+				int ip_len);
+int rmnet_wlan_act_encap_port_pass_through(__be16 port, struct genl_info *info);
+int rmnet_wlan_act_encap_port_drop(__be16 port, struct genl_info *info);
+bool rmnet_wlan_udp_encap_drop_check(struct rmnet_wlan_tuple *tuple);
+
+/* Pull the plug */
+int rmnet_wlan_reset(void);
+
+/* Module teardown */
+void rmnet_wlan_deinit(void);
+
+char *rmnet_wlan_get_dev(void);
+char *rmnet_wwan_get_dev(void);
+
+struct rmnet_wlan_fwd_info_node * rmnet_wlan_fwd_info_find
+				(struct rmnet_wlan_fwd_info *info);
+
+/* Low Latency Tuple Management */
+int rmnet_wlan_add_ll_tuple(struct rmnet_wlan_ll_tuple *tuple);
+int rmnet_wlan_del_ll_tuple(void);
+extern struct rmnet_wlan_ll_tuple * rmnet_wlan_ll_tuple_cache;
+
+int rmnet_wlan_strlcmp(const char *string1, const char *string2,
+		       size_t limit_bytes);
+
+#endif

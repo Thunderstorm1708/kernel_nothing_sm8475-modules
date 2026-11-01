@@ -1,71 +1,115 @@
-/* Copyright (c) 2020 The Linux Foundation. All rights reserved.
- * Copyright (c) 2022-2024 Qualcomm Innovation Center, Inc. All rights reserved.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 and
- * only version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
+/* SPDX-License-Identifier: GPL-2.0-only */
+/*
+ * Copyright (c) 2020 The Linux Foundation. All rights reserved.
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
  */
 
-#ifndef DATARMNET4e9dcb0338
-#define DATARMNET4e9dcb0338
+#ifndef _RMNET_SHS_COMMON_H_
+#define _RMNET_SHS_COMMON_H_
 #undef TRACE_INCLUDE_PATH
+
 #include <trace/hooks/sched.h>
 #include <linux/tracepoint.h>
 #include <trace/hooks/vendor_hooks.h>
-#if (KERNEL_VERSION((0xd03+244-0xdf1), 9, (0xd2d+202-0xdf7)) <= \
-LINUX_VERSION_CODE)
+#if (KERNEL_VERSION(6, 9, 0) <= LINUX_VERSION_CODE)
 #include <net/rps.h>
 #endif
-#define DATARMNET94fa0a43a2 489335
-void DATARMNET4095253347(struct DATARMNET9b44b71ee9*ep);void DATARMNETf7d317ed55
-(struct DATARMNET9b44b71ee9*ep);void DATARMNET36e5e526fa(struct 
-DATARMNET6c78e47d24*DATARMNETd2a694d52a);void DATARMNET2fe780019f(struct 
-DATARMNET6c78e47d24*DATARMNETd2a694d52a);void DATARMNETd8a6375e9c(struct 
-DATARMNET6c78e47d24*DATARMNETd2a694d52a,struct list_head*head);void 
-DATARMNET9914e9761e(struct DATARMNET6c78e47d24*DATARMNETd2a694d52a,struct 
-list_head*head);void DATARMNET6bf538fa23(void);void DATARMNETaea4c85748(void);
-void DATARMNETe46c480d71(void);void DATARMNETde8ee16f92(struct 
-DATARMNET63d7680df2*DATARMNET63b1a086d5);void DATARMNET3e37ad2816(struct 
-DATARMNET63d7680df2*DATARMNET63b1a086d5,struct list_head*DATARMNET4d030eb9b5);
-void DATARMNETe102b3a798(struct DATARMNET63d7680df2*DATARMNET63b1a086d5,struct 
-list_head*DATARMNET4d030eb9b5,int DATARMNETa7a5705ab0);void DATARMNET4bde88919f(
-u8 cpu,int count);inline int DATARMNET362b15f941(u16 cpu);u64 
-DATARMNETfc888b4d3e(u16 cpu);u32 DATARMNETeb3978575d(u8 DATARMNET42a992465f);u32
- DATARMNETeea3cef5b6(u8 DATARMNET42a992465f);u8 DATARMNET928c931df9(struct 
-rps_map*map);int DATARMNET4e292977da(void*priv,const struct list_head*
-DATARMNET9cf7d31274,const struct list_head*DATARMNET5444bd3b6f);int 
-DATARMNET3c489db64a(void*priv,const struct list_head*DATARMNET9cf7d31274,const 
-struct list_head*DATARMNET5444bd3b6f);int DATARMNETd5c15f1ff3(void*priv,const 
-struct list_head*DATARMNET9cf7d31274,const struct list_head*DATARMNET5444bd3b6f)
-;int DATARMNET85af86a36d(void*priv,const struct list_head*DATARMNET9cf7d31274,
-const struct list_head*DATARMNET5444bd3b6f);int DATARMNETf181a18009(struct 
-net_device*dev);int DATARMNET98b2a0ce62(struct net_device*dev);void 
-DATARMNET7f1d9480cb(void*port);void DATARMNETa4bd2ef52c(void*port);int 
-DATARMNET310c3eb16e(u8 mask);void DATARMNETb4a6870b3b(struct DATARMNET6c78e47d24
-*DATARMNETd2a694d52a);void DATARMNETd8a6375e9c(struct DATARMNET6c78e47d24*
-DATARMNETd2a694d52a,struct list_head*head);void DATARMNET9914e9761e(struct 
-DATARMNET6c78e47d24*DATARMNETd2a694d52a,struct list_head*head);int 
-DATARMNET04e8d1b862(u8 cpu,u8 mask);void DATARMNET44459105b4(struct sk_buff*skb,
-struct DATARMNET63d7680df2*node_p);int DATARMNET217fe38119(u64 
-DATARMNETab155dfd5d,struct net_device*dev);void*DATARMNETefcaf5fbe9(struct 
-sk_buff*skb,u32 offset,u32 DATARMNET567bdc7221,void*buf);u32 DATARMNET8532ab3089
-(u32 index,u32 DATARMNET0258668025,u32 hash,u8 DATARMNET778962e2c2);extern 
-struct list_head DATARMNET9825511866;static inline void DATARMNET3e88a91b63(void
-*unused,struct wait_queue_head*DATARMNETa08427f746,int*done,struct sock*sk){if((
-sk->sk_protocol==IPPROTO_TCP||sk->sk_protocol==IPPROTO_UDP)&&(sk->sk_rxhash&
-1048575)==DATARMNET94fa0a43a2){(*done)=(0xd26+209-0xdf6);
-wake_up_interruptible_poll(DATARMNETa08427f746,EPOLLIN|EPOLLPRI|EPOLLRDNORM|
-EPOLLRDBAND);}}static inline int DATARMNETed3cac41ac(void){int rc=
-(0xd2d+202-0xdf7);rc=register_trace_android_vh_do_wake_up_sync(
-DATARMNET3e88a91b63,NULL);return rc;}static inline int DATARMNET7fcf8c178f(void)
-{int rc=(0xd2d+202-0xdf7);rc=unregister_trace_android_vh_do_wake_up_sync(
-DATARMNET3e88a91b63,NULL);return rc;}
+
+#define VH_MAGIC_HASH 0x77777
+#define SHSUSR_IPV4 1
+#define SHSUSR_IPV6 2
+
+void rmnet_shs_switch_disable(void);
+void rmnet_shs_switch_enable(void);
+void rmnet_shs_skb_entry_disable(void);
+void rmnet_shs_skb_entry_enable(void);
+
+/* Helper functions to add and remove entries to the table
+ * that maintains a list of all nodes that maintain statistics per flow
+ */
+void rmnet_shs_hstat_tbl_add(struct rmnet_shs_wq_hstat_s *hnode);
+void rmnet_shs_hstat_tbl_remove(struct rmnet_shs_wq_hstat_s *hnode);
+
+/* We maintain a list of all flow nodes processed by a cpu.
+ * Below helper functions are used to maintain flow<=>cpu
+ * association.*
+ */
+void rmnet_shs_cpu_list_add(struct rmnet_shs_wq_hstat_s *hnode,
+			    struct list_head *head);
+void rmnet_shs_cpu_list_move(struct rmnet_shs_wq_hstat_s *hnode,
+			     struct list_head *head);
+
+void rmnet_shs_ep_lock_bh(void);
+void rmnet_shs_ep_unlock_bh(void);
+
+void rmnet_shs_update_cfg_mask(void);
+
+void rmnet_shs_cpu_node_remove(struct rmnet_shs_skbn_s *node);
+void rmnet_shs_cpu_node_add(struct rmnet_shs_skbn_s *node,
+			    struct list_head *hd);
+void rmnet_shs_cpu_node_move(struct rmnet_shs_skbn_s *node,
+			     struct list_head *hd, int oldcpu);
+
+void rmnet_shs_cpu_ooo(u8 cpu, int count);
+inline int rmnet_shs_is_lpwr_cpu(u16 cpu);
+
+u64 rmnet_shs_wq_get_max_allowed_pps(u16 cpu);
+u32 rmnet_shs_get_cpu_qtail(u8 cpu_num);
+u32 rmnet_shs_get_cpu_qdiff(u8 cpu_num);
+u8 rmnet_shs_mask_from_map(struct rps_map *map);
+
+/* Return Invalid core if only pri core available*/
+void rmnet_shs_ps_on_hdlr(void *port);
+void rmnet_shs_ps_off_hdlr(void *port);
+int rmnet_shs_get_mask_len(u8 mask);
+void rmnet_shs_cpu_list_remove(struct rmnet_shs_wq_hstat_s *hnode);
+void rmnet_shs_cpu_list_add(struct rmnet_shs_wq_hstat_s *hnode,
+			    struct list_head *head);
+void rmnet_shs_cpu_list_move(struct rmnet_shs_wq_hstat_s *hnode,
+			     struct list_head *head);
+
+int rmnet_shs_idx_from_cpu(u8 cpu, u8 mask);
+void rmnet_shs_get_update_skb_hdr_info(struct sk_buff *skb,
+				       struct rmnet_shs_skbn_s *node_p);
+
+void *rmnet_shs_header_ptr(struct sk_buff *skb, u32 offset, u32 hlen,
+				  void *buf);
+int rmnet_shs_is_skb_l4s(struct sk_buff *skb);
+int rmnet_shs_is_skb_ecn_capable(struct sk_buff *skb);
+u32 rmnet_shs_form_hash(u32 index, u32 maplen, u32 hash, u8 setasync);
+void rmnet_shs_deliver_skb(struct sk_buff *skb);
+void rmnet_shs_deliver_skb_wq(struct sk_buff *skb);
+extern struct list_head rmnet_shs_wq_hstat_tbl;
+u8 rmnet_shs_get_online_mask(void);
+
+static inline void rmnet_vh_do_wake_up_sync(void *unused, struct wait_queue_head *wq_head, int *done, struct sock* sk)
+{
+
+	if ((sk->sk_protocol == IPPROTO_TCP || sk->sk_protocol == IPPROTO_UDP) &&
+	    (sk->sk_rxhash & 0xFFFFF) == VH_MAGIC_HASH) {
+		(*done) = 1;
+		/* Non sync poll is done here as above flag disables sync poll */
+		wake_up_interruptible_poll(wq_head, EPOLLIN | EPOLLPRI | EPOLLRDNORM | EPOLLRDBAND);
+	}
+}
+
+static inline int rmnet_shs_vh_set(void)
+{
+	int rc = 0;
+
+	rc = register_trace_android_vh_do_wake_up_sync(rmnet_vh_do_wake_up_sync, NULL);
+
+	return rc;
+}
+
+static inline int rmnet_shs_vh_unset(void)
+{
+	int rc = 0;
+
+	rc = unregister_trace_android_vh_do_wake_up_sync(rmnet_vh_do_wake_up_sync, NULL);
+
+	return rc;
+}
+
 #undef TRACE_INCLUDE_PATH
 #endif
-

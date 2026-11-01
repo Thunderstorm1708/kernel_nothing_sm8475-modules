@@ -1,25 +1,14 @@
 load(":mmrm_modules.bzl", "mmrm_driver_modules")
-load(":mmrm_modules_build.bzl", "define_consolidate_gki_modules", "define_target_variant_modules")
-load("//vendor/nothing/pong-kernel:target_variants.bzl", "get_all_la_variants")
+load(":mmrm_modules_build.bzl", "define_target_variant_modules")
+load(":target_variants.bzl", "get_all_variants")
 
-def define_waipio():
-    for (t, v) in get_all_la_variants():
-        if t == "waipio":
-            define_target_variant_modules(
-                target = t,
-                variant = v,
-                registry = mmrm_driver_modules,
-                modules = [
-                    "msm-mmrm",
-                ],
-            )
-
-def define_blair():
-    define_consolidate_gki_modules(
-        target = "blair",
-        registry = mmrm_driver_modules,
-        modules = [
-            "msm-mmrm",
-            "mmrm_test_module",
-        ],
-)
+def define_target_modules():
+    for target, variant in get_all_variants():
+        define_target_variant_modules(
+            target = target,
+            variant = variant,
+            registry = mmrm_driver_modules,
+            modules = [
+                "msm-mmrm"
+            ],
+        )

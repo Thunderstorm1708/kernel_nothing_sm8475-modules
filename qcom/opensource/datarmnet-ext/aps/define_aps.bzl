@@ -5,6 +5,16 @@ def define_aps(target, variant):
     kernel_build_variant = "{}_{}".format(target, variant)
     include_base = "../../../{}".format(native.package_name())
 
+    deps_aps = select({
+	"//build/qcom_build_extensions:qtisocrepo_true": ["//soc-repo:all_headers"],
+	"//build/qcom_build_extensions:qtisocrepo_false": ["//msm-kernel:all_headers"],
+    })
+
+    kernel_build = select({
+	"//build/qcom_build_extensions:qtisocrepo_true": "//soc-repo:{}_base_kernel".format(kernel_build_variant),
+	"//build/qcom_build_extensions:qtisocrepo_false": "//msm-kernel:{}".format(kernel_build_variant),
+    })
+
     ddk_module(
         name = "{}_aps".format(kernel_build_variant),
         out = "rmnet_aps.ko",
@@ -14,11 +24,11 @@ def define_aps(target, variant):
             "rmnet_aps.h",
             "rmnet_aps_genl.h",
         ],
-        kernel_build = "//vendor/nothing/pong-kernel:{}".format(kernel_build_variant),
-        deps = [
-            "//vendor/nothing/pong-kernel:all_headers",
-            "//vendor/nothing/pong-modules/qcom/opensource/datarmnet:{}_rmnet_core".format(kernel_build_variant),
-            "//vendor/nothing/pong-modules/qcom/opensource/datarmnet:rmnet_core_headers",
+        kernel_build = kernel_build,
+        deps = deps_aps + [
+	    ":include_headers",
+            "//vendor/qcom/opensource/datarmnet:{}_rmnet_core".format(kernel_build_variant),
+            "//vendor/qcom/opensource/datarmnet:rmnet_core_headers",
         ],
         copts = ["-Wno-misleading-indentation"],
         includes = ["include"],

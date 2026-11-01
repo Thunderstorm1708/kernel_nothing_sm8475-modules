@@ -1,8 +1,6 @@
-/* SPDX-License-Identifier: GPL-2.0-only */
-/* Copyright (c) 2021-2024 Qualcomm Innovation Center, Inc. All rights reserved.
- *
- * RMNET PERF framework
- *
+// SPDX-License-Identifier: GPL-2.0-only
+/*
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
  */
 
 #include <linux/module.h>
@@ -13,397 +11,1031 @@
 #include <linux/ipv6.h>
 #include <net/ip.h>
 #include <net/ipv6.h>
-#include "rmnet_module.h"
 #include <net/ipv6.h>
 #include <net/ip.h>
-#include "rmnet_perf_tcp.h"
-#include "rmnet_perf_udp.h"
+#include <net/genetlink.h>
+
+#include <uapi/linux/rmnet_perf_stats.h>
+
+#include "rmnet_module.h"
 #include "rmnet_descriptor.h"
 #include "rmnet_map.h"
 #include "rmnet_qmap.h"
-#include <net/genetlink.h>
-MODULE_LICENSE("\x47\x50\x4c\x20\x76\x32");static char*verinfo[]={
-"\x37\x31\x62\x32\x30\x31\x39\x64","\x31\x61\x35\x66\x61\x34\x39\x33",
-"\x35\x38\x61\x61\x39\x62\x65\x65","\x38\x61\x62\x30\x61\x38\x65\x65",
-"\x66\x32\x32\x62\x61\x63\x65\x30","\x63\x63\x39\x38\x66\x30\x38\x61",
-"\x63\x65\x37\x39\x33\x32\x31\x63","\x35\x64\x63\x64\x64\x34\x63\x30",
-"\x34\x63\x39\x62\x35\x33\x33\x37","\x61\x33\x62\x61\x62\x64\x34\x30",
-"\x37\x66\x30\x37\x38\x66\x39\x36"};
-#define DATARMNETa83100182f "\x52\x4d\x4e\x45\x54\x5f\x50\x45\x52\x46"
-#define DATARMNET00fb84ae3b \
-"\x52\x4d\x4e\x45\x54\x5f\x50\x45\x52\x46\x5f\x4d\x43\x5f\x30"
-#define DATARMNET73fb6764ba \
-"\x52\x4d\x4e\x45\x54\x5f\x50\x45\x52\x46\x5f\x4d\x43\x5f\x31"
-#define DATARMNET28c8fd3c72 \
-"\x52\x4d\x4e\x45\x54\x5f\x50\x45\x52\x46\x5f\x4d\x43\x5f\x32"
-#define DATARMNET7c6c3f348a \
-"\x52\x4d\x4e\x45\x54\x5f\x50\x45\x52\x46\x5f\x4d\x43\x5f\x33"
-#define DATARMNET816321eafb (0xd26+209-0xdf6)
-enum{DATARMNET6030257476,DATARMNET9420caeb53,DATARMNET036a8433e0,
-DATARMNET553ce0f746,};enum{DATARMNETda6c092e19,DATARMNET3b1665bc33,
-DATARMNETf5c6d9329e,DATARMNET951a42c086,DATARMNET246991e0bf,DATARMNET5b232a76af,
-DATARMNETf1e02c5c94,};enum{DATARMNET055fcd05b3,DATARMNETf1d566b8aa,
-DATARMNET4b4a874099,DATARMNETa5619df200,DATARMNET906d0d1a72,};
-#define DATARMNETed4efa075c (DATARMNETf1e02c5c94 - (0xd26+209-0xdf6))
-struct DATARMNETf698794b6c{u8 mux_id;}__aligned((0xd26+209-0xdf6));struct 
-DATARMNET980f4f86dc{u64 DATARMNET209094b7dd;u64 DATARMNETfdd32eb79e;u64 
-DATARMNET6c81844df0;u64 DATARMNET462c6e2ad3;u64 DATARMNET8409399739;u64 
-DATARMNETcb286ca3be;u64 DATARMNET2698e2274b;u64 DATARMNET29b53445ac;}__aligned(
-(0xd26+209-0xdf6));struct DATARMNETcbee5bfe39{u64 DATARMNET09a124a6d5;u64 
-DATARMNET9447586660;u64 DATARMNET3507da0e2a;u64 DATARMNETa510b8513c;u64 
-DATARMNET34fcb79334;u64 DATARMNETda64236809;u64 DATARMNETe6327165c4;u64 
-DATARMNET9dbda9c770;u64 DATARMNETaa87614a96;u64 DATARMNET232a43aa2e;u64 
-DATARMNET914ce4d7bc;}__aligned((0xd26+209-0xdf6));struct DATARMNET2af049cb88{
-struct DATARMNETcbee5bfe39 DATARMNETcd826f85c1;struct DATARMNET980f4f86dc 
-DATARMNETc5ec22d8f4[(0xeb7+1158-0x132d)];u64 DATARMNET11724e6fbe;u64 
-DATARMNET3e28742e7a;}__aligned((0xd26+209-0xdf6));struct DATARMNET67c61325df{
-struct DATARMNET980f4f86dc DATARMNET0e6c4cf04c;}__aligned((0xd26+209-0xdf6));
-struct DATARMNETce5df1988e{struct DATARMNET2af049cb88 DATARMNETbe4615133d;struct
- DATARMNET67c61325df DATARMNET0b3510b126;}__aligned((0xd26+209-0xdf6));struct 
-DATARMNETf723c861fa{u16 DATARMNETfdf7997f18;struct DATARMNETce5df1988e 
-DATARMNETa57ae53d4c;}__aligned((0xd26+209-0xdf6));struct DATARMNETec7dafaa2f{u16
- DATARMNETaab62d18d0;u8 cmd_name;u8 ack;u8 DATARMNET7dcd62530f[16384];}__aligned
-((0xd26+209-0xdf6));struct DATARMNETa312f70a7c{u8 cmd_name;u16 
-DATARMNETfdf7997f18;}__aligned((0xd26+209-0xdf6));struct DATARMNET0276dc600a{u16
- DATARMNETaab62d18d0;u8 cmd_name;u8 ack;u8 DATARMNET7dcd62530f[
-(0x24f5+499-0x16e8)];}__aligned((0xd26+209-0xdf6));static struct nla_policy 
-DATARMNET9e2a491680[DATARMNETed4efa075c+(0xd26+209-0xdf6)]={[DATARMNET3b1665bc33
-]=NLA_POLICY_EXACT_LEN(sizeof(struct DATARMNETf698794b6c)),[DATARMNETf5c6d9329e]
-=NLA_POLICY_EXACT_LEN(sizeof(struct DATARMNETf723c861fa)),[DATARMNET951a42c086]=
-NLA_POLICY_EXACT_LEN(sizeof(struct DATARMNETec7dafaa2f)),[DATARMNET246991e0bf]=
-NLA_POLICY_EXACT_LEN(sizeof(struct DATARMNETa312f70a7c)),[DATARMNET5b232a76af]=
-NLA_POLICY_EXACT_LEN(sizeof(struct DATARMNET0276dc600a)),};static const struct 
-genl_multicast_group DATARMNET4e83edd544[]={[DATARMNET055fcd05b3]={.name=
-DATARMNET00fb84ae3b,},[DATARMNETf1d566b8aa]={.name=DATARMNET73fb6764ba,},[
-DATARMNET4b4a874099]={.name=DATARMNET28c8fd3c72,},[DATARMNETa5619df200]={.name=
-DATARMNET7c6c3f348a,},};int DATARMNET376884db81=(0xd2d+202-0xdf7);
-module_param_array(verinfo,charp,NULL,(0xcb7+5769-0x221c));MODULE_PARM_DESC(
-verinfo,
-"\x56\x65\x72\x73\x69\x6f\x6e\x20\x6f\x66\x20\x74\x68\x65\x20\x64\x72\x69\x76\x65\x72"
-);bool DATARMNETc03b668e4c=true;module_param_named(rmnet_perf_knob0,
-DATARMNETc03b668e4c,bool,(0xdb7+6665-0x261c));static bool DATARMNET21c7a3c377=
-true;module_param_named(rmnet_perf_knob1,DATARMNET21c7a3c377,bool,
-(0xdb7+6665-0x261c));
-#define DATARMNETf241a4b20f (0xe07+6616-0x2624)
-struct DATARMNETce5df1988e DATARMNETceb52e7075[(0xeb7+1151-0x1325)];static 
-inline bool DATARMNETe1ef3edea2(struct udphdr*DATARMNETa1abb4897c){return 
-be16_to_cpu(DATARMNETa1abb4897c->source)==DATARMNETf241a4b20f||be16_to_cpu(
-DATARMNETa1abb4897c->dest)==DATARMNETf241a4b20f;}static bool DATARMNET77ab42949f
-(struct sk_buff*DATARMNET543491eb0f,int DATARMNET611d08d671){u8*
-DATARMNET352416e828,DATARMNETd9bda61912;struct udphdr*DATARMNETa1abb4897c,
-DATARMNET7b1af10647;DATARMNETa1abb4897c=skb_header_pointer(DATARMNET543491eb0f,
-DATARMNET611d08d671,sizeof(*DATARMNETa1abb4897c),&DATARMNET7b1af10647);if(!
-DATARMNETa1abb4897c||!DATARMNETe1ef3edea2(DATARMNETa1abb4897c))return false;if(
-be16_to_cpu(DATARMNETa1abb4897c->len)<sizeof(struct udphdr)+(0xd26+209-0xdf6))
-return false;DATARMNET352416e828=skb_header_pointer(DATARMNET543491eb0f,
-DATARMNET611d08d671+sizeof(struct udphdr),(0xd26+209-0xdf6),&DATARMNETd9bda61912
-);if(!DATARMNET352416e828)return false;return((*DATARMNET352416e828)&
-(0xbf7+4869-0x1e3c))==(0xbf7+4869-0x1e3c);}static int DATARMNETee9214ce9b(struct
- sk_buff*DATARMNET543491eb0f,int DATARMNET611d08d671){if(DATARMNET77ab42949f(
-DATARMNET543491eb0f,DATARMNET611d08d671)){DATARMNET543491eb0f->hash=
-(0xd2d+202-0xdf7);DATARMNET543491eb0f->sw_hash=(0xd26+209-0xdf6);return
-(0xd2d+202-0xdf7);}return-EINVAL;}int DATARMNETf2958615b1(struct sk_buff*
-DATARMNET543491eb0f){if(DATARMNET543491eb0f->protocol==htons(ETH_P_IP)){struct 
-iphdr*DATARMNET86f1f2cdc9,DATARMNETbf6548198e;DATARMNET86f1f2cdc9=
-skb_header_pointer(DATARMNET543491eb0f,(0xd2d+202-0xdf7),sizeof(*
-DATARMNET86f1f2cdc9),&DATARMNETbf6548198e);if(!DATARMNET86f1f2cdc9||
-ip_is_fragment(DATARMNET86f1f2cdc9))return-EINVAL;if(DATARMNET86f1f2cdc9->
-protocol==IPPROTO_UDP){if(DATARMNET21c7a3c377)DATARMNET2a6d02a6a5(
-DATARMNET543491eb0f);return DATARMNETee9214ce9b(DATARMNET543491eb0f,
-DATARMNET86f1f2cdc9->ihl*(0xd11+230-0xdf3));}if(DATARMNET86f1f2cdc9->protocol==
-IPPROTO_TCP){if(DATARMNETc03b668e4c)DATARMNET9250714999(DATARMNET543491eb0f);
-return-EINVAL;}}else if(DATARMNET543491eb0f->protocol==htons(ETH_P_IPV6)){struct
- ipv6hdr*DATARMNETbf55123e5b,DATARMNETcf1d9e2c1e;int DATARMNET611d08d671;__be16 
-DATARMNET98fed39916;u8 DATARMNET65293f17c4;DATARMNETbf55123e5b=
-skb_header_pointer(DATARMNET543491eb0f,(0xd2d+202-0xdf7),sizeof(*
-DATARMNETbf55123e5b),&DATARMNETcf1d9e2c1e);if(!DATARMNETbf55123e5b)return-EINVAL
-;DATARMNET65293f17c4=DATARMNETbf55123e5b->nexthdr;DATARMNET611d08d671=
-ipv6_skip_exthdr(DATARMNET543491eb0f,sizeof(*DATARMNETbf55123e5b),&
-DATARMNET65293f17c4,&DATARMNET98fed39916);if(DATARMNET611d08d671<
-(0xd2d+202-0xdf7)||DATARMNET98fed39916)return-EINVAL;if(DATARMNET65293f17c4==
-IPPROTO_UDP){if(DATARMNET21c7a3c377)DATARMNET2a6d02a6a5(DATARMNET543491eb0f);
-return DATARMNETee9214ce9b(DATARMNET543491eb0f,DATARMNET611d08d671);}if(
-DATARMNET65293f17c4==IPPROTO_TCP){if(DATARMNETc03b668e4c)DATARMNET9250714999(
-DATARMNET543491eb0f);return-EINVAL;}}return-EINVAL;}void DATARMNET7b0253229f(
-struct sk_buff*DATARMNET543491eb0f){if(DATARMNET543491eb0f->protocol==htons(
-ETH_P_IP)){struct iphdr*DATARMNET86f1f2cdc9,DATARMNETbf6548198e;
-DATARMNET86f1f2cdc9=skb_header_pointer(DATARMNET543491eb0f,(0xd2d+202-0xdf7),
-sizeof(*DATARMNET86f1f2cdc9),&DATARMNETbf6548198e);if(!DATARMNET86f1f2cdc9||
-ip_is_fragment(DATARMNET86f1f2cdc9))return;if(DATARMNET86f1f2cdc9->protocol==
-IPPROTO_TCP){if(DATARMNETc03b668e4c)DATARMNETd8fdde8978(DATARMNET543491eb0f);}}
-else if(DATARMNET543491eb0f->protocol==htons(ETH_P_IPV6)){struct ipv6hdr*
-DATARMNETbf55123e5b,DATARMNETcf1d9e2c1e;int DATARMNET611d08d671;__be16 
-DATARMNET98fed39916;u8 DATARMNET65293f17c4;DATARMNETbf55123e5b=
-skb_header_pointer(DATARMNET543491eb0f,(0xd2d+202-0xdf7),sizeof(*
-DATARMNETbf55123e5b),&DATARMNETcf1d9e2c1e);if(!DATARMNETbf55123e5b)return;
-DATARMNET65293f17c4=DATARMNETbf55123e5b->nexthdr;DATARMNET611d08d671=
-ipv6_skip_exthdr(DATARMNET543491eb0f,sizeof(*DATARMNETbf55123e5b),&
-DATARMNET65293f17c4,&DATARMNET98fed39916);if(DATARMNET611d08d671<
-(0xd2d+202-0xdf7)||DATARMNET98fed39916)return;if(DATARMNET65293f17c4==
-IPPROTO_TCP){if(DATARMNETc03b668e4c)DATARMNETd8fdde8978(DATARMNET543491eb0f);}}}
-static void DATARMNET05c4bf8af9(struct sk_buff*DATARMNET543491eb0f,int 
-DATARMNET611d08d671){if(DATARMNET77ab42949f(DATARMNET543491eb0f,
-DATARMNET611d08d671))DATARMNET543491eb0f->priority=14286874;}void 
-DATARMNET324fe25dad(struct sk_buff*DATARMNET543491eb0f){if(DATARMNET543491eb0f->
-protocol==htons(ETH_P_IP)){struct iphdr*DATARMNET86f1f2cdc9,DATARMNETbf6548198e;
-DATARMNET86f1f2cdc9=skb_header_pointer(DATARMNET543491eb0f,(0xd2d+202-0xdf7),
-sizeof(*DATARMNET86f1f2cdc9),&DATARMNETbf6548198e);if(!DATARMNET86f1f2cdc9||
-ip_is_fragment(DATARMNET86f1f2cdc9))return;if(DATARMNET86f1f2cdc9->protocol==
-IPPROTO_UDP){if(DATARMNET21c7a3c377)DATARMNET5ecc30669c(DATARMNET543491eb0f);
-DATARMNET05c4bf8af9(DATARMNET543491eb0f,DATARMNET86f1f2cdc9->ihl*
-(0xd11+230-0xdf3));return;}if(DATARMNET86f1f2cdc9->protocol==IPPROTO_TCP){if(
-DATARMNETc03b668e4c)DATARMNET9d574e64b1(DATARMNET543491eb0f);return;}}else if(
-DATARMNET543491eb0f->protocol==htons(ETH_P_IPV6)){struct ipv6hdr*
-DATARMNETbf55123e5b,DATARMNETcf1d9e2c1e;int DATARMNET611d08d671;__be16 
-DATARMNET98fed39916;u8 DATARMNET65293f17c4;DATARMNETbf55123e5b=
-skb_header_pointer(DATARMNET543491eb0f,(0xd2d+202-0xdf7),sizeof(*
-DATARMNETbf55123e5b),&DATARMNETcf1d9e2c1e);if(!DATARMNETbf55123e5b)return;
-DATARMNET65293f17c4=DATARMNETbf55123e5b->nexthdr;DATARMNET611d08d671=
-ipv6_skip_exthdr(DATARMNET543491eb0f,sizeof(*DATARMNETbf55123e5b),&
-DATARMNET65293f17c4,&DATARMNET98fed39916);if(DATARMNET611d08d671<
-(0xd2d+202-0xdf7)||DATARMNET98fed39916)return;if(DATARMNET65293f17c4==
-IPPROTO_UDP){if(DATARMNET21c7a3c377)DATARMNET5ecc30669c(DATARMNET543491eb0f);
-DATARMNET05c4bf8af9(DATARMNET543491eb0f,DATARMNET611d08d671);return;}if(
-DATARMNET65293f17c4==IPPROTO_TCP){if(DATARMNETc03b668e4c)DATARMNET9d574e64b1(
-DATARMNET543491eb0f);return;}}}void DATARMNET21f4abc439(struct sk_buff*
-DATARMNET543491eb0f);void DATARMNETa7918f2abb(struct sk_buff*DATARMNET543491eb0f
-){if(skb_linearize(DATARMNET543491eb0f)){pr_err(
-"\x25\x73\x28\x29\x3a\x20\x4c\x69\x6e\x65\x61\x72\x69\x7a\x61\x74\x69\x6f\x6e\x20\x65\x72\x72\x6f\x72" "\n"
-,__func__);return;}DATARMNET21f4abc439(DATARMNET543491eb0f);}void 
-DATARMNET941e2135b0(uint8_t mux_id,uint32_t DATARMNET6f031e7934){if(!mux_id||
-mux_id>(0xeb7+1158-0x132d))goto DATARMNET27d4697979;switch(DATARMNET6f031e7934){
-case(0xd2d+202-0xdf7):DATARMNETceb52e7075[mux_id].DATARMNETbe4615133d.
-DATARMNETcd826f85c1.DATARMNET09a124a6d5++;break;case(0xd26+209-0xdf6):
-DATARMNETceb52e7075[mux_id].DATARMNETbe4615133d.DATARMNETcd826f85c1.
-DATARMNET9447586660++;break;case(0xd1f+216-0xdf5):DATARMNETceb52e7075[mux_id].
-DATARMNETbe4615133d.DATARMNETcd826f85c1.DATARMNET3507da0e2a++;break;case
-(0xd18+223-0xdf4):DATARMNETceb52e7075[mux_id].DATARMNETbe4615133d.
-DATARMNETcd826f85c1.DATARMNETa510b8513c++;break;case(0xd11+230-0xdf3):
-DATARMNETceb52e7075[mux_id].DATARMNETbe4615133d.DATARMNETcd826f85c1.
-DATARMNET34fcb79334++;break;case(0xd0a+237-0xdf2):DATARMNETceb52e7075[mux_id].
-DATARMNETbe4615133d.DATARMNETcd826f85c1.DATARMNETda64236809++;break;case
-(0xd03+244-0xdf1):DATARMNETceb52e7075[mux_id].DATARMNETbe4615133d.
-DATARMNETcd826f85c1.DATARMNETe6327165c4++;break;case(0xcfc+267-0xe00):
-DATARMNETceb52e7075[mux_id].DATARMNETbe4615133d.DATARMNETcd826f85c1.
-DATARMNET9dbda9c770++;break;case(0xd35+210-0xdff):DATARMNETceb52e7075[mux_id].
-DATARMNETbe4615133d.DATARMNETcd826f85c1.DATARMNETaa87614a96++;break;case 9:
-DATARMNETceb52e7075[mux_id].DATARMNETbe4615133d.DATARMNETcd826f85c1.
-DATARMNET232a43aa2e++;break;case(0xd27+224-0xdfd):DATARMNETceb52e7075[mux_id].
-DATARMNETbe4615133d.DATARMNETcd826f85c1.DATARMNET914ce4d7bc++;break;default:
-break;}DATARMNET27d4697979:return;}void DATARMNETe6269dcf2c(uint8_t mux_id,
-uint8_t DATARMNETb2211e57d2,uint64_t len,uint32_t DATARMNET6f031e7934){if(!
-mux_id||mux_id>(0xeb7+1158-0x132d))goto DATARMNET27d4697979;if(
-DATARMNETb2211e57d2>=(0xeb7+1158-0x132d))goto DATARMNET27d4697979;switch(
-DATARMNET6f031e7934){case(0xd2d+202-0xdf7):DATARMNETceb52e7075[mux_id].
-DATARMNETbe4615133d.DATARMNETc5ec22d8f4[DATARMNETb2211e57d2].DATARMNET209094b7dd
-++;DATARMNETceb52e7075[mux_id].DATARMNETbe4615133d.DATARMNETc5ec22d8f4[
-DATARMNETb2211e57d2].DATARMNETfdd32eb79e+=len;break;case(0xd26+209-0xdf6):
-DATARMNETceb52e7075[mux_id].DATARMNETbe4615133d.DATARMNETc5ec22d8f4[
-DATARMNETb2211e57d2].DATARMNET6c81844df0++;DATARMNETceb52e7075[mux_id].
-DATARMNETbe4615133d.DATARMNETc5ec22d8f4[DATARMNETb2211e57d2].DATARMNET462c6e2ad3
-+=len;break;case(0xd1f+216-0xdf5):DATARMNETceb52e7075[mux_id].
-DATARMNETbe4615133d.DATARMNETc5ec22d8f4[DATARMNETb2211e57d2].DATARMNET8409399739
-++;DATARMNETceb52e7075[mux_id].DATARMNETbe4615133d.DATARMNETc5ec22d8f4[
-DATARMNETb2211e57d2].DATARMNETcb286ca3be+=len;break;case(0xd18+223-0xdf4):
-DATARMNETceb52e7075[mux_id].DATARMNETbe4615133d.DATARMNETc5ec22d8f4[
-DATARMNETb2211e57d2].DATARMNET2698e2274b++;DATARMNETceb52e7075[mux_id].
-DATARMNETbe4615133d.DATARMNETc5ec22d8f4[DATARMNETb2211e57d2].DATARMNET29b53445ac
-+=len;break;}DATARMNET27d4697979:return;}void DATARMNETc70b241863(uint8_t mux_id
-,struct sk_buff*DATARMNET543491eb0f){if(!mux_id||mux_id>(0xeb7+1158-0x132d))goto
- DATARMNET27d4697979;if(DATARMNET543491eb0f->protocol==htons(ETH_P_IP)){if(
-ip_hdr(DATARMNET543491eb0f)->protocol==IPPROTO_TCP){DATARMNETceb52e7075[mux_id].
-DATARMNET0b3510b126.DATARMNET0e6c4cf04c.DATARMNET209094b7dd++;
-DATARMNETceb52e7075[mux_id].DATARMNET0b3510b126.DATARMNET0e6c4cf04c.
-DATARMNETfdd32eb79e+=DATARMNET543491eb0f->len;}else if(ip_hdr(
-DATARMNET543491eb0f)->protocol==IPPROTO_UDP){DATARMNETceb52e7075[mux_id].
-DATARMNET0b3510b126.DATARMNET0e6c4cf04c.DATARMNET6c81844df0++;
-DATARMNETceb52e7075[mux_id].DATARMNET0b3510b126.DATARMNET0e6c4cf04c.
-DATARMNET462c6e2ad3+=DATARMNET543491eb0f->len;}}if(DATARMNET543491eb0f->protocol
-==htons(ETH_P_IPV6)){if(ipv6_hdr(DATARMNET543491eb0f)->nexthdr==IPPROTO_TCP){
-DATARMNETceb52e7075[mux_id].DATARMNET0b3510b126.DATARMNET0e6c4cf04c.
-DATARMNET8409399739++;DATARMNETceb52e7075[mux_id].DATARMNET0b3510b126.
-DATARMNET0e6c4cf04c.DATARMNETcb286ca3be+=DATARMNET543491eb0f->len;}else if(
-ipv6_hdr(DATARMNET543491eb0f)->nexthdr==IPPROTO_UDP){DATARMNETceb52e7075[mux_id]
-.DATARMNET0b3510b126.DATARMNET0e6c4cf04c.DATARMNET2698e2274b++;
-DATARMNETceb52e7075[mux_id].DATARMNET0b3510b126.DATARMNET0e6c4cf04c.
-DATARMNET29b53445ac+=DATARMNET543491eb0f->len;}}DATARMNET27d4697979:return;}void
- DATARMNETc892e451fe(uint8_t mux_id,uint64_t len){if(!mux_id||mux_id>
-(0xeb7+1158-0x132d))goto DATARMNET27d4697979;DATARMNETceb52e7075[mux_id].
-DATARMNETbe4615133d.DATARMNET11724e6fbe++;DATARMNETceb52e7075[mux_id].
-DATARMNETbe4615133d.DATARMNET3e28742e7a+=len;DATARMNET27d4697979:return;}static 
-const struct rmnet_module_hook_register_info DATARMNET95a71e03c1[]={{.hooknum=
-RMNET_MODULE_HOOK_PERF_INGRESS,.func=DATARMNETf2958615b1,},{.hooknum=
-RMNET_MODULE_HOOK_PERF_EGRESS,.func=DATARMNET324fe25dad,},{.hooknum=
-RMNET_MODULE_HOOK_PERF_SET_THRESH,.func=DATARMNET7fa1835595,},{.hooknum=
-RMNET_MODULE_HOOK_PERF_INGRESS_RX_HANDLER,.func=DATARMNET7b0253229f,},{.hooknum=
-RMNET_MODULE_HOOK_PERF_CMD_INGRESS,.func=DATARMNETa7918f2abb,},{.hooknum=
-RMNET_MODULE_HOOK_PERF_COAL_COMMON_STAT,.func=DATARMNET941e2135b0,},{.hooknum=
-RMNET_MODULE_HOOK_PERF_COAL_STAT,.func=DATARMNETe6269dcf2c,},{.hooknum=
-RMNET_MODULE_HOOK_PERF_SEG_STAT,.func=DATARMNETc70b241863,},{.hooknum=
-RMNET_MODULE_HOOK_PERF_NON_COAL_STAT,.func=DATARMNETc892e451fe,},};void 
-DATARMNET49c17a32bc(void){rmnet_module_hook_register(DATARMNET95a71e03c1,
-ARRAY_SIZE(DATARMNET95a71e03c1));}void DATARMNET41e8cc085c(void){
-rmnet_module_hook_unregister(DATARMNET95a71e03c1,ARRAY_SIZE(DATARMNET95a71e03c1)
-);}int DATARMNET0b2c5bc768(struct sk_buff*DATARMNET543491eb0f,struct genl_info*
-DATARMNET54338da2ff);int DATARMNET114b9148d9(struct sk_buff*DATARMNET543491eb0f,
-struct genl_info*DATARMNET54338da2ff);static const struct genl_ops 
-DATARMNET1cf1a695d4[]={{.cmd=DATARMNET9420caeb53,.doit=DATARMNET0b2c5bc768,},{.
-cmd=DATARMNET036a8433e0,.doit=DATARMNET114b9148d9,},};struct genl_family 
-DATARMNETe64f65b66c __ro_after_init={.hdrsize=(0xd2d+202-0xdf7),.name=
-DATARMNETa83100182f,.version=DATARMNET816321eafb,.maxattr=DATARMNETed4efa075c,.
-policy=DATARMNET9e2a491680,.ops=DATARMNET1cf1a695d4,.n_ops=ARRAY_SIZE(
-DATARMNET1cf1a695d4),.mcgrps=DATARMNET4e83edd544,.n_mcgrps=ARRAY_SIZE(
-DATARMNET4e83edd544),};int DATARMNET0b2c5bc768(struct sk_buff*
-DATARMNET543491eb0f,struct genl_info*DATARMNET54338da2ff){struct 
-DATARMNETf723c861fa*DATARMNETa13fcf9070=NULL;struct DATARMNETf698794b6c 
-DATARMNETddcafd8b91;int DATARMNET4989d95877=-(0xd26+209-0xdf6),
-DATARMNET61c2303133=-ENOMEM;struct sk_buff*DATARMNETfb7a00623a=NULL;struct 
-nlattr*DATARMNET9c5e00ef03=NULL;void*DATARMNET1ed9689f7e=NULL;
-DATARMNETfb7a00623a=genlmsg_new(NLMSG_GOODSIZE,GFP_ATOMIC);if(!
-DATARMNETfb7a00623a){pr_err(
-"\x25\x73\x28\x29\x3a\x20\x46\x61\x69\x6c\x65\x64\x20\x74\x6f\x20\x61\x6c\x6c\x6f\x63\x61\x74\x65\x20\x72\x65\x73\x70\x6f\x6e\x73\x65\x20\x73\x6b\x62" "\n"
-,__func__);goto DATARMNET27d4697979;}DATARMNET1ed9689f7e=genlmsg_put(
-DATARMNETfb7a00623a,(0xd2d+202-0xdf7),DATARMNET376884db81++,&DATARMNETe64f65b66c
-,(0xd2d+202-0xdf7),DATARMNET9420caeb53);if(!DATARMNET1ed9689f7e){pr_err(
-"\x25\x73\x28\x29\x3a\x20\x46\x61\x69\x6c\x65\x64\x20\x74\x6f\x20\x73\x65\x74\x20\x68\x65\x61\x64\x65\x72\x20\x70\x6f\x69\x6e\x74\x65\x72" "\n"
-,__func__);goto DATARMNETb042feb7e2;}DATARMNETa13fcf9070=kzalloc(sizeof(struct 
-DATARMNETf723c861fa),GFP_ATOMIC);if(!DATARMNETa13fcf9070){pr_err(
-"\x25\x73\x28\x29\x3a\x20\x46\x61\x69\x6c\x65\x64\x20\x74\x6f\x20\x61\x6c\x6c\x6f\x63\x61\x74\x65\x20\x72\x65\x73\x70\x6f\x6e\x73\x65\x20\x63\x6d\x64" "\n"
-,__func__);goto DATARMNETb042feb7e2;}memset(&DATARMNETddcafd8b91,
-(0xd2d+202-0xdf7),sizeof(struct DATARMNETf698794b6c));DATARMNET61c2303133=-
-EINVAL;DATARMNET9c5e00ef03=DATARMNET54338da2ff->attrs[DATARMNET3b1665bc33];if(!
-DATARMNET9c5e00ef03){pr_err(
-"\x25\x73\x28\x29\x3a\x20\x46\x61\x69\x6c\x65\x64\x20\x74\x6f\x20\x67\x65\x74\x20\x63\x6d\x64\x20\x72\x65\x71\x75\x65\x73\x74\x20\x61\x74\x74\x72\x69\x62\x75\x74\x65" "\n"
-,__func__);goto DATARMNET321a78afb9;}DATARMNET4989d95877=nla_memcpy(&
-DATARMNETddcafd8b91,DATARMNET9c5e00ef03,sizeof(struct DATARMNETf698794b6c));if(
-DATARMNET4989d95877<=(0xd2d+202-0xdf7)){pr_err(
-"\x25\x73\x28\x29\x3a\x20\x46\x61\x69\x6c\x65\x64\x20\x74\x6f\x20\x63\x6f\x70\x79\x20\x63\x6d\x64\x20\x72\x65\x71\x75\x65\x73\x74\x20\x61\x74\x74\x72\x69\x62\x75\x74\x65" "\n"
-,__func__);goto DATARMNET321a78afb9;}if(DATARMNETddcafd8b91.mux_id>
-(0xeb7+1158-0x132d)){pr_err(
-"\x25\x73\x28\x29\x3a\x20\x55\x6e\x73\x75\x70\x70\x6f\x72\x74\x65\x64\x20\x6d\x75\x78\x20\x69\x64\x20\x25\x75" "\n"
-,__func__,DATARMNETddcafd8b91.mux_id);goto DATARMNET321a78afb9;}
-DATARMNET61c2303133=(0xd2d+202-0xdf7);memcpy(&DATARMNETa13fcf9070->
-DATARMNETa57ae53d4c,&DATARMNETceb52e7075[DATARMNETddcafd8b91.mux_id],sizeof(
-struct DATARMNETce5df1988e));DATARMNET321a78afb9:DATARMNETa13fcf9070->
-DATARMNETfdf7997f18=abs(DATARMNET61c2303133);if(!nla_put(DATARMNETfb7a00623a,
-DATARMNETf5c6d9329e,sizeof(struct DATARMNETf723c861fa),DATARMNETa13fcf9070)){
-kfree(DATARMNETa13fcf9070);genlmsg_end(DATARMNETfb7a00623a,DATARMNET1ed9689f7e);
-return genlmsg_reply(DATARMNETfb7a00623a,DATARMNET54338da2ff);}else{pr_err(
-"\x25\x73\x28\x29\x3a\x20\x46\x61\x69\x6c\x65\x64\x20\x74\x6f\x20\x63\x6f\x70\x79\x20\x63\x6d\x64\x20\x72\x65\x73\x70\x6f\x6e\x73\x65\x20\x61\x74\x74\x72\x69\x62\x75\x74\x65" "\n"
-,__func__);}kfree(DATARMNETa13fcf9070);DATARMNETb042feb7e2:nlmsg_free(
-DATARMNETfb7a00623a);DATARMNET27d4697979:return DATARMNET61c2303133;}void 
-DATARMNET21f4abc439(struct sk_buff*DATARMNET543491eb0f){uint8_t 
-DATARMNETb65c469a15=sizeof(struct qmap_cmd_hdr);struct DATARMNET0276dc600a*
-DATARMNET3be93329cd=NULL;struct qmap_cmd_hdr*DATARMNET8b1565b348=NULL;struct 
-sk_buff*DATARMNET1bd2c6f90a=NULL;void*DATARMNET1ed9689f7e=NULL;int 
-DATARMNETb14e52a504=-EINVAL;DATARMNET1bd2c6f90a=genlmsg_new(NLMSG_GOODSIZE,
-GFP_ATOMIC);if(!DATARMNET1bd2c6f90a){pr_err(
-"\x25\x73\x28\x29\x3a\x20\x46\x61\x69\x6c\x65\x64\x20\x74\x6f\x20\x69\x6e\x64\x69\x63\x61\x74\x69\x6f\x6e\x20\x73\x6b\x62" "\n"
-,__func__);goto DATARMNET27d4697979;}DATARMNET1ed9689f7e=genlmsg_put(
-DATARMNET1bd2c6f90a,(0xd2d+202-0xdf7),DATARMNET376884db81++,&DATARMNETe64f65b66c
-,(0xd2d+202-0xdf7),DATARMNET036a8433e0);if(!DATARMNET1ed9689f7e){pr_err(
-"\x25\x73\x28\x29\x3a\x20\x46\x61\x69\x6c\x65\x64\x20\x74\x6f\x20\x73\x65\x74\x20\x68\x65\x61\x64\x65\x72\x20\x70\x6f\x69\x6e\x74\x65\x72" "\n"
-,__func__);goto DATARMNETb042feb7e2;}DATARMNET3be93329cd=kzalloc(sizeof(struct 
-DATARMNET0276dc600a),GFP_ATOMIC);if(!DATARMNET3be93329cd){pr_err(
-"\x25\x73\x28\x29\x3a\x20\x46\x61\x69\x6c\x65\x64\x20\x74\x6f\x20\x61\x6c\x6c\x6f\x63\x61\x74\x65\x20\x69\x6e\x64\x69\x63\x61\x74\x69\x6f\x6e\x20\x63\x6d\x64" "\n"
-,__func__);goto DATARMNETb042feb7e2;}if(DATARMNET543491eb0f->len<=
-DATARMNETb65c469a15){pr_err(
-"\x25\x73\x28\x29\x3a\x20\x49\x6e\x63\x6f\x6d\x69\x6e\x67\x20\x63\x6d\x64\x20\x73\x69\x7a\x65\x20\x69\x73\x20\x69\x6e\x76\x61\x6c\x69\x64" "\n"
-,__func__);goto DATARMNET321a78afb9;}DATARMNET8b1565b348=(struct qmap_cmd_hdr*)
-DATARMNET543491eb0f->data;DATARMNET3be93329cd->DATARMNETaab62d18d0=
-DATARMNET543491eb0f->len-DATARMNETb65c469a15;DATARMNET3be93329cd->cmd_name=
-DATARMNET8b1565b348->cmd_name;DATARMNET3be93329cd->ack=DATARMNET8b1565b348->
-cmd_type;memcpy(DATARMNET3be93329cd->DATARMNET7dcd62530f,DATARMNET543491eb0f->
-data+DATARMNETb65c469a15,DATARMNET3be93329cd->DATARMNETaab62d18d0);if(nla_put(
-DATARMNET1bd2c6f90a,DATARMNET5b232a76af,sizeof(struct DATARMNET0276dc600a),
-DATARMNET3be93329cd)){pr_err(
-"\x25\x73\x28\x29\x3a\x20\x46\x61\x69\x6c\x65\x64\x20\x74\x6f\x20\x63\x6f\x70\x79\x20\x63\x6d\x64\x20\x69\x6e\x64\x69\x63\x61\x74\x69\x6f\x6e\x20\x61\x74\x74\x72\x69\x62\x75\x74\x65" "\n"
-,__func__);goto DATARMNET321a78afb9;}genlmsg_end(DATARMNET1bd2c6f90a,
-DATARMNET1ed9689f7e);kfree(DATARMNET3be93329cd);DATARMNETb14e52a504=
-genlmsg_multicast(&DATARMNETe64f65b66c,DATARMNET1bd2c6f90a,(0xd2d+202-0xdf7),
-DATARMNET055fcd05b3,GFP_ATOMIC);if(DATARMNETb14e52a504==-EINVAL){pr_err(
-"\x25\x73\x28\x29\x3a\x20\x49\x6e\x76\x61\x6c\x69\x64\x20\x67\x72\x6f\x75\x70\x20\x66\x6f\x72\x20\x6d\x75\x6c\x74\x69\x63\x61\x73\x74" "\n"
-,__func__);goto DATARMNETb042feb7e2;}return;DATARMNET321a78afb9:kfree(
-DATARMNET3be93329cd);DATARMNETb042feb7e2:nlmsg_free(DATARMNET1bd2c6f90a);
-DATARMNET27d4697979:return;}int DATARMNETaee3327083(struct DATARMNETec7dafaa2f*
-cmd){struct net_device*dev=dev_get_by_name(&init_net,
-"\x72\x6d\x6e\x65\x74\x5f\x69\x70\x61\x30");int DATARMNETaab62d18d0=sizeof(
-struct qmap_cmd_hdr)+cmd->DATARMNETaab62d18d0;struct qmap_cmd_hdr*
-DATARMNET8b1565b348=NULL;struct sk_buff*DATARMNET543491eb0f=NULL;char*
-DATARMNET7dcd62530f=NULL;int DATARMNET61c2303133=-ENODEV;if(!dev){pr_err(
-"\x25\x73\x28\x29\x3a\x20\x55\x6e\x61\x62\x6c\x65\x20\x74\x6f\x20\x67\x65\x74\x20\x72\x65\x66\x65\x72\x65\x6e\x63\x65\x20\x74\x6f\x20\x64\x65\x76\x69\x63\x65" "\n"
-,__func__);goto DATARMNET27d4697979;}DATARMNET543491eb0f=alloc_skb(
-DATARMNETaab62d18d0,GFP_ATOMIC);if(!DATARMNET543491eb0f){pr_err(
-"\x25\x73\x28\x29\x3a\x20\x55\x6e\x61\x62\x6c\x65\x20\x74\x6f\x20\x61\x6c\x6c\x6f\x63\x61\x74\x65\x20\x6d\x65\x6d\x6f\x72\x79\x20\x66\x6f\x72\x20\x63\x6d\x64" "\n"
-,__func__);DATARMNET61c2303133=-ENOMEM;goto DATARMNETb042feb7e2;}skb_put(
-DATARMNET543491eb0f,DATARMNETaab62d18d0);memset(DATARMNET543491eb0f->data,
-(0xd2d+202-0xdf7),DATARMNETaab62d18d0);DATARMNET8b1565b348=(struct qmap_cmd_hdr*
-)DATARMNET543491eb0f->data;DATARMNET8b1565b348->cd_bit=(0xd26+209-0xdf6);
-DATARMNET8b1565b348->mux_id=(0xd2d+202-0xdf7);DATARMNET8b1565b348->pkt_len=htons
-(sizeof(struct rmnet_map_control_command_header)+cmd->DATARMNETaab62d18d0);
-DATARMNET8b1565b348->cmd_name=cmd->cmd_name;DATARMNET8b1565b348->cmd_type=cmd->
-ack;DATARMNET7dcd62530f=(char*)(DATARMNET543491eb0f->data+sizeof(struct 
-qmap_cmd_hdr));memcpy(DATARMNET7dcd62530f,cmd->DATARMNET7dcd62530f,cmd->
-DATARMNETaab62d18d0);DATARMNET543491eb0f->dev=dev;DATARMNET543491eb0f->protocol=
-htons(ETH_P_MAP);DATARMNET61c2303133=rmnet_qmap_send(DATARMNET543491eb0f,
-RMNET_CH_CTL,false);DATARMNETb042feb7e2:dev_put(dev);DATARMNET27d4697979:return 
-DATARMNET61c2303133;}int DATARMNET114b9148d9(struct sk_buff*DATARMNET543491eb0f,
-struct genl_info*DATARMNET54338da2ff){struct DATARMNETec7dafaa2f*
-DATARMNETddcafd8b91=NULL;struct DATARMNETa312f70a7c DATARMNETa13fcf9070;int 
-DATARMNET4989d95877=-(0xd26+209-0xdf6),DATARMNET61c2303133=-ENOMEM;struct 
-sk_buff*DATARMNETfb7a00623a=NULL;struct nlattr*DATARMNET9c5e00ef03=NULL;void*
-DATARMNET1ed9689f7e=NULL;DATARMNETfb7a00623a=genlmsg_new(NLMSG_GOODSIZE,
-GFP_ATOMIC);if(!DATARMNETfb7a00623a){pr_err(
-"\x25\x73\x28\x29\x3a\x20\x46\x61\x69\x6c\x65\x64\x20\x74\x6f\x20\x61\x6c\x6c\x6f\x63\x61\x74\x65\x20\x72\x65\x73\x70\x6f\x6e\x73\x65\x20\x73\x6b\x62" "\n"
-,__func__);goto DATARMNET27d4697979;}DATARMNET1ed9689f7e=genlmsg_put(
-DATARMNETfb7a00623a,(0xd2d+202-0xdf7),DATARMNET376884db81++,&DATARMNETe64f65b66c
-,(0xd2d+202-0xdf7),DATARMNET036a8433e0);if(!DATARMNET1ed9689f7e){pr_err(
-"\x25\x73\x28\x29\x3a\x20\x46\x61\x69\x6c\x65\x64\x20\x74\x6f\x20\x73\x65\x74\x20\x68\x65\x61\x64\x65\x72\x20\x70\x6f\x69\x6e\x74\x65\x72" "\n"
-,__func__);goto DATARMNETb042feb7e2;}memset(&DATARMNETa13fcf9070,
-(0xd2d+202-0xdf7),sizeof(struct DATARMNETa312f70a7c));DATARMNETddcafd8b91=
-kzalloc(sizeof(struct DATARMNETec7dafaa2f),GFP_ATOMIC);if(!DATARMNETddcafd8b91){
-pr_err(
-"\x25\x73\x28\x29\x3a\x20\x46\x61\x69\x6c\x65\x64\x20\x74\x6f\x20\x61\x6c\x6c\x6f\x63\x61\x74\x65\x20\x72\x65\x71\x75\x65\x73\x74\x20\x63\x6d\x64" "\n"
-,__func__);goto DATARMNET321a78afb9;}DATARMNET61c2303133=-EINVAL;
-DATARMNET9c5e00ef03=DATARMNET54338da2ff->attrs[DATARMNET951a42c086];if(!
-DATARMNET9c5e00ef03){pr_err(
-"\x25\x73\x28\x29\x3a\x20\x46\x61\x69\x6c\x65\x64\x20\x74\x6f\x20\x67\x65\x74\x20\x63\x6d\x64\x20\x72\x65\x71\x75\x65\x73\x74\x20\x61\x74\x74\x72\x69\x62\x75\x74\x65" "\n"
-,__func__);goto DATARMNET55f99d18f5;}DATARMNET4989d95877=nla_memcpy(
-DATARMNETddcafd8b91,DATARMNET9c5e00ef03,sizeof(struct DATARMNETec7dafaa2f));if(
-DATARMNET4989d95877<=(0xd2d+202-0xdf7)){pr_err(
-"\x25\x73\x28\x29\x3a\x20\x46\x61\x69\x6c\x65\x64\x20\x74\x6f\x20\x63\x6f\x70\x79\x20\x63\x6d\x64\x20\x72\x65\x71\x75\x65\x73\x74\x20\x61\x74\x74\x72\x69\x62\x75\x74\x65" "\n"
-,__func__);goto DATARMNET55f99d18f5;}switch(DATARMNETddcafd8b91->cmd_name){case 
-QMAP_CMD_31:case QMAP_CMD_32:case QMAP_CMD_40:case QMAP_CMD_42:break;default:
-pr_err(
-"\x25\x73\x28\x29\x3a\x20\x55\x6e\x73\x75\x70\x70\x6f\x72\x74\x65\x64\x20\x63\x6f\x6d\x6d\x61\x6e\x64\x20\x25\x75" "\n"
-,__func__,DATARMNETddcafd8b91->cmd_name);goto DATARMNET55f99d18f5;}if(!
-DATARMNETddcafd8b91->DATARMNETaab62d18d0||(DATARMNETddcafd8b91->
-DATARMNETaab62d18d0>16000)){pr_err(
-"\x25\x73\x28\x29\x3a\x20\x55\x6e\x73\x75\x70\x70\x6f\x72\x74\x65\x64\x20\x6c\x65\x6e\x67\x74\x68\x20\x25\x75" "\n"
-,__func__,DATARMNETddcafd8b91->DATARMNETaab62d18d0);goto DATARMNET55f99d18f5;}
-DATARMNETa13fcf9070.cmd_name=DATARMNETddcafd8b91->cmd_name;DATARMNET61c2303133=
-DATARMNETaee3327083(DATARMNETddcafd8b91);DATARMNET55f99d18f5:kfree(
-DATARMNETddcafd8b91);DATARMNET321a78afb9:DATARMNETa13fcf9070.DATARMNETfdf7997f18
-=abs(DATARMNET61c2303133);if(!nla_put(DATARMNETfb7a00623a,DATARMNET246991e0bf,
-sizeof(struct DATARMNETa312f70a7c),&DATARMNETa13fcf9070)){genlmsg_end(
-DATARMNETfb7a00623a,DATARMNET1ed9689f7e);return genlmsg_reply(
-DATARMNETfb7a00623a,DATARMNET54338da2ff);}else{pr_err(
-"\x25\x73\x28\x29\x3a\x20\x46\x61\x69\x6c\x65\x64\x20\x74\x6f\x20\x63\x6f\x70\x79\x20\x63\x6d\x64\x20\x72\x65\x73\x70\x6f\x6e\x73\x65\x20\x61\x74\x74\x72\x69\x62\x75\x74\x65" "\n"
-,__func__);}DATARMNETb042feb7e2:nlmsg_free(DATARMNETfb7a00623a);
-DATARMNET27d4697979:return DATARMNET61c2303133;}int DATARMNET31ff8cdc40(void){
-return genl_register_family(&DATARMNETe64f65b66c);}void DATARMNET8e1548cd2e(void
-){genl_unregister_family(&DATARMNETe64f65b66c);}static int __init 
-DATARMNET63abbdc3d3(void){int DATARMNETb14e52a504;pr_info(
-"\x25\x73\x28\x29\x3a\x20\x4c\x6f\x61\x64\x69\x6e\x67" "\n",__func__);
-DATARMNETb14e52a504=DATARMNET7e9995246e();if(DATARMNETb14e52a504)goto 
-DATARMNET27d4697979;DATARMNETb14e52a504=DATARMNETe80a33d544();if(
-DATARMNETb14e52a504)goto DATARMNETb042feb7e2;DATARMNETb14e52a504=
-DATARMNET31ff8cdc40();if(DATARMNETb14e52a504){pr_err(
-"\x25\x73\x28\x29\x3a\x20\x46\x61\x69\x6c\x65\x64\x20\x74\x6f\x20\x72\x65\x67\x69\x73\x74\x65\x72\x20\x67\x65\x6e\x65\x72\x69\x63\x20\x6e\x65\x74\x6c\x69\x6e\x6b\x20\x66\x61\x6d\x69\x6c\x79" "\n"
-,__func__);goto DATARMNET321a78afb9;}DATARMNET49c17a32bc();DATARMNET321a78afb9:
-DATARMNET4b5170a1ef();DATARMNETb042feb7e2:DATARMNET38bb6f2b7a();
-DATARMNET27d4697979:return DATARMNETb14e52a504;}static void __exit 
-DATARMNETa343229e33(void){DATARMNET41e8cc085c();DATARMNET8e1548cd2e();
-DATARMNET4b5170a1ef();DATARMNET38bb6f2b7a();pr_info(
-"\x25\x73\x28\x29\x3a\x20\x65\x78\x69\x74\x69\x6e\x67" "\n",__func__);}
-module_init(DATARMNET63abbdc3d3);module_exit(DATARMNETa343229e33);
+
+#include "rmnet_perf.h"
+#include "rmnet_perf_tcp.h"
+#include "rmnet_perf_udp.h"
+
+MODULE_LICENSE("GPL v2");
+
+/* Insert newest first, last 4 bytes of the change id */
+static char *verinfo[] = {
+	"f16980f6",
+	"fa851010",
+	"5ec3713c",
+	"e79ea282",
+	"acaa7e6b",
+	"173bc5b9",
+	"db7d80fd",
+};
+
+#define RMNET_PERF_GENL_VERSION 1
+
+enum {
+	RMNET_PERF_MULTICAST_GROUP_0,
+	RMNET_PERF_MULTICAST_GROUP_1,
+	RMNET_PERF_MULTICAST_GROUP_2,
+	RMNET_PERF_MULTICAST_GROUP_3,
+	__RMNET_PERF_MULTICAST_GROUP_MAX,
+};
+
+#define RMNET_PERF_ATTR_MAX RMNET_PERF_ATTR_ECN_DROPS
+
+static struct nla_policy rmnet_perf_nl_policy[RMNET_PERF_ATTR_MAX + 1] = {
+	[RMNET_PERF_ATTR_STATS_REQ] = NLA_POLICY_EXACT_LEN(sizeof(struct rmnet_perf_stats_req)),
+	[RMNET_PERF_ATTR_STATS_RESP] = NLA_POLICY_EXACT_LEN(sizeof(struct rmnet_perf_stats_resp)),
+	[RMNET_PERF_ATTR_MAP_CMD_REQ] = NLA_POLICY_EXACT_LEN(sizeof(struct rmnet_perf_map_cmd_req)),
+	[RMNET_PERF_ATTR_MAP_CMD_RESP] = NLA_POLICY_EXACT_LEN(sizeof(struct rmnet_perf_map_cmd_resp)),
+	[RMNET_PERF_ATTR_MAP_CMD_IND] = NLA_POLICY_EXACT_LEN(sizeof(struct rmnet_perf_map_cmd_ind)),
+	[RMNET_PERF_ATTR_ECN_HASH] = { .type = NLA_U32, },
+	[RMNET_PERF_ATTR_ECN_PROB] = { .type = NLA_U32, },
+	[RMNET_PERF_ATTR_ECN_TYPE] = { .type = NLA_U8, },
+	[RMNET_PERF_ATTR_ECN_DROPS] = { .type = NLA_U32, },
+};
+
+static const struct genl_multicast_group rmnet_perf_nl_mcgrps[] = {
+	[RMNET_PERF_MULTICAST_GROUP_0] = { .name = RMNET_PERF_GENL_MULTICAST_NAME_0, },
+	[RMNET_PERF_MULTICAST_GROUP_1] = { .name = RMNET_PERF_GENL_MULTICAST_NAME_1, },
+	[RMNET_PERF_MULTICAST_GROUP_2] = { .name = RMNET_PERF_GENL_MULTICAST_NAME_2, },
+	[RMNET_PERF_MULTICAST_GROUP_3] = { .name = RMNET_PERF_GENL_MULTICAST_NAME_3, },
+};
+
+int rmnet_perf_netlink_seq = 0;
+
+module_param_array(verinfo, charp, NULL, 0444);
+MODULE_PARM_DESC(verinfo, "Version of the driver");
+
+bool enable_tcp = true;
+module_param_named(rmnet_perf_knob0, enable_tcp, bool, 0644);
+
+static bool enable_udp = true;
+module_param_named(rmnet_perf_knob1, enable_udp, bool, 0644);
+
+#define RMNET_INGRESS_QUIC_PORT 443
+
+struct rmnet_perf_stats_store stats_store[17];
+
+/* Holds all ECN nodes. Synchronized using internal lock */
+static DEFINE_XARRAY(rmnet_perf_ecn_map);
+
+struct xarray *rmnet_perf_get_ecn_map(void)
+{
+	return &rmnet_perf_ecn_map;
+}
+
+static void rmnet_perf_ecn_node_free(struct rcu_head *head)
+{
+	struct rmnet_perf_ecn_node *node;
+
+	node = container_of(head, struct rmnet_perf_ecn_node, rcu);
+	kfree(node);
+}
+
+static inline bool rmnet_perf_is_quic_packet(struct udphdr *uh)
+{
+	return be16_to_cpu(uh->source) == RMNET_INGRESS_QUIC_PORT ||
+	       be16_to_cpu(uh->dest) == RMNET_INGRESS_QUIC_PORT;
+}
+
+static bool rmnet_perf_is_quic_initial_packet(struct sk_buff *skb, int ip_len)
+{
+	u8 *first_byte, __first_byte;
+	struct udphdr *uh, __uh;
+
+	uh = skb_header_pointer(skb, ip_len, sizeof(*uh), &__uh);
+
+	if (!uh || !rmnet_perf_is_quic_packet(uh))
+		return false;
+
+	/* Length sanity check. Could check for the full QUIC header length if
+	 * need be, but since all we really care about is the first byte, just
+	 * make sure there is one.
+	 */
+	if (be16_to_cpu(uh->len) < sizeof(struct udphdr) + 1)
+		return false;
+
+	/* I am a very paranoid accessor of data at this point... */
+	first_byte = skb_header_pointer(skb, ip_len + sizeof(struct udphdr),
+					1, &__first_byte);
+	if (!first_byte)
+		return false;
+
+	return ((*first_byte) & 0xC0) == 0xC0;
+}
+
+static int rmnet_perf_ingress_handle_quic(struct sk_buff *skb, int ip_len)
+{
+	if (rmnet_perf_is_quic_initial_packet(skb, ip_len)) {
+		skb->hash = 0;
+		skb->sw_hash = 1;
+		return 0;
+	}
+
+	return -EINVAL;
+}
+
+int rmnet_perf_ingress_handle(struct sk_buff *skb)
+{
+	if (skb->protocol == htons(ETH_P_IP)) {
+		struct iphdr *iph, __iph;
+
+		iph = skb_header_pointer(skb, 0, sizeof(*iph), &__iph);
+		if (!iph || ip_is_fragment(iph))
+			return -EINVAL;
+
+		if (iph->protocol == IPPROTO_UDP) {
+			if (enable_udp)
+				rmnet_perf_ingress_handle_udp(skb);
+
+			return rmnet_perf_ingress_handle_quic(skb,
+							      iph->ihl * 4);
+		}
+
+		if (iph->protocol == IPPROTO_TCP) {
+			if (enable_tcp)
+				rmnet_perf_ingress_handle_tcp(skb);
+
+			/* Don't skip SHS processing for TCP */
+			return -EINVAL;
+		}
+	} else if (skb->protocol == htons(ETH_P_IPV6)) {
+		struct ipv6hdr *ip6h, __ip6h;
+		int ip_len;
+		__be16 frag_off;
+		u8 proto;
+
+		ip6h = skb_header_pointer(skb, 0, sizeof(*ip6h), &__ip6h);
+		if (!ip6h)
+			return -EINVAL;
+
+		proto = ip6h->nexthdr;
+		ip_len = ipv6_skip_exthdr(skb, sizeof(*ip6h), &proto,
+					  &frag_off);
+		if (ip_len < 0 || frag_off)
+			return -EINVAL;
+
+		if (proto == IPPROTO_UDP) {
+			if (enable_udp)
+				rmnet_perf_ingress_handle_udp(skb);
+
+			return rmnet_perf_ingress_handle_quic(skb, ip_len);
+		}
+
+		if (proto == IPPROTO_TCP) {
+			if (enable_tcp)
+				rmnet_perf_ingress_handle_tcp(skb);
+
+			return -EINVAL;
+		}
+	}
+
+	return -EINVAL;
+}
+
+void rmnet_perf_ingress_rx_handler(struct sk_buff *skb)
+{
+	u8 proto = 0;
+
+	if (skb->protocol == htons(ETH_P_IP)) {
+		struct iphdr *iph, __iph;
+
+		iph = skb_header_pointer(skb, 0, sizeof(*iph), &__iph);
+		if (!iph || ip_is_fragment(iph))
+			return;
+
+		proto = iph->protocol;
+	} else if (skb->protocol == htons(ETH_P_IPV6)) {
+		struct ipv6hdr *ip6h, __ip6h;
+		int ip_len;
+		__be16 frag_off;
+
+		ip6h = skb_header_pointer(skb, 0, sizeof(*ip6h), &__ip6h);
+		if (!ip6h)
+			return;
+
+		proto = ip6h->nexthdr;
+		ip_len = ipv6_skip_exthdr(skb, sizeof(*ip6h), &proto,
+					  &frag_off);
+		if (ip_len < 0 || frag_off)
+			return;
+	}
+
+	if (proto == IPPROTO_TCP) {
+		if (enable_tcp)
+			rmnet_perf_ingress_rx_handler_tcp(skb);
+	}
+}
+
+int rmnet_perf_ingress_ecn_handle(struct sk_buff *skb)
+{
+	u8 proto = 0;
+	int ip_len;
+
+	if (skb->protocol == htons(ETH_P_IP)) {
+		struct iphdr *iph, __iph;
+
+		iph = skb_header_pointer(skb, 0, sizeof(*iph), &__iph);
+		if (!iph || ip_is_fragment(iph))
+			goto pass;
+
+		ip_len = iph->ihl * 4;
+		proto = iph->protocol;
+	} else if (skb->protocol == htons(ETH_P_IPV6)) {
+		struct ipv6hdr *ip6h, __ip6h;
+		__be16 frag_off;
+
+		ip6h = skb_header_pointer(skb, 0, sizeof(*ip6h), &__ip6h);
+		if (!ip6h)
+			goto pass;
+
+		proto = ip6h->nexthdr;
+		ip_len = ipv6_skip_exthdr(skb, sizeof(*ip6h), &proto,
+					  &frag_off);
+		if (ip_len < 0 || frag_off)
+			goto pass;
+	}
+
+	if (proto == IPPROTO_TCP) {
+		if (rmnet_perf_ingress_tcp_ecn(skb, ip_len))
+			return 1;
+	}
+
+	if (proto == IPPROTO_UDP) {
+		if (rmnet_perf_ingress_udp_ecn(skb, ip_len))
+			return 1;
+	}
+
+pass:
+	return 0;
+}
+
+static void rmnet_perf_egress_handle_quic(struct sk_buff *skb, int ip_len)
+{
+	if (rmnet_perf_is_quic_initial_packet(skb, ip_len))
+		skb->priority = 0xDA001A;
+}
+
+void rmnet_perf_egress_handle(struct sk_buff *skb)
+{
+	if (skb->protocol == htons(ETH_P_IP)) {
+		struct iphdr *iph, __iph;
+
+		iph = skb_header_pointer(skb, 0, sizeof(*iph), &__iph);
+		/* Potentially problematic, but the problem is secondary
+		 * fragments have no transport header.
+		 */
+		if (!iph || ip_is_fragment(iph))
+			return;
+
+		if (iph->protocol == IPPROTO_UDP) {
+			if (enable_udp)
+				rmnet_perf_egress_handle_udp(skb);
+
+			rmnet_perf_egress_handle_quic(skb, iph->ihl * 4);
+			return;
+		}
+
+		if (iph->protocol == IPPROTO_TCP) {
+			if (enable_tcp)
+				rmnet_perf_egress_handle_tcp(skb);
+
+			return;
+		}
+	} else if (skb->protocol == htons(ETH_P_IPV6)) {
+		struct ipv6hdr *ip6h, __ip6h;
+		int ip_len;
+		__be16 frag_off;
+		u8 proto;
+
+		ip6h = skb_header_pointer(skb, 0, sizeof(*ip6h), &__ip6h);
+		if (!ip6h)
+			return;
+
+		proto = ip6h->nexthdr;
+		ip_len = ipv6_skip_exthdr(skb, sizeof(*ip6h), &proto,
+					  &frag_off);
+		if (ip_len < 0 || frag_off)
+			return;
+
+		if (proto == IPPROTO_UDP) {
+			if (enable_udp)
+				rmnet_perf_egress_handle_udp(skb);
+
+			rmnet_perf_egress_handle_quic(skb, ip_len);
+			return;
+		}
+
+		if (proto == IPPROTO_TCP) {
+			if (enable_tcp)
+				rmnet_perf_egress_handle_tcp(skb);
+
+			return;
+		}
+	}
+}
+
+void rmnet_perf_nl_map_cmd_multicast(struct sk_buff *skb);
+
+/* skb will be freed by rmnet_qmap_cmd_handler() */
+void rmnet_perf_cmd_ingress_handler(struct sk_buff *skb)
+{
+	if (skb_linearize(skb)) {
+		pr_err("%s(): Linearization error\n", __func__);
+		return;
+	}
+
+	rmnet_perf_nl_map_cmd_multicast(skb);
+}
+
+void rmnet_perf_coal_common_stat(uint8_t mux_id, uint32_t type)
+{
+	if (!mux_id || mux_id > 16)
+		goto err0;
+
+	switch (type) {
+	case 0:
+		stats_store[mux_id].dl_stats.coal_common_stats.csum_error++;
+		break;
+	case 1:
+		stats_store[mux_id].dl_stats.coal_common_stats.pkt_recons++;
+		break;
+	case 2:
+		stats_store[mux_id].dl_stats.coal_common_stats.close_non_coal++;
+		break;
+	case 3:
+		stats_store[mux_id].dl_stats.coal_common_stats.l3_mismatch++;
+		break;
+	case 4:
+		stats_store[mux_id].dl_stats.coal_common_stats.l4_mismatch++;
+		break;
+	case 5:
+		stats_store[mux_id].dl_stats.coal_common_stats.nlo_limit++;
+		break;
+	case 6:
+		stats_store[mux_id].dl_stats.coal_common_stats.pkt_limit++;
+		break;
+	case 7:
+		stats_store[mux_id].dl_stats.coal_common_stats.byte_limit++;
+		break;
+	case 8:
+		stats_store[mux_id].dl_stats.coal_common_stats.time_limit++;
+		break;
+	case 9:
+		stats_store[mux_id].dl_stats.coal_common_stats.eviction++;
+		break;
+	case 10:
+		stats_store[mux_id].dl_stats.coal_common_stats.close_coal++;
+		break;
+	default:
+		break;
+	}
+
+err0:
+	return;
+}
+
+void rmnet_perf_coal_stat(uint8_t mux_id, uint8_t veid, uint64_t len, uint32_t type)
+{
+	if (!mux_id || mux_id > 16)
+		goto err0;
+
+	if (veid >= 16)
+		goto err0;
+
+	switch (type) {
+	case 0:
+		stats_store[mux_id].dl_stats.coal_veid_stats[veid].tcpv4_pkts++;
+		stats_store[mux_id].dl_stats.coal_veid_stats[veid].tcpv4_bytes += len;
+		break;
+	case 1:
+		stats_store[mux_id].dl_stats.coal_veid_stats[veid].udpv4_pkts++;
+		stats_store[mux_id].dl_stats.coal_veid_stats[veid].udpv4_bytes += len;
+		break;
+	case 2:
+		stats_store[mux_id].dl_stats.coal_veid_stats[veid].tcpv6_pkts++;
+		stats_store[mux_id].dl_stats.coal_veid_stats[veid].tcpv6_bytes += len;
+		break;
+	case 3:
+		stats_store[mux_id].dl_stats.coal_veid_stats[veid].udpv6_pkts++;
+		stats_store[mux_id].dl_stats.coal_veid_stats[veid].udpv6_bytes += len;
+		break;
+	}
+
+err0:
+	return;
+}
+
+void rmnet_perf_seg_stat(uint8_t mux_id, struct sk_buff *skb)
+{
+	if (!mux_id || mux_id > 16)
+		goto err0;
+
+	if (skb->protocol == htons(ETH_P_IP)) {
+		if (ip_hdr(skb)->protocol == IPPROTO_TCP) {
+			stats_store[mux_id].ul_stats.seg_proto_stats.tcpv4_pkts++;
+			stats_store[mux_id].ul_stats.seg_proto_stats.tcpv4_bytes += skb->len;
+		} else if (ip_hdr(skb)->protocol == IPPROTO_UDP) {
+			stats_store[mux_id].ul_stats.seg_proto_stats.udpv4_pkts++;
+			stats_store[mux_id].ul_stats.seg_proto_stats.udpv4_bytes += skb->len;
+		}
+	}
+
+	if (skb->protocol == htons(ETH_P_IPV6)) {
+		if (ipv6_hdr(skb)->nexthdr == IPPROTO_TCP) {
+			stats_store[mux_id].ul_stats.seg_proto_stats.tcpv6_pkts++;
+			stats_store[mux_id].ul_stats.seg_proto_stats.tcpv6_bytes += skb->len;
+		} else if (ipv6_hdr(skb)->nexthdr == IPPROTO_UDP) {
+			stats_store[mux_id].ul_stats.seg_proto_stats.udpv6_pkts++;
+			stats_store[mux_id].ul_stats.seg_proto_stats.udpv6_bytes += skb->len;
+		}
+	}
+
+err0:
+	return;
+}
+
+void rmnet_perf_non_coal_stat(uint8_t mux_id, uint64_t len)
+{
+	if (!mux_id || mux_id > 16)
+		goto err0;
+
+	stats_store[mux_id].dl_stats.non_coal_pkts++;
+	stats_store[mux_id].dl_stats.non_coal_bytes += len;
+
+err0:
+	return;
+}
+
+static const struct rmnet_module_hook_register_info
+rmnet_perf_module_hooks[] = {
+	{
+		.hooknum = RMNET_MODULE_HOOK_PERF_INGRESS,
+		.func = rmnet_perf_ingress_handle,
+	},
+	{
+		.hooknum = RMNET_MODULE_HOOK_PERF_EGRESS,
+		.func = rmnet_perf_egress_handle,
+	},
+	{
+		.hooknum = RMNET_MODULE_HOOK_PERF_SET_THRESH,
+		.func = rmnet_perf_tcp_update_quickack_thresh,
+	},
+	{
+		.hooknum = RMNET_MODULE_HOOK_PERF_INGRESS_RX_HANDLER,
+		.func = rmnet_perf_ingress_rx_handler,
+	},
+	{
+		.hooknum = RMNET_MODULE_HOOK_PERF_CMD_INGRESS,
+		.func = rmnet_perf_cmd_ingress_handler,
+	},
+	{
+		.hooknum = RMNET_MODULE_HOOK_PERF_COAL_COMMON_STAT,
+		.func = rmnet_perf_coal_common_stat,
+	},
+	{
+		.hooknum = RMNET_MODULE_HOOK_PERF_COAL_STAT,
+		.func = rmnet_perf_coal_stat,
+	},
+	{
+		.hooknum = RMNET_MODULE_HOOK_PERF_SEG_STAT,
+		.func = rmnet_perf_seg_stat,
+	},
+	{
+		.hooknum = RMNET_MODULE_HOOK_PERF_NON_COAL_STAT,
+		.func = rmnet_perf_non_coal_stat,
+	},
+	{
+		.hooknum = RMNET_MODULE_HOOK_PERF_ECN_INGRESS,
+		.func = rmnet_perf_ingress_ecn_handle,
+	},
+};
+
+void rmnet_perf_set_hooks(void)
+{
+	rmnet_module_hook_register(rmnet_perf_module_hooks,
+				   ARRAY_SIZE(rmnet_perf_module_hooks));
+}
+
+void rmnet_perf_unset_hooks(void)
+{
+	rmnet_module_hook_unregister(rmnet_perf_module_hooks,
+				     ARRAY_SIZE(rmnet_perf_module_hooks));
+}
+
+static struct genl_family rmnet_perf_nl_family;
+
+int rmnet_perf_nl_cmd_get_stats(struct sk_buff *skb, struct genl_info *info)
+{
+	struct rmnet_perf_stats_resp *resp = NULL;
+	struct rmnet_perf_stats_req req;
+	int bytes = -1, ret = -ENOMEM;
+	struct sk_buff *rskb = NULL;
+	struct nlattr *na = NULL;
+	void *hdrp = NULL;
+
+	rskb = genlmsg_new(NLMSG_GOODSIZE, GFP_ATOMIC);
+	if (!rskb) {
+		pr_err("%s(): Failed to allocate response skb\n", __func__);
+		goto err0;
+	}
+
+	hdrp = genlmsg_put(rskb, 0, rmnet_perf_netlink_seq++,
+			   &rmnet_perf_nl_family, 0,
+			   RMNET_PERF_CMD_GET_STATS);
+	if (!hdrp) {
+		pr_err("%s(): Failed to set header pointer\n", __func__);
+		goto err1;
+	}
+
+	resp = kzalloc(sizeof(struct rmnet_perf_stats_resp), GFP_ATOMIC);
+	if (!resp) {
+		pr_err("%s(): Failed to allocate response cmd\n", __func__);
+		goto err1;
+	}
+
+	memset(&req, 0, sizeof(struct rmnet_perf_stats_req));
+	ret = -EINVAL;
+	na = info->attrs[RMNET_PERF_ATTR_STATS_REQ];
+	if (!na) {
+		pr_err("%s(): Failed to get cmd request attribute\n", __func__);
+		goto err2;
+	}
+
+	bytes = nla_memcpy(&req, na, sizeof(struct rmnet_perf_stats_req));
+	if (bytes <= 0) {
+		pr_err("%s(): Failed to copy cmd request attribute\n", __func__);
+		goto err2;
+	}
+
+	if (req.mux_id > 16) {
+		pr_err("%s(): Unsupported mux id %u\n", __func__, req.mux_id);
+		goto err2;
+	}
+
+	ret = 0;
+	memcpy(&resp->stats, &stats_store[req.mux_id],
+	       sizeof(struct rmnet_perf_stats_store));
+
+err2:
+	resp->error_code = abs(ret);
+	if (!nla_put(rskb, RMNET_PERF_ATTR_STATS_RESP,
+		     sizeof(struct rmnet_perf_stats_resp), resp)) {
+		kfree(resp);
+		genlmsg_end(rskb, hdrp);
+		return genlmsg_reply(rskb, info);
+	} else {
+		pr_err("%s(): Failed to copy cmd response attribute\n", __func__);
+	}
+	kfree(resp);
+err1:
+	nlmsg_free(rskb);
+err0:
+	return ret;
+}
+
+void rmnet_perf_nl_map_cmd_multicast(struct sk_buff *skb)
+{
+	uint8_t offset = sizeof(struct qmap_cmd_hdr);
+	struct rmnet_perf_map_cmd_ind *ind = NULL;
+	struct qmap_cmd_hdr *cmd_hdr = NULL;
+	struct sk_buff *iskb = NULL;
+	void *hdrp = NULL;
+	int rc = -EINVAL;
+
+	iskb = genlmsg_new(NLMSG_GOODSIZE, GFP_ATOMIC);
+	if (!iskb) {
+		pr_err("%s(): Failed to indication skb\n", __func__);
+		goto err0;
+	}
+
+	hdrp = genlmsg_put(iskb, 0, rmnet_perf_netlink_seq++,
+			   &rmnet_perf_nl_family, 0,
+			   RMNET_PERF_CMD_MAP_CMD);
+	if (!hdrp) {
+		pr_err("%s(): Failed to set header pointer\n", __func__);
+		goto err1;
+	}
+
+	ind = kzalloc(sizeof(struct rmnet_perf_map_cmd_ind), GFP_ATOMIC);
+	if (!ind) {
+		pr_err("%s(): Failed to allocate indication cmd\n", __func__);
+		goto err1;
+	}
+
+	if (skb->len <= offset) {
+		pr_err("%s(): Incoming cmd size is invalid\n", __func__);
+		goto err2;
+	}
+
+	cmd_hdr = (struct qmap_cmd_hdr *)skb->data;
+	ind->cmd_len = skb->len - offset;
+	ind->cmd_name = cmd_hdr->cmd_name;
+	ind->ack = cmd_hdr->cmd_type;
+	memcpy(ind->cmd_content, skb->data + offset, ind->cmd_len);
+
+	if (nla_put(iskb, RMNET_PERF_ATTR_MAP_CMD_IND,
+		    sizeof(struct rmnet_perf_map_cmd_ind), ind)) {
+		pr_err("%s(): Failed to copy cmd indication attribute\n", __func__);
+		goto err2;
+	}
+
+	genlmsg_end(iskb, hdrp);
+	kfree(ind);
+	/* -EINVAL is the only error for which the skb is not freed */
+	rc = genlmsg_multicast(&rmnet_perf_nl_family, iskb, 0,
+			       RMNET_PERF_MULTICAST_GROUP_0, GFP_ATOMIC);
+	if (rc == -EINVAL) {
+		pr_err("%s(): Invalid group for multicast\n", __func__);
+		goto err1;
+	}
+	return;
+
+err2:
+	kfree(ind);
+err1:
+	nlmsg_free(iskb);
+err0:
+	return;
+}
+
+int rmnet_perf_cmd_xmit(struct rmnet_perf_map_cmd_req *cmd)
+{
+	struct net_device *dev = dev_get_by_name(&init_net, "rmnet_ipa0");
+	int cmd_len = sizeof(struct qmap_cmd_hdr) + cmd->cmd_len;
+	struct qmap_cmd_hdr *cmd_hdr = NULL;
+	struct sk_buff *skb = NULL;
+	char *cmd_content = NULL;
+	int ret = -ENODEV;
+
+	if (!dev) {
+		pr_err("%s(): Unable to get reference to device\n", __func__);
+		goto err0;
+	}
+
+	skb = alloc_skb(cmd_len, GFP_ATOMIC);
+	if (!skb) {
+		pr_err("%s(): Unable to allocate memory for cmd\n", __func__);
+		ret = -ENOMEM;
+		goto err1;
+	}
+
+	skb_put(skb, cmd_len);
+	memset(skb->data, 0, cmd_len);
+
+	cmd_hdr = (struct qmap_cmd_hdr *)skb->data;
+	cmd_hdr->cd_bit = 1;
+	cmd_hdr->mux_id = 0;
+	cmd_hdr->pkt_len = htons(sizeof(struct rmnet_map_control_command_header) +
+					cmd->cmd_len);
+	cmd_hdr->cmd_name = cmd->cmd_name;
+	cmd_hdr->cmd_type = cmd->ack;
+
+	cmd_content = (char *)(skb->data + sizeof(struct qmap_cmd_hdr));
+	memcpy(cmd_content, cmd->cmd_content, cmd->cmd_len);
+
+	skb->dev = dev;
+	skb->protocol = htons(ETH_P_MAP);
+
+	ret = rmnet_qmap_send(skb, RMNET_CH_CTL, false);
+
+err1:
+	dev_put(dev);
+err0:
+	return ret;
+}
+
+int rmnet_perf_nl_cmd_map_cmd_req(struct sk_buff *skb, struct genl_info *info)
+{
+	struct rmnet_perf_map_cmd_req *req = NULL;
+	struct rmnet_perf_map_cmd_resp resp;
+	int bytes = -1, ret = -ENOMEM;
+	struct sk_buff *rskb = NULL;
+	struct nlattr *na = NULL;
+	void *hdrp = NULL;
+
+	rskb = genlmsg_new(NLMSG_GOODSIZE, GFP_ATOMIC);
+	if (!rskb) {
+		pr_err("%s(): Failed to allocate response skb\n", __func__);
+		goto err0;
+	}
+
+	hdrp = genlmsg_put(rskb, 0, rmnet_perf_netlink_seq++,
+			   &rmnet_perf_nl_family, 0,
+			   RMNET_PERF_CMD_MAP_CMD);
+	if (!hdrp) {
+		pr_err("%s(): Failed to set header pointer\n", __func__);
+		goto err1;
+	}
+
+	memset(&resp, 0, sizeof(struct rmnet_perf_map_cmd_resp));
+	req = kzalloc(sizeof(struct rmnet_perf_map_cmd_req), GFP_ATOMIC);
+	if (!req) {
+		pr_err("%s(): Failed to allocate request cmd\n", __func__);
+		goto err2;
+	}
+
+	ret = -EINVAL;
+	na = info->attrs[RMNET_PERF_ATTR_MAP_CMD_REQ];
+	if (!na) {
+		pr_err("%s(): Failed to get cmd request attribute\n", __func__);
+		goto err3;
+	}
+
+	bytes = nla_memcpy(req, na, sizeof(struct rmnet_perf_map_cmd_req));
+	if (bytes <= 0) {
+		pr_err("%s(): Failed to copy cmd request attribute\n", __func__);
+		goto err3;
+	}
+
+	switch (req->cmd_name) {
+	case QMAP_CMD_31:
+	case QMAP_CMD_32:
+	case QMAP_CMD_40:
+	case QMAP_CMD_42:
+	case QMAP_CMD_44:
+		break;
+	default:
+		pr_err("%s(): Unsupported command %u\n", __func__, req->cmd_name);
+		goto err3;
+	}
+
+	if (req->cmd_len > 16000) {
+		pr_err("%s(): Unsupported length %u\n", __func__, req->cmd_len);
+		goto err3;
+	}
+
+	resp.cmd_name = req->cmd_name;
+	ret = rmnet_perf_cmd_xmit(req);
+
+err3:
+	kfree(req);
+err2:
+	resp.error_code = abs(ret);
+	if (!nla_put(rskb, RMNET_PERF_ATTR_MAP_CMD_RESP,
+		     sizeof(struct rmnet_perf_map_cmd_resp), &resp)) {
+		genlmsg_end(rskb, hdrp);
+		return genlmsg_reply(rskb, info);
+	} else {
+		pr_err("%s(): Failed to copy cmd response attribute\n", __func__);
+	}
+err1:
+	nlmsg_free(rskb);
+err0:
+	return ret;
+}
+
+static int rmnet_perf_tcp_update_ecn_prob(u32 hash_key, u32 prob, bool should_drop)
+{
+	struct rmnet_perf_ecn_node *node;
+	int err;
+
+	xa_lock(rmnet_perf_get_ecn_map());
+	node = __xa_store(rmnet_perf_get_ecn_map(), hash_key, NULL, GFP_ATOMIC);
+	if (xa_is_err(node)) {
+		xa_unlock(rmnet_perf_get_ecn_map());
+		return xa_err(node);
+	}
+
+	if (!node) {
+		/* Adding the node for the first time */
+		node = kzalloc(sizeof(*node), GFP_ATOMIC);
+		if (!node) {
+			xa_unlock(rmnet_perf_get_ecn_map());
+			return -ENOMEM;
+		}
+	}
+
+	if (!prob) {
+		/* 0 drop probability means we no longer need to store
+		 * this node and track it.
+		 */
+		call_rcu(&node->rcu, rmnet_perf_ecn_node_free);
+		xa_unlock(rmnet_perf_get_ecn_map());
+		return 0;
+	}
+
+	node->prob = prob;
+	node->should_drop = should_drop;
+	err = xa_err(__xa_store(rmnet_perf_get_ecn_map(), hash_key, node,
+				GFP_ATOMIC));
+	xa_unlock(rmnet_perf_get_ecn_map());
+	if (err) {
+		kfree(node);
+		return err;
+	}
+
+	return 0;
+}
+
+static int rmnet_perf_nl_cmd_ecn_update(struct sk_buff *skb,
+					struct genl_info *info)
+{
+	u32 hash_key;
+	u32 prob;
+	u8 type;
+	int rc;
+
+	if (!info->attrs[RMNET_PERF_ATTR_ECN_HASH] ||
+	    !info->attrs[RMNET_PERF_ATTR_ECN_PROB] ||
+	    !info->attrs[RMNET_PERF_ATTR_ECN_TYPE]) {
+		GENL_SET_ERR_MSG(info,
+				 "Must provide ECN hash, probability, & type");
+		return -EINVAL;
+	}
+
+	hash_key = nla_get_u32(info->attrs[RMNET_PERF_ATTR_ECN_HASH]);
+	prob = nla_get_u32(info->attrs[RMNET_PERF_ATTR_ECN_PROB]);
+	type = nla_get_u8(info->attrs[RMNET_PERF_ATTR_ECN_TYPE]);
+	rc = rmnet_perf_tcp_update_ecn_prob(hash_key, prob,
+					    type == RMNET_PERF_ECN_TYPE_DROP);
+	if (rc) {
+		GENL_SET_ERR_MSG(info, "Updating probability failed");
+		return rc;
+	}
+
+	return 0;
+}
+
+static int rmnet_perf_get_ecn_drops(u32 hash_key, u32 *drops)
+{
+	struct rmnet_perf_ecn_node *node;
+
+	if (!drops)
+		return -EINVAL;
+
+	rcu_read_lock();
+	node = xa_load(rmnet_perf_get_ecn_map(), hash_key);
+	if (node)
+		*drops = node->drops;
+
+	rcu_read_unlock();
+	if (!node)
+		return -ESRCH;
+
+	return 0;
+}
+
+static int rmnet_perf_nl_cmd_ecn_drop_stat(struct sk_buff *skb,
+					   struct genl_info *info)
+{
+	struct sk_buff *reply;
+	int msg_size = nla_total_size(sizeof(u32)) * 2;
+	u32 hash_key;
+	u32 drops = 0;
+	int rc;
+	void *hdr;
+
+	if (!info->attrs[RMNET_PERF_ATTR_ECN_HASH]) {
+		GENL_SET_ERR_MSG(info, "Must provide hash value");
+		return -EINVAL;
+	}
+
+	hash_key = nla_get_u32(info->attrs[RMNET_PERF_ATTR_ECN_HASH]);
+	rc = rmnet_perf_get_ecn_drops(hash_key, &drops);
+	if (rc) {
+		GENL_SET_ERR_MSG(info, "Fetching drop count failed");
+		return rc;
+	}
+
+	reply = genlmsg_new(msg_size, GFP_KERNEL);
+	if (!reply) {
+		GENL_SET_ERR_MSG(info, "Allocating response failed");
+		return -ENOMEM;
+	}
+
+	hdr = genlmsg_put_reply(reply, info, &rmnet_perf_nl_family, 0,
+				RMNET_PERF_CMD_ECN_DROP_STATS);
+	if (!hdr) {
+		GENL_SET_ERR_MSG(info, "Building response failed");
+		kfree_skb(reply);
+		return -EINVAL;
+	}
+
+	nla_put_u32(reply, RMNET_PERF_ATTR_ECN_DROPS, drops);
+	genlmsg_end(reply, hdr);
+	genlmsg_reply(reply, info);
+	return 0;
+}
+
+static int rmnet_perf_nl_cmd_ecn_flush(struct sk_buff *skb,
+				       struct genl_info *info)
+{
+	struct rmnet_perf_ecn_node *node;
+	unsigned long idx;
+
+	xa_lock(rmnet_perf_get_ecn_map());
+	xa_for_each(rmnet_perf_get_ecn_map(), idx, node) {
+		__xa_erase(rmnet_perf_get_ecn_map(), idx);
+		call_rcu(&node->rcu, rmnet_perf_ecn_node_free);
+	}
+
+	xa_unlock(rmnet_perf_get_ecn_map());
+	return 0;
+}
+
+static const struct genl_ops rmnet_perf_nl_ops[] = {
+	{
+		.cmd = RMNET_PERF_CMD_GET_STATS,
+		.doit = rmnet_perf_nl_cmd_get_stats,
+	},
+	{
+		.cmd = RMNET_PERF_CMD_MAP_CMD,
+		.doit = rmnet_perf_nl_cmd_map_cmd_req,
+	},
+	{
+		.cmd = RMNET_PERF_CMD_ECN_UPDATE,
+		.doit = rmnet_perf_nl_cmd_ecn_update,
+	},
+	{
+		.cmd = RMNET_PERF_CMD_ECN_DROP_STATS,
+		.doit = rmnet_perf_nl_cmd_ecn_drop_stat,
+	},
+	{
+		.cmd = RMNET_PERF_CMD_ECN_FLUSH,
+		.doit = rmnet_perf_nl_cmd_ecn_flush,
+	},
+};
+
+static struct genl_family rmnet_perf_nl_family __ro_after_init = {
+	.hdrsize = 0,
+	.name = RMNET_PERF_GENL_FAMILY_NAME,
+	.version = RMNET_PERF_GENL_VERSION,
+	.maxattr = RMNET_PERF_ATTR_MAX,
+	.policy = rmnet_perf_nl_policy,
+	.ops = rmnet_perf_nl_ops,
+	.n_ops = ARRAY_SIZE(rmnet_perf_nl_ops),
+	.mcgrps = rmnet_perf_nl_mcgrps,
+	.n_mcgrps = ARRAY_SIZE(rmnet_perf_nl_mcgrps),
+};
+
+int rmnet_perf_nl_register(void)
+{
+	return genl_register_family(&rmnet_perf_nl_family);
+}
+
+void rmnet_perf_nl_unregister(void)
+{
+	genl_unregister_family(&rmnet_perf_nl_family);
+}
+
+static int __init rmnet_perf_init(void)
+{
+	int rc;
+
+	pr_info("%s(): Loading\n", __func__);
+	rc = rmnet_perf_tcp_init();
+	if (rc)
+		goto err0;
+
+	rc = rmnet_perf_udp_init();
+	if (rc)
+		goto err1;
+
+	rc = rmnet_perf_nl_register();
+	if (rc) {
+		pr_err("%s(): Failed to register generic netlink family\n", __func__);
+		goto err2;
+	}
+
+	rmnet_perf_set_hooks();
+
+err2:
+	rmnet_perf_udp_exit();
+err1:
+	rmnet_perf_tcp_exit();
+err0:
+	return rc;
+}
+
+static void __exit rmnet_perf_exit(void)
+{
+	struct rmnet_perf_ecn_node *node;
+	unsigned long idx;
+
+	rmnet_perf_unset_hooks();
+	rmnet_perf_nl_unregister();
+	rmnet_perf_udp_exit();
+	rmnet_perf_tcp_exit();
+
+	xa_lock(rmnet_perf_get_ecn_map());
+	xa_for_each(rmnet_perf_get_ecn_map(), idx, node)
+		call_rcu(&node->rcu, rmnet_perf_ecn_node_free);
+
+	xa_unlock(rmnet_perf_get_ecn_map());
+	xa_destroy(rmnet_perf_get_ecn_map());
+
+	pr_info("%s(): exiting\n", __func__);
+}
+
+module_init(rmnet_perf_init);
+module_exit(rmnet_perf_exit);

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
- * Copyright (c) 2022, 2024 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
  * Copyright (c) 2021, The Linux Foundation. All rights reserved.
  */
 
@@ -343,7 +343,7 @@ int spec_sync_wait_bind_array(struct dma_fence_array *fence_array, u32 timeout_m
 
 	return ret;
 }
-EXPORT_SYMBOL(spec_sync_wait_bind_array);
+EXPORT_SYMBOL_GPL(spec_sync_wait_bind_array);
 
 static int spec_sync_bind_array(struct fence_bind_data *sync_bind_info)
 {
@@ -374,6 +374,8 @@ static int spec_sync_bind_array(struct fence_bind_data *sync_bind_info)
 		goto end;
 	}
 
+	spin_lock(fence->lock);
+
 	num_fences = fence_array->num_fences;
 
 	for (i = 0; i < num_fences; i++) {
@@ -383,9 +385,11 @@ static int spec_sync_bind_array(struct fence_bind_data *sync_bind_info)
 				sync_bind_info->out_bind_fd, dma_fence_get_status(fence),
 				fence->flags);
 			ret = -EINVAL;
+			spin_unlock(fence->lock);
 			goto end;
 		}
 	}
+	spin_unlock(fence->lock);
 
 	user_fds = kzalloc(num_fences * (sizeof(int)), GFP_KERNEL);
 	if (!user_fds) {
@@ -405,6 +409,13 @@ static int spec_sync_bind_array(struct fence_bind_data *sync_bind_info)
 		if (!user_fence) {
 			pr_warn("bind fences are invalid !! user_fd:%d out_bind_fd:%d\n",
 				user_fds[i], sync_bind_info->out_bind_fd);
+			ret = -EINVAL;
+			goto bind_invalid;
+		} else if (user_fence->context == fence_array->base.context &&
+				user_fence->seqno == fence_array->base.seqno) {
+			pr_err("invalid spec fence, ufd:%d o_b_fd:%d ctx:%lld seqno:%lld\n",
+					user_fds[i], sync_bind_info->out_bind_fd,
+					user_fence->context, user_fence->seqno);
 			ret = -EINVAL;
 			goto bind_invalid;
 		}

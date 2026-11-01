@@ -1,398 +1,983 @@
-/* Copyright (c) 2019-2021 The Linux Foundation. All rights reserved.
- * Copyright (c) 2022-2024 Qualcomm Innovation Center, Inc. All rights reserved.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 and
- * only version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
+// SPDX-License-Identifier: GPL-2.0-only
+/*
+ * Copyright (c) 2019-2021 The Linux Foundation. All rights reserved.
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
  */
 
 #include "rmnet_shs_modules.h"
 #include "rmnet_shs_common.h"
 #include "rmnet_shs_ll.h"
+
 #include "rmnet_shs_wq_genl.h"
 #include <net/sock.h>
 #include <linux/skbuff.h>
 #include <linux/cpumask.h>
-MODULE_LICENSE("\x47\x50\x4c\x20\x76\x32");static struct net*DATARMNETb01cbc5ec9
-;static u32 DATARMNET373156e169;static struct net*DATARMNET77097baa98;static u32
- DATARMNET990a29d492;uint32_t DATARMNET7c4038843f;uint32_t DATARMNETf1e47cb243;
-int DATARMNETc252c204a8;
-#define DATARMNETe429c5f3dd	(0xbf7+4364-0x1c04)
-#define DATARMNET6987463c5e(DATARMNET5f1b691e95)   ((DATARMNET5f1b691e95) * \
-1000000000)
-static struct nla_policy DATARMNET23b45455b1[DATARMNETcecb35ee33+
-(0xd26+209-0xdf6)]={[DATARMNET7d289a7bfa]={.type=NLA_S32},[DATARMNET813a742587]=
-NLA_POLICY_EXACT_LEN(sizeof(struct DATARMNET6c41b886b2)),[DATARMNET50e1cd26c7]=
-NLA_POLICY_EXACT_LEN(sizeof(struct DATARMNET837c876a22)),[DATARMNET6ab4513e45]=
-NLA_POLICY_EXACT_LEN(sizeof(struct DATARMNETbf4d34b241)),[DATARMNET627787b1dd]=
-NLA_POLICY_EXACT_LEN(sizeof(struct DATARMNET1ac24ff95c)),[DATARMNETaa0fe5a855]={
-.type=NLA_NUL_STRING,.len=DATARMNETe429c5f3dd},[DATARMNET310b1858b8]=
-NLA_POLICY_EXACT_LEN(sizeof(struct DATARMNET506d6d2edb)),};
-#define DATARMNETcfe22ed4d3(DATARMNET5aeb0ef9bc, DATARMNETbd9859b58e)			\
+#include <uapi/linux/rmnet_shs.h>
+
+MODULE_LICENSE("GPL v2");
+
+static struct net *last_net;
+static u32 last_snd_portid;
+
+static struct net *msg_last_net;
+static u32 msg_last_snd_portid;
+
+uint32_t rmnet_shs_genl_seqnum;
+uint32_t rmnet_shs_genl_msg_seqnum;
+int rmnet_shs_userspace_connected;
+
+#define RMNET_SHS_GENL_MAX_STR_LEN	255
+
+#define RMNET_SHS_GENL_SEC_TO_NSEC(x)   ((x) * 1000000000)
+
+
+#define RMNET_SHS_GENL_ATTR_MAX (RMNET_SHS_GENL_ATTR_BATCH_MOVE)
+
+/* Static Functions and Definitions */
+static struct nla_policy rmnet_shs_genl_attr_policy[RMNET_SHS_GENL_ATTR_MAX + 1] = {
+	[RMNET_SHS_GENL_ATTR_INT]  = { .type = NLA_S32 },
+	[RMNET_SHS_GENL_ATTR_SUGG] = NLA_POLICY_EXACT_LEN(sizeof(struct rmnet_shs_wq_sugg_info)),
+	[RMNET_SHS_GENL_ATTR_SEG]  = NLA_POLICY_EXACT_LEN(sizeof(struct rmnet_shs_wq_seg_info)),
+	[RMNET_SHS_GENL_ATTR_FLOW] = NLA_POLICY_EXACT_LEN(sizeof(struct rmnet_shs_wq_flow_info)),
+	[RMNET_SHS_GENL_ATTR_QUICKACK]  = NLA_POLICY_EXACT_LEN(sizeof(struct rmnet_shs_wq_quickack_info)),
+	[RMNET_SHS_GENL_ATTR_STR]  = { .type = NLA_NUL_STRING, .len = RMNET_SHS_GENL_MAX_STR_LEN},
+	[RMNET_SHS_GENL_ATTR_BOOTUP] = NLA_POLICY_EXACT_LEN(sizeof(struct rmnet_shs_bootup_info)),
+	[RMNET_SHS_GENL_ATTR_CLEAN] = NLA_POLICY_EXACT_LEN(sizeof(struct rmnet_shs_wq_clean_info)),
+	[RMNET_SHS_GENL_ATTR_BATCH_MOVE] = NLA_POLICY_EXACT_LEN(sizeof(struct rmnet_shs_wq_batch_sugg_info)),
+
+};
+
+#define RMNET_SHS_GENL_OP(_cmd, _func)			\
 	{						\
-		.cmd	= DATARMNET5aeb0ef9bc,				\
-		.doit	= DATARMNETbd9859b58e,			\
+		.cmd	= _cmd,				\
+		.doit	= _func,			\
 		.dumpit	= NULL,				\
-		.flags	= (0xd2d+202-0xdf7),				\
+		.flags	= 0,				\
 	}
-static const struct genl_ops DATARMNETf2d168ff8d[]={DATARMNETcfe22ed4d3(
-DATARMNETc574b5cfba,DATARMNET740f3b34b3),DATARMNETcfe22ed4d3(DATARMNET8e3adfc5dd
-,DATARMNET29175fb5fc),DATARMNETcfe22ed4d3(DATARMNETffb2945689,
-DATARMNETd81d2866ba),DATARMNETcfe22ed4d3(DATARMNET51b1ee5a68,DATARMNETc850634243
-),DATARMNETcfe22ed4d3(RMNET_SHS_GENL_CMD_LL_FLOW,DATARMNET283f08f439),
-DATARMNETcfe22ed4d3(DATARMNET93b3e11659,DATARMNET9bbfc822c2),DATARMNETcfe22ed4d3
-(DATARMNET5d672fac06,DATARMNET2b7c02fa2c),};static struct nla_policy 
-DATARMNETd7cd67c4a9[DATARMNETcecb35ee33+(0xd26+209-0xdf6)]={[DATARMNETc08daf87d4
-]=NLA_POLICY_EXACT_LEN(sizeof(struct DATARMNET25187800fe)),[DATARMNET8070cc0bdc]
-=NLA_POLICY_EXACT_LEN(sizeof(struct DATARMNET177911299b)),};static const struct 
-genl_ops DATARMNETffa9bcf3ed[]={DATARMNETcfe22ed4d3(DATARMNETafee1e9070,
-DATARMNETd65d1351b9),};struct genl_family DATARMNETecc643c219={.hdrsize=
-(0xd2d+202-0xdf7),.name=DATARMNET0228d9f101,.version=DATARMNET0fa03ac25b,.
-maxattr=DATARMNETcecb35ee33,.policy=DATARMNET23b45455b1,.ops=DATARMNETf2d168ff8d
-,.n_ops=ARRAY_SIZE(DATARMNETf2d168ff8d),};struct genl_family 
-rmnet_shs_genl_msg_family={.hdrsize=(0xd2d+202-0xdf7),.name=DATARMNETa35687f809,
-.version=DATARMNET0fa03ac25b,.maxattr=DATARMNETcecb35ee33,.policy=
-DATARMNETd7cd67c4a9,.ops=DATARMNETffa9bcf3ed,.n_ops=ARRAY_SIZE(
-DATARMNETffa9bcf3ed),};int DATARMNET5d4ca1da1c(struct genl_info*
-DATARMNET54338da2ff,int val){struct sk_buff*skb;void*msg_head;int rc;skb=
-genlmsg_new(NLMSG_GOODSIZE,GFP_ATOMIC);if(skb==NULL)goto DATARMNETbf4095f79e;
-msg_head=genlmsg_put(skb,(0xd2d+202-0xdf7),DATARMNET54338da2ff->snd_seq+
-(0xd26+209-0xdf6),&DATARMNETecc643c219,(0xd2d+202-0xdf7),DATARMNETc574b5cfba);if
-(msg_head==NULL){rc=-ENOMEM;rm_err(
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x46\x41\x49\x4c\x45\x44\x20\x74\x6f\x20\x6d\x73\x67\x5f\x68\x65\x61\x64\x20\x25\x64" "\n"
-,rc);kfree(skb);goto DATARMNETbf4095f79e;}rc=nla_put_u32(skb,DATARMNET7d289a7bfa
-,val);if(rc!=(0xd2d+202-0xdf7)){rm_err(
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x46\x41\x49\x4c\x45\x44\x20\x6e\x6c\x61\x5f\x70\x75\x74\x20\x25\x64" "\n"
-,rc);kfree(skb);goto DATARMNETbf4095f79e;}genlmsg_end(skb,msg_head);rc=
-genlmsg_unicast(genl_info_net(DATARMNET54338da2ff),skb,DATARMNET54338da2ff->
-snd_portid);if(rc!=(0xd2d+202-0xdf7))goto DATARMNETbf4095f79e;rm_err(
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x53\x75\x63\x63\x65\x73\x73\x66\x75\x6c\x6c\x79\x20\x73\x65\x6e\x74\x20\x69\x6e\x74\x20\x25\x64" "\n"
-,val);return(0xd2d+202-0xdf7);DATARMNETbf4095f79e:rm_err(
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x46\x41\x49\x4c\x45\x44\x20\x74\x6f\x20\x73\x65\x6e\x64\x20\x69\x6e\x74\x20\x25\x64" "\n"
-,val);return-(0xd26+209-0xdf6);}int DATARMNET5945236cd3(int val){struct sk_buff*
-skb;void*msg_head;int rc;if(DATARMNETb01cbc5ec9==NULL){rm_err(
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x46\x41\x49\x4c\x45\x44\x20\x74\x6f\x20\x73\x65\x6e\x64\x20\x69\x6e\x74\x20\x25\x64\x20\x2d\x20\x6c\x61\x73\x74\x5f\x6e\x65\x74\x20\x69\x73\x20\x4e\x55\x4c\x4c" "\n"
-,val);return-(0xd26+209-0xdf6);}skb=genlmsg_new(NLMSG_GOODSIZE,GFP_ATOMIC);if(
-skb==NULL)goto DATARMNETbf4095f79e;msg_head=genlmsg_put(skb,(0xd2d+202-0xdf7),
-DATARMNET7c4038843f++,&DATARMNETecc643c219,(0xd2d+202-0xdf7),DATARMNETc574b5cfba
-);if(msg_head==NULL){rc=-ENOMEM;rm_err(
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x46\x41\x49\x4c\x45\x44\x20\x74\x6f\x20\x6d\x73\x67\x5f\x68\x65\x61\x64\x20\x25\x64" "\n"
-,rc);kfree(skb);goto DATARMNETbf4095f79e;}rc=nla_put_u32(skb,DATARMNET7d289a7bfa
-,val);if(rc!=(0xd2d+202-0xdf7)){rm_err(
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x46\x41\x49\x4c\x45\x44\x20\x6e\x6c\x61\x5f\x70\x75\x74\x20\x25\x64" "\n"
-,rc);kfree(skb);goto DATARMNETbf4095f79e;}genlmsg_end(skb,msg_head);rc=
-genlmsg_unicast(DATARMNETb01cbc5ec9,skb,DATARMNET373156e169);if(rc!=
-(0xd2d+202-0xdf7))goto DATARMNETbf4095f79e;rm_err(
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x53\x75\x63\x63\x65\x73\x73\x66\x75\x6c\x6c\x79\x20\x73\x65\x6e\x74\x20\x69\x6e\x74\x20\x25\x64" "\n"
-,val);return(0xd2d+202-0xdf7);DATARMNETbf4095f79e:rm_err(
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x46\x41\x49\x4c\x45\x44\x20\x74\x6f\x20\x73\x65\x6e\x64\x20\x69\x6e\x74\x20\x25\x64" "\n"
-,val);DATARMNETc252c204a8=(0xd2d+202-0xdf7);return-(0xd26+209-0xdf6);}int 
-DATARMNETa9a7fa898c(void){struct sk_buff*skb;void*msg_head;int rc;int val=
-DATARMNET7c4038843f++;rm_err(
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x54\x72\x79\x69\x6e\x67\x20\x74\x6f\x20\x73\x65\x6e\x64\x20\x6d\x73\x67\x20\x25\x64" "\n"
-,val);skb=genlmsg_new(NLMSG_GOODSIZE,GFP_ATOMIC);if(skb==NULL)goto 
-DATARMNETbf4095f79e;msg_head=genlmsg_put(skb,(0xd2d+202-0xdf7),
-DATARMNET7c4038843f++,&DATARMNETecc643c219,(0xd2d+202-0xdf7),DATARMNETc574b5cfba
-);if(msg_head==NULL){rc=-ENOMEM;rm_err(
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x46\x41\x49\x4c\x45\x44\x20\x74\x6f\x20\x6d\x73\x67\x5f\x68\x65\x61\x64\x20\x25\x64" "\n"
-,rc);kfree(skb);goto DATARMNETbf4095f79e;}rc=nla_put_u32(skb,DATARMNET7d289a7bfa
-,val);if(rc!=(0xd2d+202-0xdf7)){rm_err(
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x46\x41\x49\x4c\x45\x44\x20\x6e\x6c\x61\x5f\x70\x75\x74\x20\x25\x64" "\n"
-,rc);kfree(skb);goto DATARMNETbf4095f79e;}genlmsg_end(skb,msg_head);
-genlmsg_multicast(&DATARMNETecc643c219,skb,(0xd2d+202-0xdf7),(0xd2d+202-0xdf7),
-GFP_ATOMIC);rm_err(
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x53\x75\x63\x63\x65\x73\x73\x66\x75\x6c\x6c\x79\x20\x73\x65\x6e\x74\x20\x69\x6e\x74\x20\x25\x64" "\n"
-,val);return(0xd2d+202-0xdf7);DATARMNETbf4095f79e:rm_err(
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x46\x41\x49\x4c\x45\x44\x20\x74\x6f\x20\x73\x65\x6e\x64\x20\x69\x6e\x74\x20\x25\x64" "\n"
-,val);DATARMNETc252c204a8=(0xd2d+202-0xdf7);return-(0xd26+209-0xdf6);}int 
-DATARMNET740f3b34b3(struct sk_buff*DATARMNETaafc1d9519,struct genl_info*
-DATARMNET54338da2ff){rm_err("\x25\x73",
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x72\x6d\x6e\x65\x74\x5f\x73\x68\x73\x5f\x67\x65\x6e\x6c\x5f\x64\x6d\x61\x5f\x69\x6e\x69\x74\x3a\x20\x43\x6c\x65\x61\x72\x20\x4c\x4c"
-);DATARMNET90fe3a4b56();if(DATARMNET54338da2ff==NULL){rm_err("\x25\x73",
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x61\x6e\x20\x65\x72\x72\x6f\x72\x20\x6f\x63\x63\x75\x72\x65\x64\x20\x2d\x20\x69\x6e\x66\x6f\x20\x69\x73\x20\x6e\x75\x6c\x6c"
-);return-(0xd26+209-0xdf6);}return(0xd2d+202-0xdf7);}int DATARMNET283f08f439(
-struct sk_buff*DATARMNETaafc1d9519,struct genl_info*DATARMNET54338da2ff){struct 
-nlattr*na;struct DATARMNET0331d6732d*DATARMNETc4af21d05e;rm_err("\x25\x73",
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x72\x6d\x6e\x65\x74\x5f\x73\x68\x73\x5f\x67\x65\x6e\x6c\x5f\x73\x65\x74\x5f\x66\x6c\x6f\x77\x5f\x6c\x6c"
-);if(DATARMNET54338da2ff==NULL){rm_err("\x25\x73",
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x61\x6e\x20\x65\x72\x72\x6f\x72\x20\x6f\x63\x63\x75\x72\x65\x64\x20\x2d\x20\x69\x6e\x66\x6f\x20\x69\x73\x20\x6e\x75\x6c\x6c"
-);return-(0xd26+209-0xdf6);}na=DATARMNET54338da2ff->attrs[DATARMNET6ab4513e45];
-if(na){DATARMNETc4af21d05e=kzalloc(sizeof(*DATARMNETc4af21d05e),GFP_ATOMIC);if(!
-DATARMNETc4af21d05e){rm_err("\x25\x73",
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x72\x6d\x6e\x65\x74\x5f\x73\x68\x73\x5f\x67\x65\x6e\x6c\x5f\x73\x65\x74\x5f\x66\x6c\x6f\x77\x5f\x6c\x6c\x20\x66\x6c\x6f\x77\x20\x69\x6e\x66\x6f\x20\x66\x61\x69\x6c\x75\x72\x65"
-);DATARMNET5d4ca1da1c(DATARMNET54338da2ff,DATARMNET00895c1601);return
-(0xd2d+202-0xdf7);}if(nla_memcpy(&DATARMNETc4af21d05e->DATARMNET54338da2ff,na,
-sizeof(DATARMNETc4af21d05e->DATARMNET54338da2ff))>(0xd2d+202-0xdf7)){if(
-DATARMNETc4af21d05e->DATARMNET54338da2ff.DATARMNET969cfb9094==
-DATARMNET8d88a2f3f5)DATARMNET2ac305d296(DATARMNETc4af21d05e);else if(
-DATARMNETc4af21d05e->DATARMNET54338da2ff.DATARMNET969cfb9094==
-DATARMNET9a035137c0)DATARMNETd52d50282d(DATARMNETc4af21d05e);DATARMNET5d4ca1da1c
-(DATARMNET54338da2ff,DATARMNET0cb8735618);}else{rm_err(
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x6e\x6c\x61\x5f\x6d\x65\x6d\x63\x70\x79\x20\x66\x61\x69\x6c\x65\x64\x20\x25\x64" "\n"
-,DATARMNET6ab4513e45);DATARMNET5d4ca1da1c(DATARMNET54338da2ff,
-DATARMNET00895c1601);return(0xd2d+202-0xdf7);}}else{rm_err(
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x6e\x6f\x20\x69\x6e\x66\x6f\x2d\x3e\x61\x74\x74\x72\x73\x20\x25\x64" "\n"
-,DATARMNET6ab4513e45);DATARMNET5d4ca1da1c(DATARMNET54338da2ff,
-DATARMNET00895c1601);return(0xd2d+202-0xdf7);}return(0xd2d+202-0xdf7);}int 
-DATARMNET2b7c02fa2c(struct sk_buff*DATARMNETaafc1d9519,struct genl_info*
-DATARMNET54338da2ff){struct nlattr*na;struct DATARMNET506d6d2edb 
-DATARMNET9c9f014b92;int i;rm_err("\x25\x73\x20\x25\x73",
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20",__func__);if(DATARMNET54338da2ff==NULL){
-rm_err("\x25\x73",
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x61\x6e\x20\x65\x72\x72\x6f\x72\x20\x6f\x63\x63\x75\x72\x65\x64\x20\x2d\x20\x69\x6e\x66\x6f\x20\x69\x73\x20\x6e\x75\x6c\x6c"
-);return-(0xd26+209-0xdf6);}na=DATARMNET54338da2ff->attrs[DATARMNET310b1858b8];
-if(na){if(nla_memcpy(&DATARMNET9c9f014b92,na,sizeof(DATARMNET9c9f014b92))>
-(0xd2d+202-0xdf7)){DATARMNETecc0627c70.DATARMNET637025ccc1=DATARMNET9c9f014b92.
-DATARMNET637025ccc1;DATARMNETecc0627c70.DATARMNET2f954f58f8=hweight_long(
-DATARMNET9c9f014b92.DATARMNET637025ccc1);DATARMNETecc0627c70.DATARMNETf510b48c29
-=~DATARMNETecc0627c70.DATARMNET637025ccc1;DATARMNETecc0627c70.
-DATARMNET85a9848b29=DATARMNET9c9f014b92.DATARMNET85a9848b29;DATARMNETecc0627c70.
-DATARMNETe306607c08=DATARMNET9c9f014b92.DATARMNETe306607c08;if(
-DATARMNETecc0627c70.DATARMNET85a9848b29&DATARMNET5c4b64e404){DATARMNET12565c8f98
-=(0xd26+209-0xdf6);}rm_err(
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x62\x6f\x6f\x74\x75\x70\x20\x72\x65\x71\x20"
-"\x66\x65\x61\x74\x75\x72\x65\x5f\x6d\x61\x73\x6b\x20\x3d\x20\x30\x78\x25\x78\x20\x6e\x6f\x6e\x5f\x70\x65\x72\x66\x6d\x61\x78\x6b\x20\x3d\x20\x30\x78\x25\x78\x2c\x20\x70\x65\x72\x66\x5f\x6d\x61\x73\x6b\x20\x30\x78\x25\x78"
-,DATARMNET9c9f014b92.DATARMNET85a9848b29,DATARMNETecc0627c70.DATARMNET637025ccc1
-,DATARMNETecc0627c70.DATARMNETf510b48c29);for(i=(0xd2d+202-0xdf7);i<
-DATARMNETc6782fed88;i++){DATARMNET4793ed48af[i]=DATARMNET9c9f014b92.
-DATARMNETef524c3133[i];DATARMNET713717107f[i]=DATARMNET9c9f014b92.
-DATARMNET6beee7b91c[i];rm_err(
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x62\x6f\x6f\x74\x75\x70\x20\x25\x69\x20\x72\x65\x71\x20\x25\x6c\x6c\x75\x20\x25\x6c\x6c\x75"
-,i,DATARMNET4793ed48af[i],DATARMNET713717107f[i]);}DATARMNET5d4ca1da1c(
-DATARMNET54338da2ff,DATARMNETc9a3fec39c);}else{rm_err(
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x6e\x6c\x61\x5f\x6d\x65\x6d\x63\x70\x79\x20\x66\x61\x69\x6c\x65\x64\x20\x25\x64" "\n"
-,DATARMNET310b1858b8);DATARMNET5d4ca1da1c(DATARMNET54338da2ff,
-DATARMNET87c27cd354);return(0xd2d+202-0xdf7);}}else{rm_err(
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x6e\x6f\x20\x69\x6e\x66\x6f\x2d\x3e\x61\x74\x74\x72\x73\x20\x25\x64" "\n"
-,DATARMNET310b1858b8);DATARMNET5d4ca1da1c(DATARMNET54338da2ff,
-DATARMNET87c27cd354);return(0xd2d+202-0xdf7);}return(0xd2d+202-0xdf7);}int 
-DATARMNETd81d2866ba(struct sk_buff*DATARMNETaafc1d9519,struct genl_info*
-DATARMNET54338da2ff){struct nlattr*na;struct DATARMNET837c876a22 
-DATARMNET1317c6a4a2;int rc=(0xd2d+202-0xdf7);rm_err("\x25\x73",
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x72\x6d\x6e\x65\x74\x5f\x73\x68\x73\x5f\x67\x65\x6e\x6c\x5f\x73\x65\x74\x5f\x66\x6c\x6f\x77\x5f\x73\x65\x67\x6d\x65\x6e\x74\x61\x74\x69\x6f\x6e"
-);if(DATARMNET54338da2ff==NULL){rm_err("\x25\x73",
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x61\x6e\x20\x65\x72\x72\x6f\x72\x20\x6f\x63\x63\x75\x72\x65\x64\x20\x2d\x20\x69\x6e\x66\x6f\x20\x69\x73\x20\x6e\x75\x6c\x6c"
-);return-(0xd26+209-0xdf6);}na=DATARMNET54338da2ff->attrs[DATARMNET50e1cd26c7];
-if(na){if(nla_memcpy(&DATARMNET1317c6a4a2,na,sizeof(DATARMNET1317c6a4a2))>
-(0xd2d+202-0xdf7)){rm_err(
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x72\x65\x63\x76\x20\x73\x65\x67\x6d\x65\x6e\x74\x61\x74\x69\x6f\x6e\x20\x72\x65\x71\x20"
-"\x68\x61\x73\x68\x5f\x74\x6f\x5f\x73\x65\x74\x20\x3d\x20\x30\x78\x25\x78\x20\x73\x65\x67\x73\x5f\x70\x65\x72\x5f\x73\x6b\x62\x20\x3d\x20\x25\x75"
-,DATARMNET1317c6a4a2.DATARMNET8c11bd9466,DATARMNET1317c6a4a2.DATARMNET87636d0152
-);rc=DATARMNETf85599b9d8(DATARMNET1317c6a4a2.DATARMNET8c11bd9466,
-DATARMNET1317c6a4a2.DATARMNET87636d0152);if(rc==(0xd26+209-0xdf6)){
-DATARMNET5d4ca1da1c(DATARMNET54338da2ff,DATARMNET0cb8735618);
-trace_rmnet_shs_wq_high(DATARMNETa0ecb9daac,DATARMNETf814701a94,
-DATARMNET1317c6a4a2.DATARMNET8c11bd9466,DATARMNET1317c6a4a2.DATARMNET87636d0152,
-(0x16e8+787-0xc0c),(0x16e8+787-0xc0c),NULL,NULL);}else{DATARMNET5d4ca1da1c(
-DATARMNET54338da2ff,DATARMNET00895c1601);trace_rmnet_shs_wq_high(
-DATARMNETa0ecb9daac,DATARMNET166a43f3aa,DATARMNET1317c6a4a2.DATARMNET8c11bd9466,
-DATARMNET1317c6a4a2.DATARMNET87636d0152,(0x16e8+787-0xc0c),(0x16e8+787-0xc0c),
-NULL,NULL);return(0xd2d+202-0xdf7);}}else{rm_err(
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x6e\x6c\x61\x5f\x6d\x65\x6d\x63\x70\x79\x20\x66\x61\x69\x6c\x65\x64\x20\x25\x64" "\n"
-,DATARMNET50e1cd26c7);DATARMNET5d4ca1da1c(DATARMNET54338da2ff,
-DATARMNET00895c1601);return(0xd2d+202-0xdf7);}}else{rm_err(
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x6e\x6f\x20\x69\x6e\x66\x6f\x2d\x3e\x61\x74\x74\x72\x73\x20\x25\x64" "\n"
-,DATARMNET50e1cd26c7);DATARMNET5d4ca1da1c(DATARMNET54338da2ff,
-DATARMNET00895c1601);return(0xd2d+202-0xdf7);}return(0xd2d+202-0xdf7);}int 
-DATARMNET9bbfc822c2(struct sk_buff*DATARMNETaafc1d9519,struct genl_info*
-DATARMNET54338da2ff){struct nlattr*na;struct DATARMNET1ac24ff95c 
-DATARMNET8641231b50;int rc=(0xd2d+202-0xdf7);rm_err("\x25\x73",
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x72\x6d\x6e\x65\x74\x5f\x73\x68\x73\x5f\x67\x65\x6e\x6c\x5f\x73\x65\x74\x5f\x71\x75\x69\x63\x6b\x61\x63\x6b\x5f\x74\x68\x72\x65\x73\x68"
-);if(DATARMNET54338da2ff==NULL){rm_err("\x25\x73",
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x61\x6e\x20\x65\x72\x72\x6f\x72\x20\x6f\x63\x63\x75\x72\x65\x64\x20\x2d\x20\x69\x6e\x66\x6f\x20\x69\x73\x20\x6e\x75\x6c\x6c"
-);return-(0xd26+209-0xdf6);}na=DATARMNET54338da2ff->attrs[DATARMNET627787b1dd];
-if(na){if(nla_memcpy(&DATARMNET8641231b50,na,sizeof(DATARMNET8641231b50))>
-(0xd2d+202-0xdf7)){rm_err(
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x72\x65\x63\x76\x20\x71\x75\x69\x63\x6b\x61\x63\x6b\x20\x72\x65\x71\x20"
-"\x68\x61\x73\x68\x5f\x74\x6f\x5f\x73\x65\x74\x20\x3d\x20\x30\x78\x25\x78\x20\x74\x68\x72\x65\x73\x68\x20\x3d\x20\x25\x75"
-,DATARMNET8641231b50.DATARMNET8c11bd9466,DATARMNET8641231b50.ack_thresh);rc=
-DATARMNET1faf2b953f(DATARMNET8641231b50.DATARMNET8c11bd9466,DATARMNET8641231b50.
-ack_thresh);if(rc==(0xd26+209-0xdf6)){DATARMNET5d4ca1da1c(DATARMNET54338da2ff,
-DATARMNETc30f35c15f);}else{DATARMNET5d4ca1da1c(DATARMNET54338da2ff,
-DATARMNET6e742895e1);return(0xd2d+202-0xdf7);}}else{rm_err(
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x6e\x6c\x61\x5f\x6d\x65\x6d\x63\x70\x79\x20\x66\x61\x69\x6c\x65\x64\x20\x25\x64" "\n"
-,DATARMNET627787b1dd);DATARMNET5d4ca1da1c(DATARMNET54338da2ff,
-DATARMNET6e742895e1);return(0xd2d+202-0xdf7);}}else{rm_err(
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x6e\x6f\x20\x69\x6e\x66\x6f\x2d\x3e\x61\x74\x74\x72\x73\x20\x25\x64" "\n"
-,DATARMNET627787b1dd);DATARMNET5d4ca1da1c(DATARMNET54338da2ff,
-DATARMNET6e742895e1);return(0xd2d+202-0xdf7);}return(0xd2d+202-0xdf7);}int 
-DATARMNET29175fb5fc(struct sk_buff*DATARMNETaafc1d9519,struct genl_info*
-DATARMNET54338da2ff){struct nlattr*na;struct DATARMNET6c41b886b2 
-DATARMNET7f0ce2d6ad;int rc=(0xd2d+202-0xdf7);rm_err("\x25\x73",
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x72\x6d\x6e\x65\x74\x5f\x73\x68\x73\x5f\x67\x65\x6e\x6c\x5f\x74\x72\x79\x5f\x74\x6f\x5f\x6d\x6f\x76\x65\x5f\x66\x6c\x6f\x77"
-);if(DATARMNET54338da2ff==NULL){rm_err("\x25\x73",
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x61\x6e\x20\x65\x72\x72\x6f\x72\x20\x6f\x63\x63\x75\x72\x65\x64\x20\x2d\x20\x69\x6e\x66\x6f\x20\x69\x73\x20\x6e\x75\x6c\x6c"
-);return-(0xd26+209-0xdf6);}na=DATARMNET54338da2ff->attrs[DATARMNET813a742587];
-if(na){if(nla_memcpy(&DATARMNET7f0ce2d6ad,na,sizeof(DATARMNET7f0ce2d6ad))>
-(0xd2d+202-0xdf7)){rm_err(
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x63\x75\x72\x5f\x63\x70\x75\x20\x3d\x25\x75\x20\x64\x65\x73\x74\x5f\x63\x70\x75\x20\x3d\x20\x25\x75\x20"
-"\x68\x61\x73\x68\x5f\x74\x6f\x5f\x6d\x6f\x76\x65\x20\x3d\x20\x30\x78\x25\x78\x20\x73\x75\x67\x67\x5f\x74\x79\x70\x65\x20\x3d\x20\x25\x75"
-,DATARMNET7f0ce2d6ad.DATARMNETc790ff30fc,DATARMNET7f0ce2d6ad.DATARMNET208ea67e1d
-,DATARMNET7f0ce2d6ad.DATARMNET4da4612f1e,DATARMNET7f0ce2d6ad.DATARMNETa3f89581b5
-);if(DATARMNET7f0ce2d6ad.DATARMNET208ea67e1d>=DATARMNETc6782fed88||
-DATARMNET7f0ce2d6ad.DATARMNETc790ff30fc>=DATARMNETc6782fed88){
-DATARMNET930a441406[DATARMNET465c0e5e6d]++;DATARMNET5d4ca1da1c(
-DATARMNET54338da2ff,DATARMNET96de786762);return-(0xd26+209-0xdf6);}if(
-DATARMNET7f0ce2d6ad.DATARMNETa3f89581b5==DATARMNET5898b2a84b){
-DATARMNET3874292c18=DATARMNET7f0ce2d6ad.DATARMNET208ea67e1d;
-trace_rmnet_shs_wq_high(DATARMNETa0ecb9daac,DATARMNETd7f7ade458,
-DATARMNET7f0ce2d6ad.DATARMNETc790ff30fc,DATARMNET7f0ce2d6ad.DATARMNET208ea67e1d,
-DATARMNET7f0ce2d6ad.DATARMNET4da4612f1e,DATARMNET7f0ce2d6ad.DATARMNETa3f89581b5,
-NULL,NULL);DATARMNET5d4ca1da1c(DATARMNET54338da2ff,DATARMNET2d19c9b1ef);return
-(0xd2d+202-0xdf7);}if(DATARMNET7f0ce2d6ad.DATARMNETa3f89581b5==
-DATARMNET0fec83de79){DATARMNETbb1a9dff8b=DATARMNET7f0ce2d6ad.DATARMNET208ea67e1d
-;trace_rmnet_shs_wq_high(DATARMNETa0ecb9daac,DATARMNETd7f7ade458,
-DATARMNET7f0ce2d6ad.DATARMNETc790ff30fc,DATARMNET7f0ce2d6ad.DATARMNET208ea67e1d,
-DATARMNET7f0ce2d6ad.DATARMNET4da4612f1e,DATARMNET7f0ce2d6ad.DATARMNETa3f89581b5,
-NULL,NULL);DATARMNET5d4ca1da1c(DATARMNET54338da2ff,DATARMNET2d19c9b1ef);return
-(0xd2d+202-0xdf7);}if(DATARMNET7f0ce2d6ad.DATARMNETa3f89581b5==
-DATARMNET5dccc475d4){DATARMNETb7ddf3c5dd[DATARMNETf13db5ace8]++;if(!((
-(0xd26+209-0xdf6)<<DATARMNET7f0ce2d6ad.DATARMNET208ea67e1d)&DATARMNET9273f84bf1)
-||(((0xd26+209-0xdf6)<<DATARMNETecc0627c70.DATARMNET5c24e1df05)&
-DATARMNET9273f84bf1)){DATARMNET5d4ca1da1c(DATARMNET54338da2ff,
-DATARMNET2d19c9b1ef);return-(0xd26+209-0xdf6);}if((((0xd26+209-0xdf6)<<
-DATARMNET7f0ce2d6ad.DATARMNET208ea67e1d)&DATARMNETf55430ea0a)){
-DATARMNETb7ddf3c5dd[DATARMNET438fb7f8f3]++;DATARMNET5d4ca1da1c(
-DATARMNET54338da2ff,DATARMNET96de786762);return-(0xd26+209-0xdf6);}
-DATARMNETecc0627c70.DATARMNET5c24e1df05=DATARMNET7f0ce2d6ad.DATARMNET208ea67e1d;
-rcu_read_lock();DATARMNET8f9da46b14();rcu_read_unlock();DATARMNET5d4ca1da1c(
-DATARMNET54338da2ff,DATARMNET2d19c9b1ef);return(0xd2d+202-0xdf7);}if(
-DATARMNET7f0ce2d6ad.DATARMNETa3f89581b5==DATARMNET37da25c8e8){
-DATARMNETb7ddf3c5dd[DATARMNETb6eae1e097]++;if(!(((0xd26+209-0xdf6)<<
-DATARMNET7f0ce2d6ad.DATARMNET208ea67e1d)&DATARMNETbc3c416b77)){
-DATARMNET5d4ca1da1c(DATARMNET54338da2ff,DATARMNET2d19c9b1ef);return-
-(0xd26+209-0xdf6);}if((((0xd26+209-0xdf6)<<DATARMNET7f0ce2d6ad.
-DATARMNET208ea67e1d)&DATARMNETf55430ea0a)){DATARMNETb7ddf3c5dd[
-DATARMNETf6458f40e6]++;DATARMNET5d4ca1da1c(DATARMNET54338da2ff,
-DATARMNET96de786762);return-(0xd26+209-0xdf6);}if((DATARMNETecc0627c70.
-DATARMNET7d667e828e)==DATARMNET7f0ce2d6ad.DATARMNET208ea67e1d&&(
-DATARMNETecc0627c70.DATARMNET5c24e1df05)==DATARMNET7f0ce2d6ad.
-DATARMNET208ea67e1d){DATARMNET5d4ca1da1c(DATARMNET54338da2ff,DATARMNET2d19c9b1ef
-);return(0xd2d+202-0xdf7);}if((((0xd26+209-0xdf6)<<DATARMNET7f0ce2d6ad.
-DATARMNET208ea67e1d)&DATARMNETbc3c416b77)&&(((0xd26+209-0xdf6)<<
-DATARMNETecc0627c70.DATARMNET7d667e828e)&DATARMNETbc3c416b77)){
-DATARMNETb7ddf3c5dd[DATARMNET6fed39da20]++;}DATARMNETecc0627c70.
-DATARMNET5c24e1df05=DATARMNET7f0ce2d6ad.DATARMNET208ea67e1d;rcu_read_lock();
-DATARMNET8f9da46b14();rcu_read_unlock();DATARMNET5d4ca1da1c(DATARMNET54338da2ff,
-DATARMNET2d19c9b1ef);return(0xd2d+202-0xdf7);}rc=DATARMNET5f72606f6f(
-DATARMNET7f0ce2d6ad.DATARMNETc790ff30fc,DATARMNET7f0ce2d6ad.DATARMNET208ea67e1d,
-DATARMNET7f0ce2d6ad.DATARMNET4da4612f1e,DATARMNET7f0ce2d6ad.DATARMNETa3f89581b5)
-;if(rc==(0xd26+209-0xdf6)){DATARMNET5d4ca1da1c(DATARMNET54338da2ff,
-DATARMNET598eb03fad);trace_rmnet_shs_wq_high(DATARMNETa0ecb9daac,
-DATARMNETd7f7ade458,DATARMNET7f0ce2d6ad.DATARMNETc790ff30fc,DATARMNET7f0ce2d6ad.
-DATARMNET208ea67e1d,DATARMNET7f0ce2d6ad.DATARMNET4da4612f1e,DATARMNET7f0ce2d6ad.
-DATARMNETa3f89581b5,NULL,NULL);}else{DATARMNET5d4ca1da1c(DATARMNET54338da2ff,
-DATARMNETe64295b6cb);trace_rmnet_shs_wq_high(DATARMNETa0ecb9daac,
-DATARMNET53e4a6b394,DATARMNET7f0ce2d6ad.DATARMNETc790ff30fc,DATARMNET7f0ce2d6ad.
-DATARMNET208ea67e1d,DATARMNET7f0ce2d6ad.DATARMNET4da4612f1e,DATARMNET7f0ce2d6ad.
-DATARMNETa3f89581b5,NULL,NULL);return(0xd2d+202-0xdf7);}}else{rm_err(
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x6e\x6c\x61\x5f\x6d\x65\x6d\x63\x70\x79\x20\x66\x61\x69\x6c\x65\x64\x20\x25\x64" "\n"
-,DATARMNET813a742587);DATARMNET5d4ca1da1c(DATARMNET54338da2ff,
-DATARMNETe64295b6cb);return(0xd2d+202-0xdf7);}}else{rm_err(
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x6e\x6f\x20\x69\x6e\x66\x6f\x2d\x3e\x61\x74\x74\x72\x73\x20\x25\x64" "\n"
-,DATARMNET813a742587);DATARMNET5d4ca1da1c(DATARMNET54338da2ff,
-DATARMNETe64295b6cb);return(0xd2d+202-0xdf7);}return(0xd2d+202-0xdf7);}int 
-DATARMNETc850634243(struct sk_buff*DATARMNETaafc1d9519,struct genl_info*
-DATARMNET54338da2ff){rm_err("\x25\x73",
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x72\x6d\x6e\x65\x74\x5f\x73\x68\x73\x5f\x67\x65\x6e\x6c\x5f\x6d\x65\x6d\x5f\x73\x79\x6e\x63"
-);if(!DATARMNETc252c204a8)DATARMNETc252c204a8=(0xd26+209-0xdf6);
-trace_rmnet_shs_wq_high(DATARMNETa0ecb9daac,DATARMNETd1d3902361,
-(0x16e8+787-0xc0c),(0x16e8+787-0xc0c),(0x16e8+787-0xc0c),(0x16e8+787-0xc0c),NULL
-,NULL);if(DATARMNET54338da2ff==NULL){rm_err("\x25\x73",
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x61\x6e\x20\x65\x72\x72\x6f\x72\x20\x6f\x63\x63\x75\x72\x65\x64\x20\x2d\x20\x69\x6e\x66\x6f\x20\x69\x73\x20\x6e\x75\x6c\x6c"
-);return-(0xd26+209-0xdf6);}DATARMNETb01cbc5ec9=genl_info_net(
-DATARMNET54338da2ff);DATARMNET373156e169=DATARMNET54338da2ff->snd_portid;rm_err(
-"\x70\x6f\x72\x74\x5f\x69\x64\x20\x3d\x20\x25\x75",DATARMNET373156e169);return
-(0xd2d+202-0xdf7);}void DATARMNET8d0d510d45(uint32_t DATARMNETaf3d356342,struct 
-DATARMNET177911299b*DATARMNET60b6e12cfd){struct DATARMNETe5f1cf1a69 
-DATARMNET7baa284dc5;struct timespec64 time;if(DATARMNET60b6e12cfd==NULL){rm_err(
-"\x25\x73",
-"\x53\x48\x53\x5f\x4d\x53\x47\x5f\x47\x4e\x4c\x20\x2d\x20\x69\x6e\x76\x61\x6c\x69\x64\x20\x69\x6e\x70\x75\x74"
-);return;}memset(DATARMNET60b6e12cfd,(0xd2d+202-0xdf7),sizeof(struct 
-DATARMNET177911299b));memset(&DATARMNET7baa284dc5,(0xd2d+202-0xdf7),sizeof(
-DATARMNET7baa284dc5));ktime_get_real_ts64(&time);DATARMNET60b6e12cfd->timestamp=
-(DATARMNET6987463c5e(time.tv_sec)+time.tv_nsec);DATARMNET7baa284dc5.
-DATARMNETaf3d356342=DATARMNETaf3d356342;DATARMNET7baa284dc5.DATARMNET43a8300dfd=
-(0xd26+209-0xdf6);memcpy(&(DATARMNET60b6e12cfd->list[(0xd2d+202-0xdf7)].
-DATARMNETdf2dbc641f),&DATARMNET7baa284dc5,sizeof(DATARMNET7baa284dc5));
-DATARMNET60b6e12cfd->list[(0xd2d+202-0xdf7)].msg_type=DATARMNETfce267cbe9;
-DATARMNET60b6e12cfd->valid=(0xd26+209-0xdf6);DATARMNET60b6e12cfd->list_len=
-(0xd26+209-0xdf6);}void DATARMNET88ef60041c(uint8_t seq,struct 
-DATARMNET177911299b*DATARMNET60b6e12cfd){struct DATARMNET1564093dbc 
-DATARMNET28ce320ddf;if(DATARMNET60b6e12cfd==NULL){rm_err("\x25\x73",
-"\x53\x48\x53\x5f\x4d\x53\x47\x5f\x47\x4e\x4c\x20\x2d\x20\x69\x6e\x76\x61\x6c\x69\x64\x20\x69\x6e\x70\x75\x74"
-);return;}memset(DATARMNET60b6e12cfd,(0xd2d+202-0xdf7),sizeof(struct 
-DATARMNET177911299b));memset(&DATARMNET28ce320ddf,(0xd2d+202-0xdf7),sizeof(
-DATARMNET28ce320ddf));memcpy(&(DATARMNET60b6e12cfd->list[(0xd2d+202-0xdf7)].
-DATARMNETdf2dbc641f),&DATARMNET28ce320ddf,sizeof(DATARMNET28ce320ddf));
-DATARMNET60b6e12cfd->list[(0xd2d+202-0xdf7)].msg_type=DATARMNET890e50739c;
-DATARMNET60b6e12cfd->valid=(0xd26+209-0xdf6);DATARMNET60b6e12cfd->list_len=
-(0xd26+209-0xdf6);}void DATARMNET1d4b1eff85(struct DATARMNET177911299b*
-DATARMNET60b6e12cfd,uint8_t DATARMNET907a90c6af,uint8_t DATARMNET9a4544e068){
-struct DATARMNET80e227e008 DATARMNETc909849dcb;struct timespec64 time;if(
-DATARMNET60b6e12cfd==NULL){rm_err("\x25\x73",
-"\x53\x48\x53\x5f\x4d\x53\x47\x5f\x47\x4e\x4c\x20\x2d\x20\x69\x6e\x76\x61\x6c\x69\x64\x20\x69\x6e\x70\x75\x74"
-);return;}memset(DATARMNET60b6e12cfd,(0xd2d+202-0xdf7),sizeof(struct 
-DATARMNET177911299b));memset(&DATARMNETc909849dcb,(0xd2d+202-0xdf7),sizeof(
-DATARMNETc909849dcb));ktime_get_real_ts64(&time);DATARMNET60b6e12cfd->timestamp=
-(DATARMNET6987463c5e(time.tv_sec)+time.tv_nsec);DATARMNETc909849dcb.
-DATARMNET035f475d5c=DATARMNET907a90c6af;DATARMNETc909849dcb.DATARMNETcfb5dc7296=
-DATARMNET9a4544e068;memcpy(&(DATARMNET60b6e12cfd->list[(0xd2d+202-0xdf7)].
-DATARMNETdf2dbc641f),&DATARMNETc909849dcb,sizeof(DATARMNETc909849dcb));
-DATARMNET60b6e12cfd->list[(0xd2d+202-0xdf7)].msg_type=DATARMNETf41c724abf;
-DATARMNET60b6e12cfd->valid=(0xd26+209-0xdf6);DATARMNET60b6e12cfd->list_len=
-(0xd26+209-0xdf6);}int DATARMNETb5d58adbe7(struct DATARMNET177911299b*msg_ptr){
-struct sk_buff*skb;void*msg_head;int rc;if(DATARMNET77097baa98==NULL){rm_err(
-"\x25\x73",
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x46\x41\x49\x4c\x45\x44\x20\x74\x6f\x20\x73\x65\x6e\x64\x20\x6d\x73\x67\x5f\x6c\x61\x73\x74\x5f\x6e\x65\x74\x20\x69\x73\x20\x4e\x55\x4c\x4c" "\n"
-);return-(0xd26+209-0xdf6);}skb=genlmsg_new(NLMSG_GOODSIZE,GFP_ATOMIC);if(skb==
-NULL)goto DATARMNETbf4095f79e;msg_head=genlmsg_put(skb,(0xd2d+202-0xdf7),
-DATARMNETf1e47cb243++,&rmnet_shs_genl_msg_family,(0xd2d+202-0xdf7),
-DATARMNETafee1e9070);if(msg_head==NULL){rc=-ENOMEM;rm_err(
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x46\x41\x49\x4c\x45\x44\x20\x74\x6f\x20\x6d\x73\x67\x5f\x68\x65\x61\x64\x20\x25\x64" "\n"
-,rc);kfree(skb);goto DATARMNETbf4095f79e;}rc=nla_put(skb,DATARMNET8070cc0bdc,
-sizeof(struct DATARMNET177911299b),msg_ptr);if(rc!=(0xd2d+202-0xdf7)){rm_err(
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x46\x41\x49\x4c\x45\x44\x20\x6e\x6c\x61\x5f\x70\x75\x74\x20\x25\x64" "\n"
-,rc);kfree(skb);goto DATARMNETbf4095f79e;}genlmsg_end(skb,msg_head);rc=
-genlmsg_unicast(DATARMNET77097baa98,skb,DATARMNET990a29d492);if(rc!=
-(0xd2d+202-0xdf7))goto DATARMNETbf4095f79e;rm_err(
-"\x53\x48\x53\x5f\x4d\x53\x47\x5f\x47\x4e\x4c\x3a\x20\x53\x75\x63\x63\x65\x73\x73\x66\x75\x6c\x6c\x79\x20\x73\x65\x6e\x74\x20\x6d\x73\x67\x20\x25\x64" "\n"
-,DATARMNETf1e47cb243);return(0xd2d+202-0xdf7);DATARMNETbf4095f79e:rm_err(
-"\x25\x73",
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x46\x41\x49\x4c\x45\x44\x20\x74\x6f\x20\x73\x65\x6e\x64\x20\x74\x6f\x20\x6d\x73\x67\x20\x63\x68\x61\x6e\x6e\x65\x6c" "\n"
-);return-(0xd26+209-0xdf6);}int DATARMNETd65d1351b9(struct sk_buff*
-DATARMNETaafc1d9519,struct genl_info*DATARMNET54338da2ff){rm_err("\x25\x73",
-"\x53\x48\x53\x5f\x47\x4e\x4c\x5f\x4d\x53\x47\x3a\x20\x72\x6d\x6e\x65\x74\x5f\x73\x68\x73\x5f\x67\x65\x6e\x6c\x5f\x6d\x73\x67\x5f\x72\x65\x71"
-);if(!DATARMNETc252c204a8){rm_err("\x25\x73",
-"\x53\x48\x53\x5f\x47\x4e\x4c\x5f\x4d\x53\x47\x3a\x20\x65\x72\x72\x6f\x72\x3a\x20\x75\x73\x65\x72\x73\x70\x61\x63\x65\x20\x6e\x6f\x74\x20\x63\x6f\x6e\x6e\x65\x63\x74\x65\x64"
-);return-(0xd26+209-0xdf6);}if(DATARMNET54338da2ff==NULL){rm_err("\x25\x73",
-"\x53\x48\x53\x5f\x47\x4e\x4c\x5f\x4d\x53\x47\x3a\x20\x65\x72\x72\x6f\x72\x3a\x20\x69\x6e\x66\x6f\x20\x69\x73\x20\x6e\x75\x6c\x6c"
-);return-(0xd26+209-0xdf6);}DATARMNET77097baa98=genl_info_net(
-DATARMNET54338da2ff);DATARMNET990a29d492=DATARMNET54338da2ff->snd_portid;rm_err(
-"\x6d\x73\x67\x5f\x70\x6f\x72\x74\x5f\x69\x64\x20\x3d\x20\x25\x75",
-DATARMNET990a29d492);return(0xd2d+202-0xdf7);}int DATARMNET0dbc627e8f(void){int 
-ret;DATARMNETc252c204a8=(0xd2d+202-0xdf7);ret=genl_register_family(&
-DATARMNETecc643c219);if(ret!=(0xd2d+202-0xdf7)){rm_err(
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x72\x65\x67\x69\x73\x74\x65\x72\x20\x66\x61\x6d\x69\x6c\x79\x20\x66\x61\x69\x6c\x65\x64\x3a\x20\x25\x69"
-,ret);genl_unregister_family(&DATARMNETecc643c219);return-(0xd26+209-0xdf6);}
-rm_err(
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x73\x75\x63\x63\x65\x73\x73\x66\x75\x6c\x6c\x79\x20\x72\x65\x67\x69\x73\x74\x65\x72\x65\x64\x20\x67\x65\x6e\x65\x72\x69\x63\x20\x6e\x65\x74\x6c\x69\x6e\x6b\x20\x66\x61\x6d\x69\x6c\x79\x3a\x20\x25\x73"
-,DATARMNET0228d9f101);ret=genl_register_family(&rmnet_shs_genl_msg_family);if(
-ret!=(0xd2d+202-0xdf7)){rm_err(
-"\x53\x48\x53\x5f\x4d\x53\x47\x5f\x47\x4e\x4c\x3a\x20\x72\x65\x67\x69\x73\x74\x65\x72\x20\x66\x61\x6d\x69\x6c\x79\x20\x66\x61\x69\x6c\x65\x64\x3a\x20\x25\x69"
-,ret);genl_unregister_family(&rmnet_shs_genl_msg_family);}else{rm_err(
-"\x53\x48\x53\x5f\x4d\x53\x47\x5f\x47\x4e\x4c\x3a\x20\x73\x75\x63\x63\x65\x73\x73\x66\x75\x6c\x6c\x79\x20\x72\x65\x67\x69\x73\x74\x65\x72\x65\x64\x20\x67\x65\x6e\x65\x72\x69\x63\x20\x6e\x65\x74\x6c\x69\x6e\x6b\x20\x66\x61\x6d\x69\x6c\x79\x3a\x20\x25\x73"
-,DATARMNETa35687f809);}return(0xd2d+202-0xdf7);}int DATARMNETeabd69d1ab(void){
-int ret;DATARMNET5945236cd3(DATARMNET19092afcc2);ret=genl_unregister_family(&
-DATARMNETecc643c219);if(ret!=(0xd2d+202-0xdf7)){rm_err(
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x75\x6e\x72\x65\x67\x69\x73\x74\x65\x72\x20\x66\x61\x6d\x69\x6c\x79\x20\x66\x61\x69\x6c\x65\x64\x3a\x20\x25\x69" "\n"
-,ret);}DATARMNETc252c204a8=(0xd2d+202-0xdf7);ret=genl_unregister_family(&
-rmnet_shs_genl_msg_family);if(ret!=(0xd2d+202-0xdf7)){rm_err(
-"\x53\x48\x53\x5f\x47\x4e\x4c\x3a\x20\x75\x6e\x72\x65\x67\x69\x73\x74\x65\x72\x20\x66\x61\x6d\x69\x6c\x79\x20\x66\x61\x69\x6c\x65\x64\x3a\x20\x25\x69" "\n"
-,ret);}return(0xd2d+202-0xdf7);}
+
+static const struct genl_ops rmnet_shs_genl_ops[] = {
+	RMNET_SHS_GENL_OP(RMNET_SHS_GENL_CMD_INIT_SHSUSRD,
+			  rmnet_shs_genl_dma_init),
+	RMNET_SHS_GENL_OP(RMNET_SHS_GENL_CMD_TRY_TO_MOVE_FLOW,
+			  rmnet_shs_genl_try_to_move_flow),
+	RMNET_SHS_GENL_OP(RMNET_SHS_GENL_CMD_SET_FLOW_SEGMENTATION,
+			  rmnet_shs_genl_set_flow_segmentation),
+	RMNET_SHS_GENL_OP(RMNET_SHS_GENL_CMD_MEM_SYNC,
+			  rmnet_shs_genl_mem_sync),
+	RMNET_SHS_GENL_OP(RMNET_SHS_GENL_CMD_LL_FLOW,
+			  rmnet_shs_genl_set_flow_ll),
+	RMNET_SHS_GENL_OP(RMNET_SHS_GENL_CMD_QUICKACK,
+			  rmnet_shs_genl_set_quickack_thresh),
+	RMNET_SHS_GENL_OP(RMNET_SHS_GENL_CMD_BOOTUP,
+			  rmnet_shs_genl_set_bootup_config),
+	RMNET_SHS_GENL_OP(RMNET_SHS_GENL_CMD_CLEANUP,
+			  rmnet_shs_genl_cleanup),
+	RMNET_SHS_GENL_OP(RMNET_SHS_GENL_CMD_BATCH_MOVE,
+			  rmnet_shs_genl_batch_move_flow),
+};
+
+/* Generic Netlink Message Channel policy and ops */
+static struct nla_policy rmnet_shs_genl_msg_attr_policy[RMNET_SHS_GENL_ATTR_MAX + 1] = {
+	[RMNET_SHS_GENL_MSG_ATTR_REQ]  = NLA_POLICY_EXACT_LEN(sizeof(struct rmnet_shs_msg_req)),
+	[RMNET_SHS_GENL_MSG_ATTR_RESP]  = NLA_POLICY_EXACT_LEN(sizeof(struct rmnet_shs_msg_resp)),
+};
+
+static const struct genl_ops rmnet_shs_genl_msg_ops[] = {
+	RMNET_SHS_GENL_OP(RMNET_SHS_GENL_MSG_WAIT_CMD,
+			  rmnet_shs_genl_msg_req_hdlr),
+};
+
+struct genl_family rmnet_shs_genl_family = {
+	.hdrsize = 0,
+	.name    = RMNET_SHS_GENL_FAMILY_NAME,
+	.version = RMNET_SHS_GENL_VERSION,
+	.maxattr = RMNET_SHS_GENL_ATTR_MAX,
+	.policy = rmnet_shs_genl_attr_policy,
+	.ops     = rmnet_shs_genl_ops,
+	.n_ops   = ARRAY_SIZE(rmnet_shs_genl_ops),
+};
+
+struct genl_family rmnet_shs_genl_msg_family = {
+	.hdrsize = 0,
+	.name    = RMNET_SHS_GENL_MSG_FAMILY_NAME,
+	.version = RMNET_SHS_GENL_VERSION,
+	.maxattr = RMNET_SHS_GENL_ATTR_MAX,
+	.policy = rmnet_shs_genl_msg_attr_policy,
+	.ops     = rmnet_shs_genl_msg_ops,
+	.n_ops   = ARRAY_SIZE(rmnet_shs_genl_msg_ops),
+};
+
+int rmnet_shs_genl_send_int_to_userspace(struct genl_info *info, int val)
+{
+	struct sk_buff *skb;
+	void *msg_head;
+	int rc;
+
+	skb = genlmsg_new(NLMSG_GOODSIZE, GFP_ATOMIC);
+	if (skb == NULL)
+		goto out;
+
+	msg_head = genlmsg_put(skb, 0, info->snd_seq+1, &rmnet_shs_genl_family,
+			       0, RMNET_SHS_GENL_CMD_INIT_SHSUSRD);
+	if (msg_head == NULL) {
+		rc = -ENOMEM;
+		rm_err("SHS_GNL: FAILED to msg_head %d\n", rc);
+		kfree(skb);
+		goto out;
+	}
+	rc = nla_put_u32(skb, RMNET_SHS_GENL_ATTR_INT, val);
+	if (rc != 0) {
+		rm_err("SHS_GNL: FAILED nla_put %d\n", rc);
+		kfree(skb);
+		goto out;
+	}
+
+	genlmsg_end(skb, msg_head);
+
+	rc = genlmsg_unicast(genl_info_net(info), skb, info->snd_portid);
+	if (rc != 0)
+		goto out;
+
+	rm_err("SHS_GNL: Successfully sent int %d\n", val);
+	return 0;
+
+out:
+	/* TODO: Need to free skb?? */
+	rm_err("SHS_GNL: FAILED to send int %d\n", val);
+	return -1;
+}
+
+int rmnet_shs_genl_send_int_to_userspace_no_info(int val)
+{
+	struct sk_buff *skb;
+	void *msg_head;
+	int rc;
+
+	if (last_net == NULL) {
+		rm_err("SHS_GNL: FAILED to send int %d - last_net is NULL\n",
+		       val);
+		return -1;
+	}
+
+	skb = genlmsg_new(NLMSG_GOODSIZE, GFP_ATOMIC);
+	if (skb == NULL)
+		goto out;
+
+	msg_head = genlmsg_put(skb, 0, rmnet_shs_genl_seqnum++, &rmnet_shs_genl_family,
+			       0, RMNET_SHS_GENL_CMD_INIT_SHSUSRD);
+	if (msg_head == NULL) {
+		rc = -ENOMEM;
+		rm_err("SHS_GNL: FAILED to msg_head %d\n", rc);
+		kfree(skb);
+		goto out;
+	}
+	rc = nla_put_u32(skb, RMNET_SHS_GENL_ATTR_INT, val);
+	if (rc != 0) {
+		rm_err("SHS_GNL: FAILED nla_put %d\n", rc);
+		kfree(skb);
+		goto out;
+	}
+
+	genlmsg_end(skb, msg_head);
+
+	rc = genlmsg_unicast(last_net, skb, last_snd_portid);
+	if (rc != 0)
+		goto out;
+
+	rm_err("SHS_GNL: Successfully sent int %d\n", val);
+	return 0;
+
+out:
+	/* TODO: Need to free skb?? */
+	rm_err("SHS_GNL: FAILED to send int %d\n", val);
+	rmnet_shs_userspace_connected = 0;
+	return -1;
+}
+
+int rmnet_shs_genl_send_msg_to_userspace(void)
+{
+	struct sk_buff *skb;
+	void *msg_head;
+	int rc;
+	int val = rmnet_shs_genl_seqnum++;
+
+	rm_err("SHS_GNL: Trying to send msg %d\n", val);
+	skb = genlmsg_new(NLMSG_GOODSIZE, GFP_ATOMIC);
+	if (skb == NULL)
+		goto out;
+
+	msg_head = genlmsg_put(skb, 0, rmnet_shs_genl_seqnum++, &rmnet_shs_genl_family,
+			       0, RMNET_SHS_GENL_CMD_INIT_SHSUSRD);
+	if (msg_head == NULL) {
+		rc = -ENOMEM;
+		rm_err("SHS_GNL: FAILED to msg_head %d\n", rc);
+		kfree(skb);
+		goto out;
+	}
+	rc = nla_put_u32(skb, RMNET_SHS_GENL_ATTR_INT, val);
+	if (rc != 0) {
+		rm_err("SHS_GNL: FAILED nla_put %d\n", rc);
+		kfree(skb);
+		goto out;
+	}
+
+	genlmsg_end(skb, msg_head);
+
+	genlmsg_multicast(&rmnet_shs_genl_family, skb, 0, 0, GFP_ATOMIC);
+
+	rm_err("SHS_GNL: Successfully sent int %d\n", val);
+	return 0;
+
+out:
+	/* TODO: Need to free skb?? */
+	rm_err("SHS_GNL: FAILED to send int %d\n", val);
+	rmnet_shs_userspace_connected = 0;
+	return -1;
+}
+
+int rmnet_shs_genl_msg_direct_send_to_userspace(struct rmnet_shs_msg_resp *msg_ptr)
+{
+	struct sk_buff *skb;
+	void *msg_head;
+	int rc;
+
+	if (msg_last_net == NULL) {
+		rm_err("%s", "SHS_GNL: FAILED to send msg_last_net is NULL\n");
+		return -1;
+	}
+
+	skb = genlmsg_new(NLMSG_GOODSIZE, GFP_ATOMIC);
+	if (skb == NULL)
+		goto out;
+
+	msg_head = genlmsg_put(skb, 0, rmnet_shs_genl_msg_seqnum++,
+			       &rmnet_shs_genl_msg_family,
+			       0, RMNET_SHS_GENL_MSG_WAIT_CMD);
+	if (msg_head == NULL) {
+		rc = -ENOMEM;
+		rm_err("SHS_GNL: FAILED to msg_head %d\n", rc);
+		kfree(skb);
+		goto out;
+	}
+	rc = nla_put(skb, RMNET_SHS_GENL_MSG_ATTR_RESP,
+		     sizeof(struct rmnet_shs_msg_resp),
+		     msg_ptr);
+	if (rc != 0) {
+		rm_err("SHS_GNL: FAILED nla_put %d\n", rc);
+		kfree(skb);
+		goto out;
+	}
+
+	genlmsg_end(skb, msg_head);
+
+	rc = genlmsg_unicast(msg_last_net, skb, msg_last_snd_portid);
+	if (rc != 0)
+		goto out;
+
+	rm_err("SHS_MSG_GNL: Successfully sent msg %d\n",
+	       rmnet_shs_genl_msg_seqnum);
+	return 0;
+
+out:
+	rm_err("%s", "SHS_GNL: FAILED to send to msg channel\n");
+	return -1;
+}
+
+/* Currently unused - handles message from userspace to initialize the shared memory,
+ * memory is inited by kernel wq automatically
+ */
+int rmnet_shs_genl_dma_init(struct sk_buff *skb_2, struct genl_info *info)
+{
+	rm_err("%s", "SHS_GNL: rmnet_shs_genl_dma_init: Clear LL");
+
+	rmnet_shs_ll_deinit();
+
+	if (info == NULL) {
+		rm_err("%s", "SHS_GNL: an error occured - info is null");
+		return -1;
+	}
+
+	return 0;
+}
+
+int rmnet_shs_genl_cleanup(struct sk_buff *skb_2, struct genl_info *info)
+{
+	struct nlattr *na;
+	struct rmnet_shs_wq_clean_info flow_info;
+
+	rm_err("%s", "SHS_GNL: rmnet_shs_genl_cleanup");
+
+	if (info == NULL) {
+		rm_err("%s", "SHS_GNL: an error occured - info is null");
+		return -1;
+	}
+
+	na = info->attrs[RMNET_SHS_GENL_ATTR_CLEAN];
+	if (na) {
+        /* Dyanmically allocating filter/flow info which must be freed */
+		if (nla_memcpy(&flow_info, na, sizeof(flow_info)) > 0) {
+			rm_err("SHS_GNL: cleanup hash %x ",
+			       flow_info.hash_to_clean);
+
+			rmnet_shs_wq_cleanup_hash_tbl(1, flow_info.hash_to_clean);
+			rmnet_shs_genl_send_int_to_userspace(info,
+						RMNET_SHS_CLEAN_PASS_INT);
+		} else {
+			rm_err("SHS_GNL: nla_memcpy failed %d\n",
+			       RMNET_SHS_GENL_ATTR_FLOW);
+			rmnet_shs_genl_send_int_to_userspace(info,
+					RMNET_SHS_CLEAN_FAIL_RESP_INT);
+			return 0;
+		}
+	} else {
+		rm_err("SHS_GNL: no info->attrs %d\n",
+		       RMNET_SHS_GENL_ATTR_CLEAN);
+		rmnet_shs_genl_send_int_to_userspace(info,
+				RMNET_SHS_CLEAN_FAIL_RESP_INT);
+		return 0;
+	}
+
+	return 0;
+}
+
+int rmnet_shs_genl_set_flow_ll(struct sk_buff *skb_2, struct genl_info *info)
+{
+	struct nlattr *na;
+	struct rmnet_shs_wq_flow_node *flow_info;
+
+	rm_err("%s", "SHS_GNL: rmnet_shs_genl_set_flow_ll");
+
+	if (info == NULL) {
+		rm_err("%s", "SHS_GNL: an error occured - info is null");
+		return -1;
+	}
+
+	na = info->attrs[RMNET_SHS_GENL_ATTR_FLOW];
+	if (na) {
+        /* Dyanmically allocating filter/flow info which must be freed */
+		flow_info = kzalloc(sizeof(*flow_info), GFP_ATOMIC);
+		if (!flow_info) {
+			rm_err("%s", "SHS_GNL: rmnet_shs_genl_set_flow_ll flow info failure");
+			rmnet_shs_genl_send_int_to_userspace(info,
+					RMNET_SHS_SEG_FAIL_RESP_INT);
+			return 0;
+		}
+
+		if (nla_memcpy(&flow_info->info, na, sizeof(flow_info->info)) > 0) {
+			/* Fixup various optional elements with sane values.
+			 * Currently, this means if no ranges provided, set the
+			 * missinge values.
+			 */
+			if (flow_info->info.src_addr_valid &&
+			    !flow_info->info.src_ip_addr_mask.mask)
+				memset(&flow_info->info.src_ip_addr_mask.v6_mask,
+				       0xFFFFFFFF,
+				       sizeof(flow_info->info.src_ip_addr_mask.v6_mask));
+
+			if (flow_info->info.dest_addr_valid &&
+			    !flow_info->info.dest_ip_addr_mask.mask)
+				memset(&flow_info->info.dest_ip_addr_mask.v6_mask,
+				       0xFFFFFFFF,
+				       sizeof(flow_info->info.dest_ip_addr_mask.v6_mask));
+
+			if (flow_info->info.src_port_valid &&
+			    !flow_info->info.src_port_max)
+				flow_info->info.src_port_max = flow_info->info.src_port;
+
+			if (flow_info->info.dest_port_valid &&
+			    !flow_info->info.dest_port_max)
+				flow_info->info.dest_port_max = flow_info->info.dest_port;
+
+			if (flow_info->info.opcode == RMNET_SHS_LL_OPCODE_ADD)
+				rmnet_shs_add_llflow(flow_info);
+			else if (flow_info->info.opcode == RMNET_SHS_LL_OPCODE_DEL)
+				rmnet_shs_remove_llflow(flow_info);
+			rmnet_shs_genl_send_int_to_userspace(info,
+						RMNET_SHS_SEG_SET_RESP_INT);
+		} else {
+			rm_err("SHS_GNL: nla_memcpy failed %d\n",
+			       RMNET_SHS_GENL_ATTR_FLOW);
+			rmnet_shs_genl_send_int_to_userspace(info,
+					RMNET_SHS_SEG_FAIL_RESP_INT);
+			return 0;
+		}
+	} else {
+		rm_err("SHS_GNL: no info->attrs %d\n",
+		       RMNET_SHS_GENL_ATTR_FLOW);
+		rmnet_shs_genl_send_int_to_userspace(info,
+				RMNET_SHS_SEG_FAIL_RESP_INT);
+		return 0;
+	}
+
+	return 0;
+}
+
+int rmnet_shs_genl_set_bootup_config(struct sk_buff *skb_2, struct genl_info *info)
+{
+	struct nlattr *na;
+	struct rmnet_shs_bootup_info bootup_info;
+	int i;
+	int maj_ver;
+	int min_ver;
+
+	rm_err("%s %s", "SHS_GNL: ", __func__);
+
+	if (info == NULL) {
+		rm_err("%s", "SHS_GNL: an error occured - info is null");
+		return -1;
+	}
+
+	na = info->attrs[RMNET_SHS_GENL_ATTR_BOOTUP];
+	if (na) {
+		if (nla_memcpy(&bootup_info, na, sizeof(bootup_info)) > 0) {
+
+			rmnet_shs_cfg.non_perf_mask = bootup_info.non_perf_mask;
+			rmnet_shs_cfg.max_s_cores = hweight_long(bootup_info.non_perf_mask);
+			rmnet_shs_cfg.perf_mask = ~rmnet_shs_cfg.non_perf_mask;
+			rmnet_shs_cfg.feature_mask = bootup_info.feature_mask;
+			rmnet_shs_cfg.cpu_freq_boost_val = bootup_info.cpu_freq_boost_val;
+			rmnet_shs_cfg.usr_version = bootup_info.usr_version;
+			maj_ver = bootup_info.usr_version >> 16;
+			min_ver = bootup_info.usr_version & 0xFFFF;
+
+			/* Requires shsusrd to enable */
+			if (rmnet_shs_cfg.feature_mask & INST_RX_SWTCH_FEAT) {
+				rmnet_shs_inst_rate_switch = 1;
+			}
+
+			rm_err("SHS_GNL: bootup req "
+			       "feature_mask = 0x%x non_perfmaxk = 0x%x, perf_mask 0x%x version %d.%d",
+			       bootup_info.feature_mask,
+			       rmnet_shs_cfg.non_perf_mask,
+				   rmnet_shs_cfg.perf_mask, maj_ver, min_ver);
+			for(i = 0; i < MAX_CPUS; i++)
+			{
+				rmnet_shs_cpu_rx_min_pps_thresh[i] = bootup_info.rx_min_pps_thresh[i];
+				rmnet_shs_cpu_rx_max_pps_thresh[i] = bootup_info.rx_max_pps_thresh[i];
+				rm_err("SHS_GNL: bootup %i req %llu %llu", i,
+						rmnet_shs_cpu_rx_min_pps_thresh[i],
+						rmnet_shs_cpu_rx_max_pps_thresh[i] );
+			}
+			rmnet_shs_genl_send_int_to_userspace(info,
+					RMNET_SHS_BOOT_SET_RESP_INT);
+
+		} else {
+			rm_err("SHS_GNL: nla_memcpy failed %d\n",
+			       RMNET_SHS_GENL_ATTR_BOOTUP);
+			rmnet_shs_genl_send_int_to_userspace(info,
+					RMNET_SHS_BOOT_FAIL_RESP_INT);
+			return 0;
+		}
+	} else {
+		rm_err("SHS_GNL: no info->attrs %d\n",
+		       RMNET_SHS_GENL_ATTR_BOOTUP);
+		rmnet_shs_genl_send_int_to_userspace(info,
+				RMNET_SHS_BOOT_FAIL_RESP_INT);
+		return 0;
+	}
+
+	return 0;
+}
+
+int rmnet_shs_genl_set_flow_segmentation(struct sk_buff *skb_2, struct genl_info *info)
+{
+	struct nlattr *na;
+	struct rmnet_shs_wq_seg_info seg_info;
+	int rc = 0;
+
+	rm_err("%s", "SHS_GNL: rmnet_shs_genl_set_flow_segmentation");
+
+	if (info == NULL) {
+		rm_err("%s", "SHS_GNL: an error occured - info is null");
+		return -1;
+	}
+
+	na = info->attrs[RMNET_SHS_GENL_ATTR_SEG];
+	if (na) {
+		if (nla_memcpy(&seg_info, na, sizeof(seg_info)) > 0) {
+			rm_err("SHS_GNL: recv segmentation req "
+			       "hash_to_set = 0x%x segs_per_skb = %u",
+			       seg_info.hash_to_set,
+			       seg_info.segs_per_skb);
+
+			rc = rmnet_shs_wq_set_flow_segmentation(seg_info.hash_to_set,
+								seg_info.segs_per_skb);
+
+			if (rc == 1) {
+				rmnet_shs_genl_send_int_to_userspace(info,
+						RMNET_SHS_SEG_SET_RESP_INT);
+				trace_rmnet_shs_wq_high(RMNET_SHS_WQ_SHSUSR,
+					RMNET_SHS_WQ_FLOW_SEG_SET_PASS,
+					seg_info.hash_to_set, seg_info.segs_per_skb,
+					0xDEF, 0xDEF, NULL, NULL);
+			} else {
+				rmnet_shs_genl_send_int_to_userspace(info,
+						RMNET_SHS_SEG_FAIL_RESP_INT);
+				trace_rmnet_shs_wq_high(RMNET_SHS_WQ_SHSUSR,
+					RMNET_SHS_WQ_FLOW_SEG_SET_FAIL,
+					seg_info.hash_to_set, seg_info.segs_per_skb,
+					0xDEF, 0xDEF, NULL, NULL);
+				return 0;
+			}
+		} else {
+			rm_err("SHS_GNL: nla_memcpy failed %d\n",
+			       RMNET_SHS_GENL_ATTR_SEG);
+			rmnet_shs_genl_send_int_to_userspace(info,
+					RMNET_SHS_SEG_FAIL_RESP_INT);
+			return 0;
+		}
+	} else {
+		rm_err("SHS_GNL: no info->attrs %d\n",
+		       RMNET_SHS_GENL_ATTR_SEG);
+		rmnet_shs_genl_send_int_to_userspace(info,
+				RMNET_SHS_SEG_FAIL_RESP_INT);
+		return 0;
+	}
+
+	return 0;
+}
+
+int rmnet_shs_genl_set_quickack_thresh(struct sk_buff *skb_2, struct genl_info *info)
+{
+	struct nlattr *na;
+	struct rmnet_shs_wq_quickack_info quickack_info;
+	int rc = 0;
+
+	rm_err("%s", "SHS_GNL: rmnet_shs_genl_set_quickack_thresh");
+
+	if (info == NULL) {
+		rm_err("%s", "SHS_GNL: an error occured - info is null");
+		return -1;
+	}
+
+	na = info->attrs[RMNET_SHS_GENL_ATTR_QUICKACK];
+	if (na) {
+		if (nla_memcpy(&quickack_info, na, sizeof(quickack_info)) > 0) {
+			rm_err("SHS_GNL: recv quickack req "
+			       "hash_to_set = 0x%x thresh = %u",
+			       quickack_info.hash_to_set,
+			       quickack_info.ack_thresh);
+
+			rc = rmnet_shs_wq_set_quickack_thresh(quickack_info.hash_to_set,
+							      quickack_info.ack_thresh);
+
+			if (rc == 1) {
+				rmnet_shs_genl_send_int_to_userspace(info,
+						RMNET_SHS_QUICKACK_SET_RESP_INT);
+			} else {
+				rmnet_shs_genl_send_int_to_userspace(info,
+						RMNET_SHS_QUICKACK_FAIL_RESP_INT);
+				return 0;
+			}
+		} else {
+			rm_err("SHS_GNL: nla_memcpy failed %d\n",
+			       RMNET_SHS_GENL_ATTR_QUICKACK);
+			rmnet_shs_genl_send_int_to_userspace(info,
+					RMNET_SHS_QUICKACK_FAIL_RESP_INT);
+			return 0;
+		}
+	} else {
+		rm_err("SHS_GNL: no info->attrs %d\n",
+		       RMNET_SHS_GENL_ATTR_QUICKACK);
+		rmnet_shs_genl_send_int_to_userspace(info,
+				RMNET_SHS_QUICKACK_FAIL_RESP_INT);
+		return 0;
+	}
+
+	return 0;
+}
+
+int rmnet_shs_genl_batch_move_flow(struct sk_buff *skb_2, struct genl_info *info)
+{
+	struct nlattr *na;
+	struct rmnet_shs_wq_batch_sugg_info sugg_info;
+	int rc = 0, i = 0, fails = 0;
+
+	rm_err("%s", "SHS_GNL: rmnet_shs_genl_batch_move_flow");
+
+	if (info == NULL) {
+		rm_err("%s", "SHS_GNL: an error occured - info is null");
+		return -1;
+	}
+
+	na = info->attrs[RMNET_SHS_GENL_ATTR_BATCH_MOVE];
+	if (na && nla_memcpy(&sugg_info, na, sizeof(sugg_info)) > 0) {
+		if (sugg_info.num_flows >= MAX_BATCH_FLOWS)
+			goto fail;
+
+		for (i = 0; i < sugg_info.num_flows; i++) {
+			rm_err("SHS_GNL: cur_cpu =%u dest_cpu = %u "
+				"hash_to_move = 0x%x sugg_type = %u",
+				sugg_info.move_info[i].cur_cpu,
+				sugg_info.move_info[i].dest_cpu,
+				sugg_info.move_info[i].hash_to_move,
+				sugg_info.move_info[i].sugg_type);
+
+			if (sugg_info.move_info[i].dest_cpu >= MAX_CPUS || sugg_info.move_info[i].cur_cpu >= MAX_CPUS) {
+				rmnet_shs_mid_err[RMNET_SHS_MALFORM_MOVE]++;
+				fails++;
+				continue;
+			}
+
+			rc = rmnet_shs_wq_try_to_move_flow(sugg_info.move_info[i].cur_cpu,
+							sugg_info.move_info[i].dest_cpu,
+							sugg_info.move_info[i].hash_to_move,
+							sugg_info.move_info[i].sugg_type);
+			if (rc != 1) {
+				fails++;
+			}
+		}
+		if (!fails) {
+			rmnet_shs_genl_send_int_to_userspace(info, RMNET_SHS_BATCH_PASS_INT);
+			return 0;
+		}
+	}
+
+fail:
+	rmnet_shs_genl_send_int_to_userspace(info, RMNET_SHS_BATCH_FAIL_INT);
+	return 0;
+}
+
+
+int rmnet_shs_genl_try_to_move_flow(struct sk_buff *skb_2, struct genl_info *info)
+{
+	struct nlattr *na;
+	struct rmnet_shs_wq_sugg_info sugg_info;
+	int rc = 0;
+
+	rm_err("%s", "SHS_GNL: rmnet_shs_genl_try_to_move_flow");
+
+	if (info == NULL) {
+		rm_err("%s", "SHS_GNL: an error occured - info is null");
+		return -1;
+	}
+
+	na = info->attrs[RMNET_SHS_GENL_ATTR_SUGG];
+	if (na) {
+		if (nla_memcpy(&sugg_info, na, sizeof(sugg_info)) > 0) {
+			rm_err("SHS_GNL: cur_cpu =%u dest_cpu = %u "
+			       "hash_to_move = 0x%x sugg_type = %u",
+			       sugg_info.cur_cpu,
+			       sugg_info.dest_cpu,
+			       sugg_info.hash_to_move,
+			       sugg_info.sugg_type);
+			if (sugg_info.dest_cpu >= MAX_CPUS || sugg_info.cur_cpu >= MAX_CPUS) {
+				rmnet_shs_mid_err[RMNET_SHS_MALFORM_MOVE]++;
+				rmnet_shs_genl_send_int_to_userspace(info, RMNET_SHS_RMNET_MOVE_FAIL_RESP_INT);
+				return -1;
+			}
+
+			if (sugg_info.sugg_type == RMNET_SHS_WQ_SUGG_LL_FLOW_CORE) {
+				rmnet_shs_ll_flow_cpu = sugg_info.dest_cpu;
+				trace_rmnet_shs_wq_high(RMNET_SHS_WQ_SHSUSR, RMNET_SHS_WQ_TRY_PASS,
+				   sugg_info.cur_cpu, sugg_info.dest_cpu,
+				   sugg_info.hash_to_move, sugg_info.sugg_type, NULL, NULL);
+
+				rmnet_shs_genl_send_int_to_userspace(info,RMNET_SHS_RMNET_MOVE_DONE_RESP_INT);
+				return 0;
+			}
+			if (sugg_info.sugg_type == RMNET_SHS_WQ_SUGG_LL_PHY_CORE) {
+				rmnet_shs_ll_phy_cpu = sugg_info.dest_cpu;
+				trace_rmnet_shs_wq_high(RMNET_SHS_WQ_SHSUSR, RMNET_SHS_WQ_TRY_PASS,
+				   sugg_info.cur_cpu, sugg_info.dest_cpu,
+				   sugg_info.hash_to_move, sugg_info.sugg_type, NULL, NULL);
+
+				rmnet_shs_genl_send_int_to_userspace(info,RMNET_SHS_RMNET_MOVE_DONE_RESP_INT);
+				return 0;
+			}
+
+			if (sugg_info.sugg_type == RMNET_SHS_WQ_SUGG_RMNET_TO_SILVER) {
+				rmnet_shs_switch_reason[RMNET_SHS_PHY_SWITCH_GOLD_TO_S]++;
+
+				/* Only drop to silver if given a gold core and phy core not already dropped*/
+				if (!((1 << sugg_info.dest_cpu) & NONPERF_MASK)  ||
+				    ((1 << rmnet_shs_cfg.phy_tcpu) & NONPERF_MASK )) {
+						rmnet_shs_genl_send_int_to_userspace(info,RMNET_SHS_RMNET_MOVE_DONE_RESP_INT);
+					return -1;
+				}
+				/* Dont move back down to core 1 if core 1 is reserved */
+				if (((1 << sugg_info.dest_cpu) & rmnet_shs_halt_mask)) {
+					rmnet_shs_switch_reason[RMNET_SHS_SUGG_R2S_FAIL1]++;
+					rmnet_shs_genl_send_int_to_userspace(info, RMNET_SHS_RMNET_MOVE_FAIL_RESP_INT);
+					return -1;
+				}
+
+				rmnet_shs_cfg.phy_tcpu = sugg_info.dest_cpu;
+				rcu_read_lock();
+				rmnet_shs_switch_enable();
+				rcu_read_unlock();
+
+				rmnet_shs_genl_send_int_to_userspace(info,RMNET_SHS_RMNET_MOVE_DONE_RESP_INT);
+				return 0;
+			}
+
+			if (sugg_info.sugg_type == RMNET_SHS_WQ_SUGG_RMNET_TO_GOLD) {
+				rmnet_shs_switch_reason[RMNET_SHS_PHY_SWITCH_SILVER_TO_G]++;
+
+				/* Only ramp to gold  if given a gold core and phy cpu is not already ramped*/
+				if (!((1 << sugg_info.dest_cpu) & PERF_MASK)) {
+					rmnet_shs_genl_send_int_to_userspace(info,  RMNET_SHS_RMNET_MOVE_DONE_RESP_INT);
+					return -1;
+				}
+
+				if (((1 << sugg_info.dest_cpu) & rmnet_shs_halt_mask)) {
+					rmnet_shs_switch_reason[RMNET_SHS_SUGG_R2G_FAIL1]++;
+					rmnet_shs_genl_send_int_to_userspace(info, RMNET_SHS_RMNET_MOVE_FAIL_RESP_INT);
+					return -1;
+				}
+
+				/* If dest is already current cpu exit */
+				if ((rmnet_shs_cfg.phy_acpu) == sugg_info.dest_cpu &&
+				    (rmnet_shs_cfg.phy_tcpu) == sugg_info.dest_cpu) {
+					rmnet_shs_genl_send_int_to_userspace(info,  RMNET_SHS_RMNET_MOVE_DONE_RESP_INT);
+					return 0;
+				}
+
+				if (((1 << sugg_info.dest_cpu) & PERF_MASK) && ((1 << rmnet_shs_cfg.phy_acpu) & PERF_MASK)) {
+					rmnet_shs_switch_reason[RMNET_SHS_RM2G_G2G_SWITCH]++;
+				}
+
+
+				rmnet_shs_cfg.phy_tcpu = sugg_info.dest_cpu;
+				rcu_read_lock();
+				rmnet_shs_switch_enable();
+				rcu_read_unlock();
+
+				rmnet_shs_genl_send_int_to_userspace(info,RMNET_SHS_RMNET_MOVE_DONE_RESP_INT);
+				return 0;
+			}
+
+			rc = rmnet_shs_wq_try_to_move_flow(sugg_info.cur_cpu,
+							   sugg_info.dest_cpu,
+							   sugg_info.hash_to_move,
+							   sugg_info.sugg_type);
+			if (rc == 1) {
+				rmnet_shs_genl_send_int_to_userspace(info,
+						RMNET_SHS_MOVE_PASS_RESP_INT);
+				trace_rmnet_shs_wq_high(RMNET_SHS_WQ_SHSUSR, RMNET_SHS_WQ_TRY_PASS,
+				   sugg_info.cur_cpu, sugg_info.dest_cpu,
+				   sugg_info.hash_to_move, sugg_info.sugg_type, NULL, NULL);
+
+			} else {
+				rmnet_shs_genl_send_int_to_userspace(info,
+						RMNET_SHS_MOVE_FAIL_RESP_INT);
+				trace_rmnet_shs_wq_high(RMNET_SHS_WQ_SHSUSR, RMNET_SHS_WQ_TRY_FAIL,
+				   sugg_info.cur_cpu, sugg_info.dest_cpu,
+				   sugg_info.hash_to_move, sugg_info.sugg_type, NULL, NULL);
+				return 0;
+			}
+		} else {
+			rm_err("SHS_GNL: nla_memcpy failed %d\n",
+			       RMNET_SHS_GENL_ATTR_SUGG);
+			rmnet_shs_genl_send_int_to_userspace(info,
+					RMNET_SHS_MOVE_FAIL_RESP_INT);
+			return 0;
+		}
+	} else {
+		rm_err("SHS_GNL: no info->attrs %d\n",
+		       RMNET_SHS_GENL_ATTR_SUGG);
+		rmnet_shs_genl_send_int_to_userspace(info,
+				RMNET_SHS_MOVE_FAIL_RESP_INT);
+		return 0;
+	}
+
+	return 0;
+}
+
+int rmnet_shs_genl_mem_sync(struct sk_buff *skb_2, struct genl_info *info)
+{
+	rm_err("%s", "SHS_GNL: rmnet_shs_genl_mem_sync");
+
+	if (!rmnet_shs_userspace_connected)
+		rmnet_shs_userspace_connected = 1;
+
+	/* Todo: detect when userspace is disconnected. If we dont get
+	 * a sync message in the next 2 wq ticks, we got disconnected
+	 */
+
+	trace_rmnet_shs_wq_high(RMNET_SHS_WQ_SHSUSR, RMNET_SHS_WQ_SHSUSR_SYNC_START,
+				0xDEF, 0xDEF, 0xDEF, 0xDEF, NULL, NULL);
+
+	if (info == NULL) {
+		rm_err("%s", "SHS_GNL: an error occured - info is null");
+		return -1;
+	}
+
+	last_net = genl_info_net(info);
+	last_snd_portid = info->snd_portid;
+
+	rm_err("port_id = %u", last_snd_portid);
+	return 0;
+}
+
+/* Create paylod messages from dlkm to userspace for specific message type
+ */
+void rmnet_shs_create_ping_boost_msg_resp(uint32_t perf_duration,
+					  struct rmnet_shs_msg_resp *msg_resp)
+{
+	struct rmnet_shs_ping_boost_payload ping_boost_msg;
+	struct timespec64 time;
+
+	if (msg_resp == NULL) {
+		rm_err("%s", "SHS_MSG_GNL - invalid input");
+		return;
+	}
+
+	memset(msg_resp, 0x0, sizeof(struct rmnet_shs_msg_resp));
+	memset(&ping_boost_msg, 0x0, sizeof(ping_boost_msg));
+
+	ktime_get_real_ts64(&time);
+	msg_resp->timestamp = (RMNET_SHS_GENL_SEC_TO_NSEC(time.tv_sec) + time.tv_nsec);
+	ping_boost_msg.perf_duration = perf_duration;
+	ping_boost_msg.perf_acq = 1;
+
+	/* Copy to boost info into to the payload of first msg */
+	memcpy(&(msg_resp->list[0].payload),
+	       &ping_boost_msg, sizeof(ping_boost_msg));
+	msg_resp->list[0].msg_type = RMNET_SHS_GENL_PING_BOOST_MSG;
+
+	msg_resp->valid = 1;
+	msg_resp->list_len = 1;
+}
+
+void rmnet_shs_create_pause_msg_resp(uint8_t seq,
+					  struct rmnet_shs_msg_resp *msg_resp)
+{
+	struct rmnet_shs_pause_payload pause_msg;
+
+	if (msg_resp == NULL) {
+		rm_err("%s", "SHS_MSG_GNL - invalid input");
+		return;
+	}
+
+	memset(msg_resp, 0x0, sizeof(struct rmnet_shs_msg_resp));
+	memset(&pause_msg, 0x0, sizeof(pause_msg));
+
+	/* Copy to boost info into to the payload of first msg */
+	memcpy(&(msg_resp->list[0].payload),
+	       &pause_msg, sizeof(pause_msg));
+	msg_resp->list[0].msg_type = RMNET_SHS_GENL_TRAFFIC_PAUSE_MSG;
+
+	msg_resp->valid = 1;
+	msg_resp->list_len = 1;
+}
+
+void rmnet_shs_create_cleanup_msg_resp(struct rmnet_shs_msg_resp *msg_resp)
+{
+	struct rmnet_shs_clean_payload clean_msg;
+
+	if (msg_resp == NULL) {
+		rm_err("%s", "SHS_MSG_GNL - invalid input");
+		return;
+	}
+
+	memset(msg_resp, 0x0, sizeof(struct rmnet_shs_msg_resp));
+	memset(&clean_msg, 0x0, sizeof(clean_msg));
+
+	/* Copy to boost info into to the payload of first msg */
+	memcpy(&(msg_resp->list[0].payload),
+	       &clean_msg, sizeof(clean_msg));
+	msg_resp->list[0].msg_type = RMNET_SHS_GENL_CLEANUP_MSG;
+
+	msg_resp->valid = 1;
+	msg_resp->list_len = 1;
+}
+
+void rmnet_shs_create_phy_msg_resp(struct rmnet_shs_msg_resp *msg_resp,
+                                  uint8_t ocpu, uint8_t ncpu)
+{
+	struct rmnet_shs_phy_change_payload phy_change_msg;
+	struct timespec64 time;
+
+	if (msg_resp == NULL) {
+		rm_err("%s", "SHS_MSG_GNL - invalid input");
+		return;
+	}
+
+	memset(msg_resp, 0x0, sizeof(struct rmnet_shs_msg_resp));
+	memset(&phy_change_msg, 0x0, sizeof(phy_change_msg));
+
+	ktime_get_real_ts64(&time);
+	msg_resp->timestamp = (RMNET_SHS_GENL_SEC_TO_NSEC(time.tv_sec) + time.tv_nsec);
+	phy_change_msg.old_cpu = ocpu;
+	phy_change_msg.new_cpu = ncpu;
+
+	/* Copy to boost info into to the payload of first msg */
+	memcpy(&(msg_resp->list[0].payload),
+	       &phy_change_msg, sizeof(phy_change_msg));
+	msg_resp->list[0].msg_type = RMNET_SHS_GENL_PHY_CHANGE_MSG;
+
+	msg_resp->valid = 1;
+	msg_resp->list_len = 1;
+}
+
+/* Handler for message channel to shsusrd */
+int rmnet_shs_genl_msg_req_hdlr(struct sk_buff *skb_2,
+				struct genl_info *info)
+{
+	rm_err("%s", "SHS_GNL_MSG: rmnet_shs_genl_msg_req");
+
+	if (!rmnet_shs_userspace_connected) {
+		rm_err("%s", "SHS_GNL_MSG: error: userspace not connected");
+		return -1;
+	}
+
+	if (info == NULL) {
+		rm_err("%s", "SHS_GNL_MSG: error: info is null");
+		return -1;
+	}
+
+	msg_last_net = genl_info_net(info);
+	msg_last_snd_portid = info->snd_portid;
+
+	rm_err("msg_port_id = %u", msg_last_snd_portid);
+	return 0;
+}
+
+/* register new generic netlink family */
+int rmnet_shs_wq_genl_init(void)
+{
+	int ret;
+
+	rmnet_shs_userspace_connected = 0;
+	ret = genl_register_family(&rmnet_shs_genl_family);
+	if (ret != 0) {
+		rm_err("SHS_GNL: register family failed: %i", ret);
+		genl_unregister_family(&rmnet_shs_genl_family);
+		return -1;
+	}
+
+	rm_err("SHS_GNL: successfully registered generic netlink family: %s",
+	       RMNET_SHS_GENL_FAMILY_NAME);
+
+	ret = genl_register_family(&rmnet_shs_genl_msg_family);
+	if (ret != 0) {
+		rm_err("SHS_MSG_GNL: register family failed: %i", ret);
+		genl_unregister_family(&rmnet_shs_genl_msg_family);
+	} else {
+		rm_err("SHS_MSG_GNL: successfully registered generic netlink family: %s",
+		       RMNET_SHS_GENL_MSG_FAMILY_NAME);
+	}
+
+	return 0;
+}
+
+/* Unregister the generic netlink family */
+int rmnet_shs_wq_genl_deinit(void)
+{
+	int ret;
+
+	rmnet_shs_genl_send_int_to_userspace_no_info(RMNET_SHS_SYNC_WQ_EXIT);
+
+	ret = genl_unregister_family(&rmnet_shs_genl_family);
+	if(ret != 0){
+		rm_err("SHS_GNL: unregister family failed: %i\n",ret);
+	}
+	rmnet_shs_userspace_connected = 0;
+
+	ret = genl_unregister_family(&rmnet_shs_genl_msg_family);
+	if(ret != 0){
+		rm_err("SHS_GNL: unregister family failed: %i\n", ret);
+	}
+	return 0;
+}

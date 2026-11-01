@@ -1,63 +1,79 @@
-/* Copyright (c) 2020 The Linux Foundation. All rights reserved.
- * Copyright (c) 2022-2024 Qualcomm Innovation Center, Inc. All rights reserved.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 and
- * only version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
+/* SPDX-License-Identifier: GPL-2.0-only */
+/*
+ * Copyright (c) 2020 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2022-2025 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 #include  "rmnet_shs_wq.h"
 #include  "rmnet_shs_common.h"
 #include  "rmnet_shs.h"
-#ifndef DATARMNET2883628e72
-#define DATARMNET2883628e72
-extern unsigned int DATARMNET1fc3ad67fd;extern unsigned long DATARMNETa804c0b904
-;extern unsigned int DATARMNETcab56af6d5 __read_mostly;extern unsigned long long
- DATARMNET713717107f[DATARMNETc6782fed88];extern unsigned long long 
-DATARMNET4793ed48af[DATARMNETc6782fed88];extern unsigned int DATARMNET18f2ba4444
-[DATARMNETc6782fed88];extern unsigned int DATARMNET2d482e7d9f[
-DATARMNETc6782fed88];extern unsigned long long DATARMNET77240d48ee[
-DATARMNETc6782fed88];extern unsigned long long DATARMNET77189ab85c[
-DATARMNETc6782fed88];extern unsigned long long DATARMNET79263b1183[
-DATARMNETc6782fed88];extern unsigned long long DATARMNET229d52b629[
-DATARMNETc6782fed88];extern unsigned long long DATARMNETd27ed7efea[
-DATARMNETc6782fed88];extern unsigned long long DATARMNET377ecf13ca[
-DATARMNETc6782fed88];extern unsigned long DATARMNETbf3b6fdfc8[
-DATARMNET2f9ea73326];extern unsigned long DATARMNET0fec241216[
-DATARMNET2f9ea73326];extern unsigned long long DATARMNET9e5e8e4048[
-DATARMNET2f9ea73326];extern int DATARMNETdba344c809[DATARMNET2f9ea73326];extern 
-int DATARMNET99a934c43a[DATARMNET2f9ea73326];extern unsigned long long 
-DATARMNET47956cbb0f[DATARMNET2f9ea73326];extern unsigned long long 
-DATARMNET338c8e7a2b[DATARMNET2f9ea73326];extern unsigned long long 
-DATARMNET4b1ae621cd[DATARMNET2f9ea73326];extern unsigned long long 
-DATARMNETf5133a99c6[DATARMNET2f9ea73326];extern unsigned long long 
-DATARMNETc5d73c43e6[DATARMNET2f9ea73326];extern unsigned long long 
-DATARMNETf4aa8ec23f[DATARMNET2f9ea73326];extern unsigned long long 
-DATARMNET6d75219ffb[DATARMNET2f9ea73326];extern unsigned long 
-DATARMNETb7ddf3c5dd[DATARMNETeccb61ebc3];extern unsigned long 
-DATARMNET14ed771dfb[DATARMNET3cef75f6cd];extern unsigned int DATARMNETea75c7b6f6
-;extern unsigned int DATARMNET7d18c0bcf8;extern unsigned int DATARMNET227d2ff866
-;extern unsigned int DATARMNETa1ac2608b5;extern unsigned int DATARMNET12565c8f98
-;extern unsigned int DATARMNET365ddeca1c;extern unsigned int DATARMNETbc049ffc4c
-[DATARMNETc6782fed88];extern unsigned int DATARMNET65393dea13[
-DATARMNETc6782fed88];extern unsigned int DATARMNET4ac8af832c;extern unsigned int
- DATARMNETa7909611da;extern unsigned int DATARMNET84413d1257[DATARMNETc6782fed88
-];extern unsigned int DATARMNET443cf5aaaf[DATARMNETc6782fed88];extern unsigned 
-int DATARMNETd75e474598[DATARMNETc6782fed88];extern unsigned int 
-DATARMNET25c61a512c;extern unsigned int DATARMNET1ad396a890;extern unsigned int 
-DATARMNET756bdd424a;extern unsigned int DATARMNET58b009b16b __read_mostly;extern
- unsigned long DATARMNET68d84e7b98[DATARMNETf3110711cb];extern unsigned long 
-DATARMNET930a441406[DATARMNET0d61981934];extern unsigned int DATARMNET3874292c18
-;extern unsigned int DATARMNETbb1a9dff8b;extern unsigned int DATARMNETf55430ea0a
-;extern unsigned int DATARMNET121c8bc82a;extern unsigned int DATARMNETd619186789
-;extern unsigned int DATARMNETaf95716235;extern unsigned int DATARMNET7e039054c6
-;extern unsigned int DATARMNET952c960091;extern unsigned int 
-rmnet_shs_no_sync_off;extern unsigned int DATARMNET68dc14b50d;
-#endif
 
+#ifndef _RMNET_SHS_MODULES_H_
+#define _RMNET_SHS_MODULES_H_
+
+extern unsigned int rmnet_shs_wq_interval_ms;
+extern unsigned long rmnet_shs_max_flow_inactivity_sec;
+extern unsigned int rmnet_shs_wq_tuning __read_mostly;
+extern unsigned long long rmnet_shs_cpu_rx_max_pps_thresh[MAX_CPUS];
+extern unsigned long long rmnet_shs_cpu_rx_min_pps_thresh[MAX_CPUS];
+extern unsigned int rmnet_shs_cpu_rx_flows[MAX_CPUS];
+extern unsigned int rmnet_shs_cpu_rx_filter_flows[MAX_CPUS];
+extern unsigned long long rmnet_shs_cpu_rx_bytes[MAX_CPUS];
+extern unsigned long long rmnet_shs_cpu_rx_pkts[MAX_CPUS];
+extern unsigned long long rmnet_shs_cpu_rx_bps[MAX_CPUS];
+extern unsigned long long rmnet_shs_cpu_rx_pps[MAX_CPUS];
+extern unsigned long long rmnet_shs_cpu_qhead_diff[MAX_CPUS];
+extern unsigned long long rmnet_shs_cpu_qhead_total[MAX_CPUS];
+extern unsigned long rmnet_shs_flow_hash[MAX_SUPPORTED_FLOWS_DEBUG];
+extern unsigned long rmnet_shs_flow_proto[MAX_SUPPORTED_FLOWS_DEBUG];
+extern unsigned long long rmnet_shs_flow_inactive_tsec[MAX_SUPPORTED_FLOWS_DEBUG];
+extern int rmnet_shs_flow_cpu[MAX_SUPPORTED_FLOWS_DEBUG];
+extern int rmnet_shs_flow_cpu_recommended[MAX_SUPPORTED_FLOWS_DEBUG];
+extern unsigned long long rmnet_shs_flow_rx_bytes[MAX_SUPPORTED_FLOWS_DEBUG];
+extern unsigned long long rmnet_shs_flow_rx_pkts[MAX_SUPPORTED_FLOWS_DEBUG];
+extern unsigned long long rmnet_shs_flow_rx_bps[MAX_SUPPORTED_FLOWS_DEBUG];
+extern unsigned long long rmnet_shs_flow_rx_pps[MAX_SUPPORTED_FLOWS_DEBUG];
+extern unsigned long long rmnet_shs_flow_silver_to_gold[MAX_SUPPORTED_FLOWS_DEBUG];
+extern unsigned long long rmnet_shs_flow_gold_to_silver[MAX_SUPPORTED_FLOWS_DEBUG];
+extern unsigned long long rmnet_shs_flow_gold_balance[MAX_SUPPORTED_FLOWS_DEBUG];
+extern unsigned long rmnet_shs_switch_reason[RMNET_SHS_SWITCH_MAX_REASON];
+extern unsigned long rmnet_shs_flush_reason[RMNET_SHS_FLUSH_MAX_REASON];
+extern unsigned int rmnet_shs_byte_store_limit;
+extern unsigned int rmnet_shs_pkts_store_limit;
+extern unsigned int rmnet_shs_max_core_wait;
+extern unsigned int rmnet_shs_inst_rate_interval;
+extern unsigned int rmnet_shs_inst_rate_switch;
+extern unsigned int rmnet_shs_fall_back_timer;
+extern unsigned int rmnet_shs_cpu_backlog_max_pkts[MAX_CPUS];
+extern unsigned int rmnet_shs_cpu_inst_rate_max_pkts[MAX_CPUS];
+extern unsigned int rmnet_shs_timeout;
+extern unsigned int rmnet_shs_switch_cores;
+extern unsigned int rmnet_shs_cpu_max_qdiff[MAX_CPUS];
+extern unsigned int rmnet_shs_cpu_ooo_count[MAX_CPUS];
+extern unsigned int rmnet_shs_cpu_max_coresum[MAX_CPUS];
+extern unsigned int rmnet_shs_cpu_prio_dur;
+extern unsigned int rmnet_oom_pkt_limit;
+extern unsigned int rmnet_shs_debug;
+extern unsigned int rmnet_shs_stats_enabled __read_mostly;
+extern unsigned long rmnet_shs_crit_err[RMNET_SHS_CRIT_ERR_MAX];
+extern unsigned long rmnet_shs_mid_err[RMNET_SHS_MID_ERR_MAX];
+extern unsigned int rmnet_shs_ll_flow_cpu;
+extern unsigned int rmnet_shs_ll_phy_cpu;
+extern unsigned int rmnet_shs_halt_mask;
+extern unsigned int rmnet_shs_reserve_mask;
+extern unsigned int rmnet_shs_wq_tick;
+extern unsigned int rmnet_shs_pause_count;
+extern unsigned int rmnet_shs_restart_count;
+extern unsigned int rmnet_shs_no_sync_packets;
+extern unsigned int rmnet_shs_no_sync_off;
+extern unsigned int rmnet_shs_reserve_on;
+extern unsigned int rmnet_shs_wake;
+extern unsigned int rmnet_shs_perf_duration;
+extern unsigned int rmnet_shs_max_qmap_pkt;
+extern unsigned int rmnet_shs_max_qmap_wait;
+extern unsigned int rmnet_shs_max_qmap_steer;
+extern unsigned int rmnet_shs_max_phy_backlog;
+extern unsigned int rmnet_shs_esp_pkts;
+extern unsigned int rmnet_shs_pb_boost_timer_ms;
+extern unsigned int rmnet_shs_freq_enable;
+#endif

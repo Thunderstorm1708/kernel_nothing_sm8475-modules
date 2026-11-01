@@ -40,6 +40,7 @@ vm_target_bases = [
     "pitti_32go",
     "parrot",
     "malabar",
+    "waipio",
 ]
 
 vm_targets = ["{}-{}".format(t, vt) for t in vm_target_bases for vt in vm_types]

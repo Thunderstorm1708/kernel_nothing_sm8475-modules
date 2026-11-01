@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2018-2021, The Linux Foundation. All rights reserved.
  * Copyright (c) 2021-2022 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -30,6 +31,10 @@
 #define DEFAULT_MQ_NUM 0
 #define ACK_MQ_OFFSET (MAX_MQ_NUM - 1)
 #define INVALID_MQ 0xFF
+
+/* Queue pair flow control macros for better code readability */
+#define RMNET_QUEUE_PAIR_ENABLE  1
+#define RMNET_QUEUE_PAIR_DISABLE 0
 
 #define DFC_MODE_SA 4
 #define PS_MAX_BEARERS 32
@@ -144,6 +149,7 @@ struct qmi_info {
 	bool dl_msg_active;
 	bool ps_ignore_grant;
 	int ps_ext;
+	struct rmnet_port *port;
 };
 
 enum data_ep_type_enum_v01 {
@@ -207,6 +213,10 @@ void qmi_rmnet_watchdog_add(struct rmnet_bearer_map *bearer);
 void qmi_rmnet_watchdog_remove(struct rmnet_bearer_map *bearer);
 
 int rmnet_ll_switch(struct net_device *dev, struct tcmsg *tcm, int attrlen);
+
+void qmi_rmnet_flow_control_queue_pair(struct net_device *dev,
+				       uint32_t data_queue_id,
+				       int enable);
 void rmnet_ll_guard_fn(struct timer_list *t);
 void rmnet_ll_wq_init(void);
 void rmnet_ll_wq_exit(void);

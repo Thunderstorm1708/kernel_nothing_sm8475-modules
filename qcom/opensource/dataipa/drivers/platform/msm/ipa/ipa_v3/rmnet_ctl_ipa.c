@@ -82,14 +82,14 @@ int ipa3_rmnet_ctl_init(void)
 	char buff[IPA_RESOURCE_NAME_MAX];
 
 	if (!ipa3_ctx) {
-		IPAERR("ipa3_ctx was not initialized\n");
+		IPAERR_BOOTUP("ipa3_ctx was not initialized\n");
 		return -EINVAL;
 	}
 
 	if (ipa_get_ep_mapping(IPA_CLIENT_APPS_WAN_LOW_LAT_PROD) == -1 ||
 		ipa_get_ep_mapping(IPA_CLIENT_APPS_WAN_LOW_LAT_CONS) == -1)
 	{
-		IPAERR("invalid low lat endpoints\n");
+		IPAERR_BOOTUP("invalid low lat endpoints\n");
 		return -EINVAL;
 	}
 
@@ -388,10 +388,13 @@ int ipa3_setup_apps_low_lat_prod_pipe(bool rmnet_config,
 		/* modem want offset at 0! */
 		ipa_low_lat_ep_cfg->ipa_ep_cfg.hdr.hdr_ofst_metadata = 0;
 	}
-	ipa_low_lat_ep_cfg->ipa_ep_cfg.mode.dst =
-		IPA_CLIENT_Q6_WAN_CONS;
-	ipa_low_lat_ep_cfg->ipa_ep_cfg.mode.mode =
-		IPA_DMA;
+
+	if (ipa3_ctx->ipa_hw_type >= IPA_HW_v5_5) {
+		ipa_low_lat_ep_cfg->ipa_ep_cfg.mode.mode = IPA_BASIC;
+	} else {
+		ipa_low_lat_ep_cfg->ipa_ep_cfg.mode.mode = IPA_DMA;
+		ipa_low_lat_ep_cfg->ipa_ep_cfg.mode.dst = IPA_CLIENT_Q6_WAN_CONS;
+	}
 	ipa_low_lat_ep_cfg->client =
 		IPA_CLIENT_APPS_WAN_LOW_LAT_PROD;
 	ipa_low_lat_ep_cfg->notify =
@@ -450,8 +453,8 @@ int ipa3_teardown_apps_low_lat_pipes(void)
 		ret = ipa_teardown_sys_pipe(
 			rmnet_ctl_ipa3_ctx->apps_to_ipa3_low_lat_hdl);
 		if (ret < 0) {
-			IPAERR("Failed to teardown APPS->IPA low lat pipe\n");
 			return ret;
+			IPAERR("Failed to teardown APPS->IPA low lat pipe\n");
 		}
 		rmnet_ctl_ipa3_ctx->apps_to_ipa3_low_lat_hdl = -1;
 		rmnet_ctl_ipa3_ctx->pipe_state &= ~IPA_RMNET_CTL_PIPE_TX_READY;
@@ -464,6 +467,7 @@ int ipa_rmnet_ctl_xmit(struct sk_buff *skb)
 	int ret;
 	int len;
 	unsigned long flags;
+	struct ipa_tx_meta meta;
 
 	if (!ipa3_ctx->rmnet_ctl_enable) {
 		IPAERR("low lat pipe not supported\n");
@@ -534,12 +538,18 @@ int ipa_rmnet_ctl_xmit(struct sk_buff *skb)
 	}
 	spin_unlock_irqrestore(&rmnet_ctl_ipa3_ctx->tx_lock, flags);
 
+	memset(&meta, 0, sizeof(meta));
+	if (ipa3_ctx->ipa_hw_type >= IPA_HW_v5_5) {
+		meta.pkt_init_dst_ep_valid = true;
+		meta.pkt_init_dst_ep = ipa_get_ep_mapping(IPA_CLIENT_Q6_WAN_CONS);
+		meta.pkt_ex_init_valid = true;
+		meta.pkt_init_dst_ep_remote = true;
+	}
 	len = skb->len;
 	/*
-	 * both data packets and command will be routed to
 	 * IPA_CLIENT_Q6_WAN_CONS based on DMA settings
 	 */
-	ret = ipa_tx_dp(IPA_CLIENT_APPS_WAN_LOW_LAT_PROD, skb, NULL);
+	ret = ipa_tx_dp(IPA_CLIENT_APPS_WAN_LOW_LAT_PROD, skb, &meta);
 	if (ret) {
 		if (ret == -EPIPE) {
 			IPAERR("Low lat fatal: pipe is not valid\n");
@@ -581,6 +591,7 @@ static void rmnet_ctl_wakeup_ipa(struct work_struct *work)
 	unsigned long flags;
 	struct sk_buff *skb;
 	int len = 0;
+	struct ipa_tx_meta meta;
 
 	/* calling from WQ */
 	ret = ipa_pm_activate_sync(rmnet_ctl_ipa3_ctx->rmnet_ctl_pm_hdl);
@@ -591,6 +602,14 @@ static void rmnet_ctl_wakeup_ipa(struct work_struct *work)
 			&rmnet_ctl_wakeup_work,
 			msecs_to_jiffies(1));
 		return;
+	}
+
+	memset(&meta, 0, sizeof(meta));
+	if (ipa3_ctx->ipa_hw_type >= IPA_HW_v5_5) {
+		meta.pkt_init_dst_ep_valid = true;
+		meta.pkt_init_dst_ep = ipa_get_ep_mapping(IPA_CLIENT_Q6_WAN_CONS);
+		meta.pkt_ex_init_valid = true;
+		meta.pkt_init_dst_ep_remote = true;
 	}
 
 	spin_lock_irqsave(&rmnet_ctl_ipa3_ctx->tx_lock, flags);
@@ -605,7 +624,7 @@ static void rmnet_ctl_wakeup_ipa(struct work_struct *work)
 		 * both data packets and command will be routed to
 		 * IPA_CLIENT_Q6_WAN_CONS based on DMA settings
 		 */
-		ret = ipa_tx_dp(IPA_CLIENT_APPS_WAN_LOW_LAT_PROD, skb, NULL);
+		ret = ipa_tx_dp(IPA_CLIENT_APPS_WAN_LOW_LAT_PROD, skb, &meta);
 		if (ret) {
 			if (ret == -EPIPE) {
 				/* try to drain skb from queue if pipe teardown */

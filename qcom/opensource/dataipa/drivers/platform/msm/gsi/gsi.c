@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2015-2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2022, 2024-2025 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
  */
 
 #include <linux/of.h>
@@ -706,7 +706,7 @@ static void gsi_process_chan(struct gsi_xfer_compl_evt *evt,
 		 * Increment RP local only in polling context to avoid
 		 * sys len mismatch.
 		 */
-		if (!callback || (ch_ctx->props.dir == CHAN_DIR_TO_GSI &&
+		if (!callback || (ch_ctx->props.dir == GSI_CHAN_DIR_TO_GSI &&
 			!ch_ctx->props.tx_poll))
 			/* the element at RP is also processed */
 			gsi_incr_ring_rp(&ch_ctx->ring);
@@ -729,7 +729,7 @@ static void gsi_process_chan(struct gsi_xfer_compl_evt *evt,
 	 * channel will receive the IEOB interrupt and xfer pointer will be
 	 * overwritten. To avoid this process all data in polling context.
 	 */
-	if (!callback || (ch_ctx->props.dir == CHAN_DIR_TO_GSI &&
+	if (!callback || (ch_ctx->props.dir == GSI_CHAN_DIR_TO_GSI &&
 		!ch_ctx->props.tx_poll)) {
 		ch_ctx->stats.completed++;
 		ch_ctx->user_data[rp_idx].valid = false;
@@ -767,7 +767,7 @@ static void gsi_process_evt_re(struct gsi_evt_ctx *ctx,
 	 * sys len mismatch.
 	 */
 	ch_ctx = &gsi_ctx->chan[evt->chid];
-	if (callback && (ch_ctx->props.dir == CHAN_DIR_FROM_GSI ||
+	if (callback && (ch_ctx->props.dir == GSI_CHAN_DIR_FROM_GSI ||
 		ch_ctx->props.tx_poll))
 		return;
 	gsi_incr_ring_rp(&ctx->ring);
@@ -804,7 +804,7 @@ static void gsi_ring_chan_doorbell(struct gsi_chan_ctx *ctx)
 	 * for TO_GSI channels the event ring doorbell is rang as part of
 	 * interrupt handling.
 	 */
-	if (ctx->evtr && ctx->props.dir == CHAN_DIR_FROM_GSI)
+	if (ctx->evtr && ctx->props.dir == GSI_CHAN_DIR_FROM_GSI)
 		gsi_ring_evt_doorbell(ctx->evtr);
 	ctx->ring.wp = ctx->ring.wp_local;
 
@@ -2131,10 +2131,8 @@ static int gsi_cleanup_xfer_user_data(unsigned long chan_hdl,
 			rp_idx = gsi_find_idx_from_addr(&ctx->ring,
 				ctx->ring.rp_local);
 			WARN_ON(!ctx->user_data[rp_idx].valid);
-			if (ctx->user_data[rp_idx].valid) {
-				cleanup_cb(ctx->props.chan_user_data,
-					ctx->user_data[rp_idx].p);
-			}
+			cleanup_cb(ctx->props.chan_user_data,
+				ctx->user_data[rp_idx].p);
 			gsi_incr_ring_rp(&ctx->ring);
 		}
 	}
@@ -3610,6 +3608,39 @@ void gsi_dump_ch_info(unsigned long chan_hdl)
 }
 EXPORT_SYMBOL(gsi_dump_ch_info);
 
+void gsi_dump_ch_scratch(u32 chan_hdl)
+{
+	uint32_t bytes = 0;
+	uint32_t overflows = 0;
+	uint32_t total_frames = 0;
+	uint64_t total_bytes = 0;
+	uint64_t avg_no_aggr_bytes = 0;
+
+	GSIERR("Dumping GSI channel scratch info for chan_hdl = %u\n", chan_hdl);
+	gsi_ctx->per.vote_clk_cb();
+	total_frames = gsihal_read_reg_nk(GSI_EE_n_GSI_CH_k_SCRATCH_5,
+		gsi_ctx->per.ee, chan_hdl);
+	if (!total_frames) {
+		GSIERR("Total aggregated frames %u\n", total_frames);
+		gsi_ctx->per.unvote_clk_cb();
+		return;
+	}
+
+	bytes = gsihal_read_reg_nk(GSI_EE_n_GSI_CH_k_SCRATCH_6,
+		gsi_ctx->per.ee, chan_hdl);
+	overflows = gsihal_read_reg_nk(GSI_EE_n_GSI_CH_k_SCRATCH_7,
+		gsi_ctx->per.ee, chan_hdl);
+	gsi_ctx->per.unvote_clk_cb();
+
+	total_bytes = bytes + (overflows * 0xFFFFFFFF);
+	avg_no_aggr_bytes = total_bytes / total_frames;
+
+	GSIERR("Total aggregated frames %u\n", total_frames);
+	GSIERR("Total aggregated bytes %llu\n", total_bytes);
+	GSIERR("Total no. of avarage aggregated bytes in frame %llu\n", avg_no_aggr_bytes);
+}
+EXPORT_SYMBOL_GPL(gsi_dump_ch_scratch);
+
 int gsi_stop_channel(unsigned long chan_hdl)
 {
 	enum gsi_ch_cmd_opcode op = GSI_CH_STOP;
@@ -3844,7 +3875,7 @@ revrfy_chnlstate:
 		reset_done = true;
 
 	/* workaround: reset GSI producers again */
-	if (ctx->props.dir == CHAN_DIR_FROM_GSI && !reset_done) {
+	if (ctx->props.dir == GSI_CHAN_DIR_FROM_GSI && !reset_done) {
 		usleep_range(GSI_RESET_WA_MIN_SLEEP, GSI_RESET_WA_MAX_SLEEP);
 		reset_done = true;
 		goto reset;
@@ -4132,7 +4163,7 @@ int gsi_is_channel_empty(unsigned long chan_hdl, bool *is_empty)
 
 	spin_lock_irqsave(slock, flags);
 
-	if (ctx->props.dir == CHAN_DIR_FROM_GSI && ctx->evtr) {
+	if (ctx->props.dir == GSI_CHAN_DIR_FROM_GSI && ctx->evtr) {
 		ev_ctx = &gsi_ctx->evtr[ctx->evtr->id];
 		/* Read the event ring rp from DDR to avoid mismatch */
 		rp = ev_ctx->props.gsi_read_event_ring_rp(&ev_ctx->props,
@@ -4161,14 +4192,14 @@ int gsi_is_channel_empty(unsigned long chan_hdl, bool *is_empty)
 		rp_local = ctx->ring.rp_local;
 	}
 
-	if (ctx->props.dir == CHAN_DIR_FROM_GSI)
+	if (ctx->props.dir == GSI_CHAN_DIR_FROM_GSI)
 		*is_empty = (rp_local == rp) ? true : false;
 	else
 		*is_empty = (wp == rp) ? true : false;
 
 	spin_unlock_irqrestore(slock, flags);
 
-	if (ctx->props.dir == CHAN_DIR_FROM_GSI && ctx->evtr)
+	if (ctx->props.dir == GSI_CHAN_DIR_FROM_GSI && ctx->evtr)
 		GSIDBG("ch=%ld ev=%d RP=0x%llx WP=0x%llx RP_LOCAL=0x%llx\n",
 			chan_hdl, ctx->evtr->id, rp, wp, rp_local);
 	else

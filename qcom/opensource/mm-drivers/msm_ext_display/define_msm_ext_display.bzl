@@ -1,18 +1,29 @@
-load("//build/kernel/kleaf:kernel.bzl", "ddk_module", "ddk_submodule")
+load("//build/kernel/kleaf:kernel.bzl", "ddk_module")
 load("//build/bazel_common_rules/dist:dist.bzl", "copy_to_dist_dir")
-load("//vendor/nothing/pong-kernel:target_variants.bzl", "get_all_variants")
+load("//vendor/qcom/opensource/mm-drivers:target_variants.bzl", "get_all_variants")
 
 def _define_module(target, variant):
     tv = "{}_{}".format(target, variant)
+
+    deps = select({
+        "//build/kernel/kleaf:socrepo_true": ["//soc-repo:all_headers"],
+        "//build/kernel/kleaf:socrepo_false": ["//msm-kernel:all_headers"],
+    })
+    kernel_build = select({
+        "//build/kernel/kleaf:socrepo_true": "//soc-repo:{}_base_kernel".format(tv),
+        "//build/kernel/kleaf:socrepo_false": "//msm-kernel:{}".format(tv),
+    })
+
     ddk_module(
         name = "{}_msm_ext_display".format(tv),
         srcs = ["src/msm_ext_display.c"],
         out = "msm_ext_display.ko",
         defconfig = "defconfig",
         kconfig = "Kconfig",
-        deps = ["//vendor/nothing/pong-kernel:all_headers",
-                "//vendor/nothing/pong-modules/qcom/opensource/mm-drivers:mm_drivers_headers"],
-        kernel_build = "//vendor/nothing/pong-kernel:{}".format(tv),
+        deps = deps + [
+            "//vendor/qcom/opensource/mm-drivers:mm_drivers_headers",
+        ],
+        kernel_build = kernel_build,
     )
 
     copy_to_dist_dir(
@@ -28,4 +39,6 @@ def _define_module(target, variant):
 
 def define_msm_ext_display():
     for (t, v) in get_all_variants():
+        if t == "malabar":
+            continue
         _define_module(t, v)

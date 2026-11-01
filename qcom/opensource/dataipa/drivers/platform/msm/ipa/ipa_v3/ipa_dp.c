@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2012-2021, The Linux Foundation. All rights reserved.
- *
  * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
  */
 #include <linux/ip.h>
@@ -27,7 +26,9 @@
 #include "ipahal.h"
 #include "ipahal_fltrt.h"
 #include "ipa_stats.h"
+#ifdef CONFIG_IPA_RMNET_MEM
 #include <rmnet_mem.h>
+#endif
 
 #define IPA_GSI_EVENT_RP_SIZE 8
 #define IPA_WAN_NAPI_MAX_FRAMES (NAPI_WEIGHT / IPA_WAN_AGGR_PKT_CNT)
@@ -637,9 +638,13 @@ int ipa3_send(struct ipa3_sys_context *sys,
 	int i = 0;
 	int j;
 	int result;
+	u32 mem_flag = GFP_ATOMIC;
 	const struct ipa_gsi_ep_config *gsi_ep_cfg;
 	bool send_nop = false;
 	unsigned int max_desc;
+
+	if (unlikely(!in_atomic))
+		mem_flag = GFP_KERNEL;
 
 	gsi_ep_cfg = ipa_get_gsi_ep_info(sys->ep->client);
 	if (unlikely(!gsi_ep_cfg)) {
@@ -1347,12 +1352,12 @@ int ipa3_setup_tput_pipe(void)
 
 	ipa_ep_idx = ipa_get_ep_mapping(sys_in.client);
 	if (ipa_ep_idx == IPA_EP_NOT_ALLOCATED) {
-		IPAERR("Invalid client.\n");
+		IPAERR_BOOTUP("Invalid client.\n");
 		return -EFAULT;
 	}
 	ep = &ipa3_ctx->ep[ipa_ep_idx];
 	if (ep->valid == 1) {
-		IPAERR("EP %d already allocated.\n", ipa_ep_idx);
+		IPAERR_BOOTUP("EP %d already allocated.\n", ipa_ep_idx);
 		return -EFAULT;
 	}
 	IPA_ACTIVE_CLIENTS_INC_EP(sys_in.client);
@@ -1362,13 +1367,13 @@ int ipa3_setup_tput_pipe(void)
 
 	result = ipa_gsi_setup_channel(&sys_in, ep);
 	if (result) {
-		IPAERR("Failed to setup GSI channel\n");
+		IPAERR_BOOTUP("Failed to setup GSI channel\n");
 		goto fail_setup;
 	}
 
 	result = ipa3_enable_data_path(ipa_ep_idx);
 	if (result) {
-		IPAERR("enable data path failed res=%d ep=%d.\n", result,
+		IPAERR_BOOTUP("enable data path failed res=%d ep=%d.\n", result,
 			 ipa_ep_idx);
 		goto fail_setup;
 	}
@@ -1438,6 +1443,7 @@ static void ipa3_tasklet_find_freepage(unsigned long data)
 
 }
 
+#ifdef CONFIG_IPA_RMNET_MEM
 static int ipa3_rmnet_mem_notifier(struct notifier_block *this,
 	unsigned long pool_size, void *ptr)
 {
@@ -1450,6 +1456,7 @@ static struct notifier_block ipa3_rmnet_mem_blk = {
 	.notifier_call = ipa3_rmnet_mem_notifier,
 	.priority = INT_MAX,
 };
+#endif
 
 /**
  * ipa_setup_sys_pipe() - Setup an IPA GPI pipe and perform
@@ -1475,7 +1482,10 @@ int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in, u32 *clnt_hdl)
 	char buff[IPA_RESOURCE_NAME_MAX];
 	struct ipa_ep_cfg ep_cfg_copy;
 	int (*tx_completion_func)(struct napi_struct *, int);
+#ifdef CONFIG_IPA_RMNET_MEM
 	int pool_capacity = 0;
+#endif
+	struct net_device *dummy_ndev = NULL;
 
 	if (sys_in == NULL || clnt_hdl == NULL) {
 		IPAERR(
@@ -1630,12 +1640,17 @@ int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in, u32 *clnt_hdl)
 	if (IPA_CLIENT_IS_PROD(sys_in->client) &&
 		ipa3_ctx->tx_napi_enable) {
 		if (sys_in->client == IPA_CLIENT_APPS_LAN_PROD) {
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(6, 13, 0))
+			dummy_ndev = &ipa3_ctx->generic_ndev;
+#else
+			dummy_ndev = ipa3_ctx->generic_ndev;
+#endif
 #if (LINUX_VERSION_CODE > KERNEL_VERSION(6, 0, 14))
-			netif_napi_add_tx_weight(&ipa3_ctx->generic_ndev,
+			netif_napi_add_tx_weight(dummy_ndev,
 			&ep->sys->napi_tx, tx_completion_func,
 			NAPI_TX_WEIGHT);
 #else
-			netif_tx_napi_add(&ipa3_ctx->generic_ndev,
+			netif_tx_napi_add(dummy_ndev,
 			&ep->sys->napi_tx, tx_completion_func,
 			NAPI_TX_WEIGHT);
 
@@ -1774,10 +1789,15 @@ int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in, u32 *clnt_hdl)
 				atomic_set(&ep->sys->page_recycle_repl->pending, 0);
 				/* For common page pool double the pool size. */
 				if (ipa3_ctx->wan_common_page_pool &&
-					sys_in->client == IPA_CLIENT_APPS_WAN_COAL_CONS)
+					sys_in->client == IPA_CLIENT_APPS_WAN_COAL_CONS) {
+#ifdef CONFIG_IPA_RMNET_MEM
 					ep->sys->page_recycle_repl->capacity =
 							(ep->sys->rx_pool_sz + 1) *
-							ipa3_ctx->ipa_gen_rx_cmn_page_pool_sz_factor;
+							((rmnet_mem_config_query(IPA_ID) & DISABLE_STATIC_REDUCTION_F) ?
+							ipa3_ctx->ipa_gen_rx_cmn_page_pool_sz_factor :
+							(ipa3_ctx->ipa_gen_rx_cmn_page_pool_sz_factor - 1));
+#endif
+					}
 				else if (sys_in->client == IPA_CLIENT_APPS_WAN_LOW_LAT_DATA_CONS)
 					ep->sys->page_recycle_repl->capacity =
 						(ep->sys->rx_pool_sz + 1) *
@@ -1817,6 +1837,7 @@ int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in, u32 *clnt_hdl)
 					   sys_in->client, ep->sys->repl->capacity);
 			if (sys_in->client == IPA_CLIENT_APPS_WAN_COAL_CONS ||
 				sys_in->client == IPA_CLIENT_APPS_WAN_CONS) {
+#ifdef CONFIG_IPA_RMNET_MEM
 				pool_capacity =
 					rmnet_mem_get_pool_size(ep->sys->page_order);
 				int temp_pool_capacity = (pool_capacity > 0) ?
@@ -1826,6 +1847,7 @@ int ipa_setup_sys_pipe(struct ipa_sys_connect_params *sys_in, u32 *clnt_hdl)
 						sys_in->client,
 						atomic_read(&ipa3_ctx->ipa_temp_pool_capacity));
 				rmnet_mem_register_notifier(&ipa3_rmnet_mem_blk);
+#endif
 			}
 			atomic_set(&ep->sys->repl->pending, 0);
 			ep->sys->repl->cache = kcalloc(ep->sys->repl->capacity,
@@ -2038,17 +2060,11 @@ int ipa_teardown_sys_pipe(u32 clnt_hdl)
 		} while (1);
 
 		delete_avail_tx_wrapper_list(ep);
-		/* Delete NAPI TX object. For WAN_PROD, it is deleted
-		 * in rmnet_ipa driver.
-		 */
-		if (ipa3_ctx->tx_napi_enable &&
-			(ep->client != IPA_CLIENT_APPS_WAN_PROD))
-			netif_napi_del(&ep->sys->napi_tx);
-	}
 
-	if(ep->client == IPA_CLIENT_APPS_WAN_LOW_LAT_DATA_CONS) {
-		napi_disable(&ep->sys->napi_rx);
-		netif_napi_del(&ep->sys->napi_rx);
+		if (ep->sys->napi_tx_enable) {
+			napi_disable(&ep->sys->napi_tx);
+			netif_napi_del(&ep->sys->napi_tx);
+		}
 	}
 
 	if ( ep->client == IPA_CLIENT_APPS_WAN_COAL_CONS ) {
@@ -2088,6 +2104,14 @@ int ipa_teardown_sys_pipe(u32 clnt_hdl)
 	if (IPA_CLIENT_IS_PROD(ep->client))
 		atomic_set(&ep->sys->workqueue_flushed, 1);
 
+	if(ep->client == IPA_CLIENT_APPS_WAN_LOW_LAT_DATA_CONS) {
+		napi_disable(&ep->sys->napi_rx);
+		netif_napi_del(&ep->sys->napi_rx);
+	}
+
+	if(ep->client == IPA_CLIENT_APPS_WAN_LOW_LAT_CONS && ep->sys)
+		tasklet_kill(&ep->sys->tasklet);
+
 	/*
 	 * Tear down the default pipe before we reset the channel
 	 */
@@ -2113,10 +2137,12 @@ int ipa_teardown_sys_pipe(u32 clnt_hdl)
 				}
 				return result;
 			}
-		} else {
-			napi_disable(ep->sys->napi_obj);
-			netif_napi_del(ep->sys->napi_obj);
 		}
+	}
+
+	if (IPA_CLIENT_IS_WAN_CONS(ep->client)) {
+		napi_disable(ep->sys->napi_obj);
+		netif_napi_del(ep->sys->napi_obj);
 	}
 
 	/*
@@ -2276,19 +2302,12 @@ static int ipa3_teardown_pipe(u32 clnt_hdl)
 		return result;
 	}
 
-	if (IPA_CLIENT_IS_WAN_CONS(ep->client)) {
-		/* Wait for any pending irqs */
-		usleep_range(POLLING_MIN_SLEEP_RX, POLLING_MAX_SLEEP_RX);
-		/* Wait until end point moving to interrupt mode before teardown */
-		do {
-			usleep_range(95, 105);
-		} while (atomic_read(&ep->sys->curr_polling_state));
-		if (ipa3_ctx->rmnet_napi_enable) {
-			napi_disable(ep->sys->napi_obj);
-			netif_napi_del(ep->sys->napi_obj);
-			ipa3_ctx->rmnet_napi_enable = false;
-		}
-	}
+	/* Wait for any pending irqs */
+	usleep_range(POLLING_MIN_SLEEP_RX, POLLING_MAX_SLEEP_RX);
+	/* Wait until end point moving to interrupt mode before teardown */
+	do {
+		usleep_range(95, 105);
+	} while (atomic_read(&ep->sys->curr_polling_state));
 
 	result = ipa3_reset_gsi_channel(clnt_hdl);
 	if (result != GSI_STATUS_SUCCESS) {
@@ -2508,11 +2527,16 @@ int ipa_tx_dp(enum ipa_client_type dst, struct sk_buff *skb,
 			data_idx++;
 		}
 
-		if ((ipa3_ctx->ipa_hw_type >= IPA_HW_v5_0) &&
-		    ((network_header->version == 4 &&
-		     network_header->protocol == IPPROTO_ICMP) ||
-		    (((struct ipv6hdr *)network_header)->version == 6 &&
-		     ((struct ipv6hdr *)network_header)->nexthdr == NEXTHDR_ICMP))) {
+		if((ipa3_ctx->ipa_hw_type >= IPA_HW_v5_0) && (meta && (meta->ncm_enable))) {
+			desc[data_idx].opcode = ipa3_ctx->pkt_init_ex_imm_opcode;
+			desc[data_idx].dma_address =
+				ipa3_ctx->pkt_init_ex_imm[dst_ep_idx].phys_base;
+		} else if ((ipa3_ctx->ipa_hw_type >= IPA_HW_v5_0) &&
+			((network_header->version == 4 &&
+			network_header->protocol == IPPROTO_ICMP) ||
+			(((struct ipv6hdr *)network_header)->version == 6 &&
+			((struct ipv6hdr *)network_header)->nexthdr == NEXTHDR_ICMP) ||
+			(meta && meta->pkt_ex_init_valid))) {
 			ipa_imm_cmd_modify_ip_packet_init_ex_dest_pipe(
 				ipa3_ctx->pkt_init_ex_imm[ipa3_ctx->ipa_num_pipes].base,
 				dst_ep_idx);
@@ -2763,6 +2787,7 @@ static struct page *ipa3_alloc_page(
 	return page;
 }
 
+#ifdef CONFIG_IPA_RMNET_MEM
 static struct page *ipa3_rmnet_alloc_page(
 	gfp_t flag, u32 *page_order, bool try_lower)
 {
@@ -2793,7 +2818,7 @@ static struct page *ipa3_rmnet_alloc_page(
 	*page_order = p_order;
 	return page;
 }
-
+#endif
 
 static struct ipa3_rx_pkt_wrapper *ipa3_alloc_rx_pkt_page(
 	gfp_t flag, bool is_tmp_alloc, struct ipa3_sys_context *sys)
@@ -2810,8 +2835,14 @@ static struct ipa3_rx_pkt_wrapper *ipa3_alloc_rx_pkt_page(
 	/* For temporary allocations, avoid triggering OOM Killer. */
 	if (is_tmp_alloc) {
 		flag |= __GFP_RETRY_MAYFAIL | __GFP_NOWARN;
+#ifdef CONFIG_IPA_RMNET_MEM
 		rx_pkt->page_data.page = ipa3_rmnet_alloc_page(
 			flag, &rx_pkt->page_data.page_order, true);
+#else
+		rx_pkt->page_data.page = ipa3_alloc_page(flag,
+					&rx_pkt->page_data.page_order,
+					(is_tmp_alloc && rx_pkt->page_data.page_order == 3));
+#endif
 	} else {
 		/* Try a lower order page for order 3 pages in case allocation fails. */
 		rx_pkt->page_data.page = ipa3_alloc_page(flag,
@@ -3010,13 +3041,14 @@ int ipa_register_notifier(void *fn_ptr)
 	if (fn_ptr == NULL)
 		return -EFAULT;
 	spin_lock(&ipa3_ctx->notifier_lock);
-	ipa_notifier_block = (struct ipa_notifier_block_data *)kzalloc(sizeof(struct ipa_notifier_block_data), GFP_KERNEL);
+	ipa_notifier_block = (struct ipa_notifier_block_data *)kzalloc(sizeof(struct ipa_notifier_block_data), GFP_ATOMIC);
 	if (ipa_notifier_block == NULL) {
 		IPAWANERR("Buffer threshold notifier failure\n");
 		spin_unlock(&ipa3_ctx->notifier_lock);
 		return -EFAULT;
 	}
 	ipa_notifier_block->ipa_rmnet_notifier.notifier_call = fn_ptr;
+	INIT_LIST_HEAD(&ipa_notifier_block->entry);
 	list_add(&ipa_notifier_block->entry, &ipa3_ctx->notifier_block_list_head);
 	raw_notifier_chain_register(ipa3_ctx->ipa_rmnet_notifier_list_internal,
 		&ipa_notifier_block->ipa_rmnet_notifier);
@@ -3912,10 +3944,12 @@ static void ipa3_cleanup_rx(struct ipa3_sys_context *sys)
 		kfree(sys->repl->cache);
 		kfree(sys->repl);
 		sys->repl = NULL;
+#ifdef CONFIG_IPA_RMNET_MEM
 		if (sys->ep->client == IPA_CLIENT_APPS_WAN_CONS ||
 			sys->ep->client == IPA_CLIENT_APPS_WAN_COAL_CONS) {
 			rmnet_mem_unregister_notifier(&ipa3_rmnet_mem_blk);
 		}
+#endif
 	}
 }
 
@@ -5835,14 +5869,16 @@ static int ipa3_assign_policy(struct ipa_sys_connect_params *in,
 	bool apps_wan_cons_agg_gro_flag;
 	unsigned long aggr_byte_limit;
 
-	if (in->client == IPA_CLIENT_APPS_CMD_PROD ||
-		in->client == IPA_CLIENT_APPS_WAN_LOW_LAT_PROD) {
+	if ((in->client == IPA_CLIENT_APPS_CMD_PROD) ||
+	   ((ipa3_ctx->ipa_hw_type < IPA_HW_v5_5) &&
+	    (in->client == IPA_CLIENT_APPS_WAN_LOW_LAT_PROD ))){
 		sys->policy = IPA_POLICY_INTR_MODE;
 		sys->use_comm_evt_ring = false;
 		return 0;
 	}
 
 	if (in->client == IPA_CLIENT_APPS_WAN_PROD ||
+		 in->client == IPA_CLIENT_APPS_WAN_LOW_LAT_PROD ||
 		in->client == IPA_CLIENT_APPS_WAN_LOW_LAT_DATA_PROD) {
 		sys->policy = IPA_POLICY_INTR_MODE;
 		if (ipa3_ctx->ipa_hw_type >= IPA_HW_v5_0)
@@ -6668,69 +6704,79 @@ void ipa3_dealloc_common_event_ring(void)
 
 int ipa3_alloc_common_event_ring(void)
 {
-	struct gsi_evt_ring_props gsi_evt_ring_props;
+	struct gsi_evt_ring_props *gsi_evt_ring_props;
 	dma_addr_t evt_dma_addr = 0;
 	dma_addr_t evt_rp_dma_addr = 0;
 	int result;
 
-	memset(&gsi_evt_ring_props, 0, sizeof(gsi_evt_ring_props));
-	gsi_evt_ring_props.intf = GSI_EVT_CHTYPE_GPI_EV;
-	gsi_evt_ring_props.intr = GSI_INTR_IRQ;
-	gsi_evt_ring_props.re_size = GSI_EVT_RING_RE_SIZE_16B;
-
-	gsi_evt_ring_props.ring_len = IPA_COMMON_EVENT_RING_SIZE;
-
-	gsi_evt_ring_props.ring_base_vaddr =
-		dma_alloc_coherent(ipa3_ctx->pdev,
-		gsi_evt_ring_props.ring_len, &evt_dma_addr, GFP_KERNEL);
-	if (!gsi_evt_ring_props.ring_base_vaddr) {
-		IPAERR("fail to dma alloc %u bytes\n",
-			gsi_evt_ring_props.ring_len);
+	/* Allocate props on heap to avoid KASAN/Stack issues */
+	gsi_evt_ring_props = kzalloc(sizeof(*gsi_evt_ring_props), GFP_KERNEL);
+	if (!gsi_evt_ring_props)
 		return -ENOMEM;
+
+	gsi_evt_ring_props->intf = GSI_EVT_CHTYPE_GPI_EV;
+	gsi_evt_ring_props->intr = GSI_INTR_IRQ;
+	gsi_evt_ring_props->re_size = GSI_EVT_RING_RE_SIZE_16B;
+
+	gsi_evt_ring_props->ring_len = IPA_COMMON_EVENT_RING_SIZE;
+
+	gsi_evt_ring_props->ring_base_vaddr =
+		dma_alloc_coherent(ipa3_ctx->pdev,
+		gsi_evt_ring_props->ring_len, &evt_dma_addr, GFP_KERNEL);
+	if (!gsi_evt_ring_props->ring_base_vaddr) {
+		IPAERR_BOOTUP("fail to dma alloc %u bytes\n",
+			gsi_evt_ring_props->ring_len);
+		result = -ENOMEM;
+		goto fail_alloc_ring;
 	}
-	gsi_evt_ring_props.ring_base_addr = evt_dma_addr;
-	gsi_evt_ring_props.int_modt = 0;
-	gsi_evt_ring_props.int_modc = 1; /* moderation comes from channel*/
+	gsi_evt_ring_props->ring_base_addr = evt_dma_addr;
+	gsi_evt_ring_props->int_modt = 0;
+	gsi_evt_ring_props->int_modc = 1; /* moderation comes from channel*/
 
 	if (ipa3_ctx->ipa_gpi_event_rp_ddr) {
-		gsi_evt_ring_props.rp_update_vaddr =
+		gsi_evt_ring_props->rp_update_vaddr =
 			dma_alloc_coherent(ipa3_ctx->pdev,
 					   IPA_GSI_EVENT_RP_SIZE,
 					   &evt_rp_dma_addr, GFP_KERNEL);
-		if (!gsi_evt_ring_props.rp_update_vaddr) {
-			IPAERR("fail to dma alloc %u bytes\n",
+		if (!gsi_evt_ring_props->rp_update_vaddr) {
+			IPAERR_BOOTUP("fail to dma alloc %u bytes\n",
 			       IPA_GSI_EVENT_RP_SIZE);
 			result = -ENOMEM;
 			goto fail_alloc_rp;
 		}
-		gsi_evt_ring_props.rp_update_addr = evt_rp_dma_addr;
+		gsi_evt_ring_props->rp_update_addr = evt_rp_dma_addr;
 	} else {
-		gsi_evt_ring_props.rp_update_addr = 0;
+		gsi_evt_ring_props->rp_update_addr = 0;
 	}
 
-	gsi_evt_ring_props.exclusive = false;
-	gsi_evt_ring_props.err_cb = ipa_gsi_evt_ring_err_cb;
-	gsi_evt_ring_props.user_data = NULL;
+	gsi_evt_ring_props->exclusive = false;
+	gsi_evt_ring_props->err_cb = ipa_gsi_evt_ring_err_cb;
+	gsi_evt_ring_props->user_data = NULL;
 
-	result = gsi_alloc_evt_ring(&gsi_evt_ring_props,
+	result = gsi_alloc_evt_ring(gsi_evt_ring_props,
 		ipa3_ctx->gsi_dev_hdl, &ipa3_ctx->gsi_evt_comm_hdl);
 	if (result) {
-		IPAERR("gsi_alloc_evt_ring failed %d\n", result);
+		IPAERR_BOOTUP("gsi_alloc_evt_ring failed %d\n", result);
 		goto fail_alloc_evt_ring;
 	}
 	ipa3_ctx->gsi_evt_comm_ring_rem = IPA_COMMON_EVENT_RING_SIZE;
 
+	/* Free the props structure before returning success */
+	kfree(gsi_evt_ring_props);
 	return 0;
+
 fail_alloc_evt_ring:
-	if (gsi_evt_ring_props.rp_update_vaddr) {
+	if (gsi_evt_ring_props->rp_update_vaddr) {
 		dma_free_coherent(ipa3_ctx->pdev, IPA_GSI_EVENT_RP_SIZE,
-				  gsi_evt_ring_props.rp_update_vaddr,
+				  gsi_evt_ring_props->rp_update_vaddr,
 				  evt_rp_dma_addr);
 	}
 fail_alloc_rp:
-	dma_free_coherent(ipa3_ctx->pdev, gsi_evt_ring_props.ring_len,
-			  gsi_evt_ring_props.ring_base_vaddr,
+	dma_free_coherent(ipa3_ctx->pdev, gsi_evt_ring_props->ring_len,
+			  gsi_evt_ring_props->ring_base_vaddr,
 			  evt_dma_addr);
+fail_alloc_ring:
+	kfree(gsi_evt_ring_props);
 	return result;
 }
 
@@ -6978,7 +7024,7 @@ static int ipa_gsi_setup_transfer_ring(struct ipa3_ep_context *ep,
 	else
 		gsi_channel_props.prot = GSI_CHAN_PROT_GPI;
 	if (IPA_CLIENT_IS_PROD(ep->client)) {
-		gsi_channel_props.dir = CHAN_DIR_TO_GSI;
+		gsi_channel_props.dir = GSI_CHAN_DIR_TO_GSI;
 		if(ep->client == IPA_CLIENT_APPS_WAN_PROD ||
 		   ep->client == IPA_CLIENT_APPS_LAN_PROD ||
 		   ep->client == IPA_CLIENT_APPS_WAN_LOW_LAT_DATA_PROD)
@@ -6986,7 +7032,7 @@ static int ipa_gsi_setup_transfer_ring(struct ipa3_ep_context *ep,
 		else
 			gsi_channel_props.tx_poll = false;
 	} else {
-		gsi_channel_props.dir = CHAN_DIR_FROM_GSI;
+		gsi_channel_props.dir = GSI_CHAN_DIR_FROM_GSI;
 		if (ep->sys)
 			gsi_channel_props.max_re_expected = ep->sys->rx_pool_sz;
 	}
@@ -7453,7 +7499,7 @@ int ipa_gsi_ch20_wa(void)
 
 	memset(&gsi_channel_props, 0, sizeof(gsi_channel_props));
 	gsi_channel_props.prot = GSI_CHAN_PROT_GPI;
-	gsi_channel_props.dir = CHAN_DIR_TO_GSI;
+	gsi_channel_props.dir = GSI_CHAN_DIR_TO_GSI;
 	gsi_channel_props.evt_ring_hdl = ~0;
 	gsi_channel_props.re_size = GSI_CHAN_RE_SIZE_16B;
 	gsi_channel_props.ring_len = 4 * gsi_channel_props.re_size;
@@ -7480,7 +7526,7 @@ int ipa_gsi_ch20_wa(void)
 			ipa3_ctx->gsi_dev_hdl,
 			&chan_hdl[i]);
 		if (result != GSI_STATUS_SUCCESS) {
-			IPAERR("failed to alloc channel %d err %d\n",
+			IPAERR_BOOTUP("failed to alloc channel %d err %d\n",
 				i, result);
 			return result;
 		}
@@ -7491,7 +7537,7 @@ int ipa_gsi_ch20_wa(void)
 	result = gsi_alloc_channel(&gsi_channel_props, ipa3_ctx->gsi_dev_hdl,
 		&chan_hdl_to_keep);
 	if (result != GSI_STATUS_SUCCESS) {
-		IPAERR("failed to alloc channel %d err %d\n",
+		IPAERR_BOOTUP("failed to alloc channel %d err %d\n",
 			i, result);
 		return result;
 	}
@@ -7500,7 +7546,7 @@ int ipa_gsi_ch20_wa(void)
 	for (i = 0; i < IPA_GSI_CH_20_WA_NUM_CH_TO_ALLOC; i++) {
 		result = gsi_dealloc_channel(chan_hdl[i]);
 		if (result != GSI_STATUS_SUCCESS) {
-			IPAERR("failed to dealloc channel %d err %d\n",
+			IPAERR_BOOTUP("failed to dealloc channel %d err %d\n",
 				i, result);
 			return result;
 		}

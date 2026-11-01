@@ -1,21 +1,29 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
-/* Copyright (c) 2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2023, Qualcomm Innovation Center, Inc. All rights reserved.
- *
- * RMNET WLAN fragment handler framework
- *
+/*
+ * Copyright (c) 2021, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2023, 2025 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
-#ifndef DATARMNET836e6c471b
-#define DATARMNET836e6c471b
+#ifndef __RMNET_WLAN_FRAGMENT_H__
+#define __RMNET_WLAN_FRAGMENT_H__
+
 #include <linux/skbuff.h>
 #include "rmnet_wlan.h"
-int DATARMNET579f75aa50(struct sk_buff*DATARMNET543491eb0f,int 
-DATARMNET611d08d671,struct DATARMNETb89ecedefc*DATARMNET3396919a68,struct 
-DATARMNET8d3c2559ca*DATARMNET2d4b4cfc9e);int DATARMNETaca8ca54ed(struct sk_buff*
-DATARMNET543491eb0f,int DATARMNET611d08d671,struct DATARMNETb89ecedefc*
-DATARMNET3396919a68,struct DATARMNET8d3c2559ca*DATARMNET2d4b4cfc9e);int 
-DATARMNET49c2c17e77(void);void DATARMNET8c0e010dfb(void);void 
-DATARMNETedae8262e1(struct DATARMNET8d3c2559ca*DATARMNET54338da2ff);
-#endif
 
+/* Fragment handling interface */
+int rmnet_wlan_fragment_v4(struct sk_buff *skb, int ip_len,
+			   struct rmnet_wlan_tuple *tuple,
+			   struct rmnet_wlan_fwd_info *fwd_info);
+int rmnet_wlan_fragment_v6(struct sk_buff *skb, int ip_len,
+			   struct rmnet_wlan_tuple *tuple,
+			   struct rmnet_wlan_fwd_info *fwd_info);
+
+/* Initialize fragment handling */
+int rmnet_wlan_fragment_init(void);
+/* Purge all fragment information */
+void rmnet_wlan_fragments_remove(void);
+
+/* Handle FWD information removal */
+void rmnet_wlan_fragment_del_fwd_info(struct rmnet_wlan_fwd_info *info);
+
+#endif

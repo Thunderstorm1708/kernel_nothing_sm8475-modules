@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
- * Copyright (c) 2022-2024 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
  */
 
 #include <linux/file.h>
 #include <linux/fs.h>
 #include <linux/ioctl.h>
-#include <linux/ktime.h>
 #include <linux/types.h>
 #include <linux/sync_file.h>
 
@@ -14,6 +13,7 @@
 #include "hw_fence_drv_utils.h"
 #include "hw_fence_drv_ipc.h"
 #include "hw_fence_drv_debug.h"
+#include "hw_fence_drv_fence.h"
 
 #define HW_SYNC_IOCTL_COUNT		ARRAY_SIZE(hw_sync_debugfs_ioctls)
 #define HW_FENCE_ARRAY_SIZE		10
@@ -35,8 +35,6 @@
 		.func = _func,			\
 		.name = #ioctl			\
 	}
-
-#define ktime_compare_safe(A, B) ktime_compare(ktime_sub((A), (B)), ktime_set(0, 0))
 
 /**
  * struct hw_sync_obj - per client hw sync object.
@@ -131,9 +129,12 @@ static bool _is_valid_client(struct hw_sync_obj *obj)
 	if (!obj)
 		return false;
 
-	if (obj->client_id < HW_FENCE_CLIENT_ID_VAL0 || obj->client_id > HW_FENCE_CLIENT_ID_VAL6) {
+	if (obj->client_id < hw_fence_drv_data->val_client_id_ext ||
+			obj->client_id >= hw_fence_drv_data->val_client_id_ext +
+			HW_FENCE_VAL_CLIENT_COUNT) {
 		HWFNC_ERR("invalid client_id:%d min:%d max:%d\n", obj->client_id,
-				HW_FENCE_CLIENT_ID_VAL0, HW_FENCE_CLIENT_ID_VAL6);
+				hw_fence_drv_data->val_client_id_ext,
+				hw_fence_drv_data->val_client_id_ext + HW_FENCE_VAL_CLIENT_COUNT);
 		return false;
 	}
 
@@ -150,10 +151,13 @@ static int _get_client_id(struct hw_sync_obj *obj, unsigned long arg)
 	if (!obj)
 		return -EINVAL;
 
-	if (client_id < HW_FENCE_CLIENT_ID_VAL0 || client_id > HW_FENCE_CLIENT_ID_VAL6) {
-		HWFNC_ERR("invalid client_id:%d min:%d max:%d\n", client_id,
-				HW_FENCE_CLIENT_ID_VAL0, HW_FENCE_CLIENT_ID_VAL6);
-		return -EINVAL;
+	if (hw_fence_drv_data->val_client_id_ext &&
+			(client_id < hw_fence_drv_data->val_client_id_ext || (client_id >=
+			(hw_fence_drv_data->val_client_id_ext + HW_FENCE_VAL_CLIENT_COUNT)))) {
+		HWFNC_ERR("invalid client_id:%d min:%d max:%d\n", obj->client_id,
+				hw_fence_drv_data->val_client_id_ext,
+				hw_fence_drv_data->val_client_id_ext + HW_FENCE_VAL_CLIENT_COUNT);
+		return false;
 	}
 
 	return client_id;
@@ -229,7 +233,7 @@ static long hw_sync_ioctl_create_fence(struct hw_sync_obj *obj, unsigned long ar
 	struct msm_hw_fence_create_params params;
 	struct hw_fence_sync_create_data data;
 	struct hw_dma_fence *fence;
-	spinlock_t *fence_lock;
+	struct dma_fence *dma_fence;
 	u64 hash;
 	struct sync_file *sync_file;
 	int fd, ret;
@@ -244,26 +248,12 @@ static long hw_sync_ioctl_create_fence(struct hw_sync_obj *obj, unsigned long ar
 	if (copy_from_user(&data, (void __user *)arg, sizeof(data)))
 		return -EFAULT;
 
-	/* create dma fence */
-	fence_lock = kzalloc(sizeof(*fence_lock), GFP_KERNEL);
-	if (!fence_lock)
-		return -ENOMEM;
+	dma_fence = hw_dma_fence_init(obj->client_handle, obj->context, data.seqno);
+	if (IS_ERR_OR_NULL(dma_fence))
+		return -EINVAL;
+	fence = (struct hw_dma_fence *)dma_fence;
 
-	fence = kzalloc(sizeof(*fence), GFP_KERNEL);
-	if (!fence) {
-		kfree(fence_lock);
-		return -ENOMEM;
-	}
-
-	snprintf(fence->name, HW_FENCE_NAME_SIZE, "hwfence:id:%d:ctx=%llu:seqno:%llu",
-			obj->client_id, obj->context, data.seqno);
-
-	spin_lock_init(fence_lock);
-	dma_fence_init(&fence->base, &hw_fence_dbg_ops, fence_lock, obj->context, data.seqno);
-
-	HWFNC_DBG_H("creating hw_fence for client:%d ctx:%llu seqno:%llu\n", obj->client_id,
-				obj->context, data.seqno);
-	params.fence = &fence->base;
+	params.fence = dma_fence;
 	params.handle = &hash;
 
 	/* create hw fence */
@@ -442,7 +432,7 @@ static long hw_sync_ioctl_reg_for_wait(struct hw_sync_obj *obj, unsigned long ar
 		return -EINVAL;
 	}
 
-	ret = msm_hw_fence_wait_update_v2(obj->client_handle, &fence, NULL, NULL, num_fences, 1);
+	ret = msm_hw_fence_wait_update(obj->client_handle, &fence, num_fences, 1);
 
 	/* Decrement the refcount that hw_sync_get_fence increments */
 	dma_fence_put(fence);
@@ -478,12 +468,12 @@ static long hw_sync_ioctl_fence_signal(struct hw_sync_obj *obj, unsigned long ar
 		return ret;
 	}
 
-	signal_id = dbg_out_clients_signal_map_no_dpu[obj->client_id].ipc_signal_id;
+	signal_id = hw_fence_client->ipc_signal_id;
 	if (signal_id < 0)
 		return -EINVAL;
 
 	tx_client = hw_fence_client->ipc_client_pid;
-	rx_client = hw_fence_client->ipc_client_vid;
+	rx_client = hw_fence_drv_data->ipcc_fctl_vid;
 	ret = msm_hw_fence_trigger_signal(obj->client_handle, tx_client, rx_client, signal_id);
 	if (ret) {
 		HWFNC_ERR("hw fence trigger signal has failed\n");
@@ -496,11 +486,10 @@ static long hw_sync_ioctl_fence_signal(struct hw_sync_obj *obj, unsigned long ar
 static long hw_sync_ioctl_fence_wait(struct hw_sync_obj *obj, unsigned long arg)
 {
 	struct msm_hw_fence_client *hw_fence_client;
-	struct msm_hw_fence_queue_payload payload;
 	struct hw_fence_sync_wait_data data;
 	struct dma_fence *fence;
-	ktime_t cur_ktime, exp_ktime;
-	int fd, ret, read = 1, queue_type = HW_FENCE_RX_QUEUE - 1;  /* rx queue index */
+	int fd, ret;
+	u32 error;
 
 	if (!_is_valid_client(obj))
 		return -EINVAL;
@@ -523,48 +512,16 @@ static long hw_sync_ioctl_fence_wait(struct hw_sync_obj *obj, unsigned long arg)
 		return -EINVAL;
 	}
 
-	exp_ktime = ktime_add_ms(ktime_get(), data.timeout_ms);
-	do {
-		ret = wait_event_timeout(hw_fence_client->wait_queue,
-				atomic_read(&hw_fence_client->val_signal) > 0,
-				msecs_to_jiffies(data.timeout_ms));
-		cur_ktime = ktime_get();
-	} while ((atomic_read(&hw_fence_client->val_signal) <= 0) && (ret == 0) &&
-		ktime_compare_safe(exp_ktime, cur_ktime) > 0);
-
-	if (!ret) {
-		HWFNC_ERR("timed out waiting for the client signal %llu\n", data.timeout_ms);
-		/* Decrement the refcount that hw_sync_get_fence increments */
-		dma_fence_put(fence);
-		return -ETIMEDOUT;
-	}
-
-	/* clear doorbell signal flag */
-	atomic_set(&hw_fence_client->val_signal, 0);
-
-	while (read) {
-		read = hw_fence_read_queue(obj->client_handle, &payload, queue_type);
-		if (read < 0) {
-			HWFNC_ERR("unable to read client rxq client_id:%d\n", obj->client_id);
-			break;
-		}
-		HWFNC_DBG_L("rxq read: hash:%llu, flags:%llu, error:%d\n",
-			payload.hash, payload.flags, payload.error);
-		if (payload.ctxt_id == fence->context && payload.seqno == fence->seqno) {
-			/* Decrement the refcount that hw_sync_get_fence increments */
-			dma_fence_put(fence);
-			return 0;
-		}
-	}
+	ret = hw_fence_debug_wait_val(hw_fence_drv_data, hw_fence_client, fence, 0, 0,
+		data.timeout_ms, &error);
+	if (ret)
+		HWFNC_ERR("failed to wait for hw-fence client:%d ctx:%llu seq:%llu\n",
+			hw_fence_client->client_id, fence->context, fence->seqno);
 
 	/* Decrement the refcount that hw_sync_get_fence increments */
 	dma_fence_put(fence);
 
-	HWFNC_ERR("fence received did not match the fence expected\n");
-	HWFNC_ERR("fence received: ctx:%llu seqno:%llu fence expected: ctx:%llu seqno:%llu\n",
-				payload.ctxt_id, payload.seqno, fence->context, fence->seqno);
-
-	return read;
+	return ret;
 }
 
 static long hw_sync_ioctl_reset_client(struct hw_sync_obj *obj, unsigned long arg)

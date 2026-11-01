@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
- * Copyright (c) 2022-2024 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
  * Copyright (c) 2016-2021, The Linux Foundation. All rights reserved.
  */
 
@@ -17,6 +17,7 @@
 #include <linux/extcon-provider.h>
 #include <msm_ext_display.h>
 #include <linux/extcon-provider.h>
+#include <linux/version.h>
 
 struct msm_ext_disp_list {
 	struct msm_ext_disp_init_data *data;
@@ -222,7 +223,7 @@ static struct msm_ext_disp *msm_ext_disp_validate_and_get(
 
 	if (!codec ||
 		codec->type >= EXT_DISPLAY_TYPE_MAX ||
-		codec->ctrl_id != 0 ||
+		((codec->ctrl_id != 0) && (codec->ctrl_id != 1)) ||
 		codec->stream_id >= MSM_EXT_DISP_MAX_CODECS) {
 		pr_err("invalid display codec id\n");
 		goto err;
@@ -407,7 +408,7 @@ end:
 
 	return ret;
 }
-EXPORT_SYMBOL(msm_ext_disp_register_audio_codec);
+EXPORT_SYMBOL_GPL(msm_ext_disp_register_audio_codec);
 
 int msm_ext_disp_select_audio_codec(struct platform_device *pdev,
 		struct msm_ext_disp_codec_id *codec)
@@ -447,7 +448,7 @@ end:
 
 	return ret;
 }
-EXPORT_SYMBOL(msm_ext_disp_select_audio_codec);
+EXPORT_SYMBOL_GPL(msm_ext_disp_select_audio_codec);
 
 static int msm_ext_disp_validate_intf(struct msm_ext_disp_init_data *init_data)
 {
@@ -464,7 +465,8 @@ static int msm_ext_disp_validate_intf(struct msm_ext_disp_init_data *init_data)
 	}
 
 	if (init_data->codec.type >= EXT_DISPLAY_TYPE_MAX ||
-		init_data->codec.ctrl_id != 0 ||
+		((init_data->codec.ctrl_id != 0) &&
+		(init_data->codec.ctrl_id != 1)) ||
 		init_data->codec.stream_id >= MSM_EXT_DISP_MAX_CODECS) {
 		pr_err("Invalid codec info type(%d), ctrl(%d) stream(%d)\n",
 				init_data->codec.type,
@@ -538,7 +540,7 @@ end:
 	mutex_unlock(&ext_disp->lock);
 	return ret;
 }
-EXPORT_SYMBOL(msm_ext_disp_register_intf);
+EXPORT_SYMBOL_GPL(msm_ext_disp_register_intf);
 
 int msm_ext_disp_deregister_intf(struct platform_device *pdev,
 		struct msm_ext_disp_init_data *init_data)
@@ -577,7 +579,7 @@ end:
 
 	return ret;
 }
-EXPORT_SYMBOL(msm_ext_disp_deregister_intf);
+EXPORT_SYMBOL_GPL(msm_ext_disp_deregister_intf);
 
 static int msm_ext_disp_probe(struct platform_device *pdev)
 {
@@ -638,7 +640,11 @@ end:
 	return ret;
 }
 
+#if (KERNEL_VERSION(6, 10, 0) <= LINUX_VERSION_CODE)
+static void msm_ext_disp_remove(struct platform_device *pdev)
+#else
 static int msm_ext_disp_remove(struct platform_device *pdev)
+#endif
 {
 	int ret = 0, id;
 	struct msm_ext_disp *ext_disp = NULL;
@@ -667,7 +673,11 @@ static int msm_ext_disp_remove(struct platform_device *pdev)
 	devm_kfree(&ext_disp->pdev->dev, ext_disp);
 
 end:
+#if (KERNEL_VERSION(6, 10, 0) > LINUX_VERSION_CODE)
 	return ret;
+#else
+	return;
+#endif
 }
 
 static const struct of_device_id msm_ext_dt_match[] = {
@@ -676,15 +686,9 @@ static const struct of_device_id msm_ext_dt_match[] = {
 };
 MODULE_DEVICE_TABLE(of, msm_ext_dt_match);
 
-/* Linux 6.11+: platform_driver.remove returns void */
-static void msm_ext_disp_remove_void(struct platform_device *pdev)
-{
-	msm_ext_disp_remove(pdev);
-}
-
 static struct platform_driver this_driver = {
 	.probe = msm_ext_disp_probe,
-	.remove = msm_ext_disp_remove_void,
+	.remove = msm_ext_disp_remove,
 	.driver = {
 		.name = "msm-ext-disp",
 		.of_match_table = msm_ext_dt_match,

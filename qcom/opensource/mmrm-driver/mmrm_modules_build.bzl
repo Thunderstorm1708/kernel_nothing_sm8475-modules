@@ -1,8 +1,7 @@
-load("//build/kernel/kleaf:kernel.bzl", "ddk_module", "ddk_submodule")
+load("//build/kernel/kleaf:kernel.bzl", "ddk_module", "kernel_module_group")
 load("//build/bazel_common_rules/dist:dist.bzl", "copy_to_dist_dir")
 
 def _register_module_to_map(module_map, name, path, config_option, srcs, deps):
-
     module = struct(
         name = name,
         path = path,
@@ -30,20 +29,34 @@ def mmrm_driver_modules_entry(hdrs = []):
 
     def register(name, path = None, config_option = None, srcs = [], deps = []):
         _register_module_to_map(module_map, name, path, config_option, srcs, deps)
+
     return struct(
         register = register,
         get = module_map.get,
         hdrs = hdrs,
-        module_map = module_map
+        module_map = module_map,
     )
 
 def define_target_variant_modules(target, variant, registry, modules, config_options = []):
     kernel_build = "{}_{}".format(target, variant)
-    kernel_build_label = "//vendor/nothing/pong-kernel:{}".format(kernel_build)
+    deps = select({
+        "//build/qcom_build_extensions:qtisocrepo_true": [
+            "//soc-repo:all_headers",
+            "//soc-repo:{}/drivers/clk/qcom/clk-qcom".format(kernel_build),
+        ],
+        "//build/qcom_build_extensions:qtisocrepo_false": [
+            "//msm-kernel:all_headers",
+        ],
+    })
+    kernel_build_label = select({
+        "//build/qcom_build_extensions:qtisocrepo_true": "//soc-repo:{}_base_kernel".format(kernel_build),
+        "//build/qcom_build_extensions:qtisocrepo_false": "//msm-kernel:{}".format(kernel_build),
+    })
+
     modules = [registry.get(module_name) for module_name in modules]
     options = _get_kernel_build_options(modules, config_options)
-    build_print = lambda message : print("{}: {}".format(kernel_build, message))
-    formatter = lambda s : s.replace("%b", kernel_build).replace("%t", target)
+    build_print = lambda message: print("{}: {}".format(kernel_build, message))
+    formatter = lambda s: s.replace("%b", kernel_build).replace("%t", target)
     all_module_rules = []
 
     for module in modules:
@@ -53,20 +66,21 @@ def define_target_variant_modules(target, variant, registry, modules, config_opt
         if not module_srcs:
             continue
 
-        ddk_submodule(
+        ddk_module(
             name = rule_name,
             srcs = module_srcs,
             out = "{}.ko".format(module.name),
-            deps = ["//vendor/nothing/pong-kernel:all_headers"] + registry.hdrs,
-            local_defines = options.keys()
+            deps = deps + registry.hdrs,
+            local_defines = options.keys(),
+            kernel_build = kernel_build_label,
         )
         all_module_rules.append(rule_name)
 
-    ddk_module(
+    kernel_module_group(
         name = "{}_mmrm_driver".format(kernel_build),
-        kernel_build = kernel_build_label,
-        deps = all_module_rules,
+        srcs = all_module_rules,
     )
+
     copy_to_dist_dir(
         name = "{}_mmrm_driver_dist".format(kernel_build),
         data = [":{}_mmrm_driver".format(kernel_build)],
@@ -77,7 +91,3 @@ def define_target_variant_modules(target, variant, registry, modules, config_opt
         mode_overrides = {"**/*": "644"},
         log = "info",
     )
-
-def define_consolidate_gki_modules(target, registry, modules, config_options = []):
-    define_target_variant_modules(target, "consolidate", registry, modules, config_options)
-    define_target_variant_modules(target, "gki", registry, modules, config_options)

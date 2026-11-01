@@ -1,22 +1,53 @@
-load(":define_modules.bzl", "define_modules")
+load(":define_modules.bzl", "define_rmnet_ctl_module", "define_rmnet_core_module")
 load("//build/kernel/kleaf:kernel.bzl", "ddk_headers")
 
-define_modules("pineapple", "consolidate")
-define_modules("pineapple", "perf")
+define_rmnet_ctl_module("sun", "consolidate")
+define_rmnet_core_module("sun", "consolidate")
+define_rmnet_ctl_module("sun", "perf")
+define_rmnet_core_module("sun", "perf")
 
-define_modules("sun", "consolidate")
-define_modules("sun", "perf")
+define_rmnet_ctl_module("canoe", "consolidate")
+define_rmnet_core_module("canoe", "consolidate")
+define_rmnet_ctl_module("canoe", "perf")
+define_rmnet_core_module("canoe", "perf")
 
-define_modules("parrot", "consolidate")
-define_modules("parrot", "perf")
+define_rmnet_ctl_module("vienna", "consolidate")
+define_rmnet_core_module("vienna", "consolidate")
+define_rmnet_ctl_module("vienna", "perf")
+define_rmnet_core_module("vienna", "perf")
 
-define_modules("monaco", "consolidate")
-define_modules("monaco", "perf")
+define_rmnet_ctl_module("monaco", "consolidate")
+define_rmnet_core_module("monaco", "consolidate")
+define_rmnet_ctl_module("monaco", "perf")
+define_rmnet_core_module("monaco", "perf")
 
-define_modules("tuna", "consolidate")
-define_modules("tuna", "perf")
+define_rmnet_ctl_module("lahaina", "consolidate")
+define_rmnet_core_module("lahaina", "consolidate")
+define_rmnet_ctl_module("lahaina", "perf")
+define_rmnet_core_module("lahaina", "perf")
 
-define_modules("waipio", "perf")
+define_rmnet_ctl_module("bengal", "consolidate")
+define_rmnet_core_module("bengal", "consolidate")
+define_rmnet_ctl_module("bengal", "perf")
+define_rmnet_core_module("bengal", "perf")
+
+define_rmnet_ctl_module("chora", "consolidate")
+define_rmnet_core_module("chora", "consolidate")
+define_rmnet_ctl_module("chora", "perf")
+define_rmnet_core_module("chora", "perf")
+
+define_rmnet_ctl_module("malabar", "consolidate")
+define_rmnet_core_module("malabar", "consolidate")
+define_rmnet_ctl_module("malabar", "perf")
+define_rmnet_core_module("malabar", "perf")
+
+define_rmnet_core_module("shikra", "consolidate")
+define_rmnet_core_module("shikra", "perf")
+
+define_rmnet_ctl_module("waipio", "consolidate")
+define_rmnet_core_module("waipio", "consolidate")
+define_rmnet_ctl_module("waipio", "perf")
+define_rmnet_core_module("waipio", "perf")
 
 package(
     default_visibility = [

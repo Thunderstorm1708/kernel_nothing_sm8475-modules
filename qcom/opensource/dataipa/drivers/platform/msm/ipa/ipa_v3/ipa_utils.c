@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2012-2021, The Linux Foundation. All rights reserved.
- *
  * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
  */
 
@@ -46,6 +45,16 @@
 #define IPA_V5_0_CLK_RATE_SVS (240 * 1000 * 1000UL)
 #define IPA_V5_0_CLK_RATE_NOMINAL (500 * 1000 * 1000UL)
 #define IPA_V5_0_CLK_RATE_TURBO (600 * 1000 * 1000UL)
+
+#define IPA_V5_2_IOT_CLK_RATE_SVS2 (75 * 1000 * 1000UL)
+#define IPA_V5_2_IOT_CLK_RATE_SVS (240 * 1000 * 1000UL)
+#define IPA_V5_2_IOT_CLK_RATE_NOMINAL (500 * 1000 * 1000UL)
+#define IPA_V5_2_IOT_CLK_RATE_TURBO (600 * 1000 * 1000UL)
+
+#define IPA_V5_5_CLK_RATE_SVS2 (75 * 1000 * 1000UL)
+#define IPA_V5_5_CLK_RATE_SVS (240 * 1000 * 1000UL)
+#define IPA_V5_5_CLK_RATE_NOMINAL (500 * 1000 * 1000UL)
+#define IPA_V5_5_CLK_RATE_TURBO (600 * 1000 * 1000UL)
 
 #define IPA_MAX_HOLB_TMR_VAL (4294967296 - 1)
 
@@ -331,7 +340,9 @@ enum ipa_ver {
 	IPA_5_1,
 	IPA_5_1_APQ,
 	IPA_5_2,
+	IPA_5_2_IOT,
 	IPA_5_5,
+	IPA_5_5_XR,
 	IPA_VER_MAX,
 };
 
@@ -621,6 +632,19 @@ static const struct rsrc_min_max ipa3_rsrc_src_grp_config
 		{15, 15}, {15, 15}, {12, 12}, {0, 0}, {0, 0}, {0, 0}, {0, 0}  },
 	},
 
+	[IPA_5_2_IOT] = {
+		[IPA_v5_0_RSRC_GRP_TYPE_SRC_PKT_CONTEXTS] = {
+		{1, 6}, {1, 6}, {0, 5}, {0, 0}, {0, 0}, {0, 0}, {0, 0},  },
+		[IPA_v5_0_RSRC_GRP_TYPE_SRC_DESCRIPTOR_LISTS] = {
+		{8, 8}, {8, 8}, {8, 8}, {0, 0}, {0, 0}, {0, 0}, {0, 0}  },
+		[IPA_v5_0_RSRC_GRP_TYPE_SRC_DESCRIPTOR_BUFF] = {
+		{10, 10}, {12, 12}, {12, 12}, {0, 0}, {0, 0}, {0, 0}, {0, 0},  },
+		[IPA_v5_0_RSRC_GRP_TYPE_SRC_HPS_DMARS] = {
+		{0, 63}, {0, 63}, {0, 63}, {0, 0}, {0, 0}, {0, 0}, {0, 0}  },
+		[IPA_v5_0_RSRC_GRP_TYPE_SRC_ACK_ENTRIES] = {
+		{15, 15}, {15, 15}, {12, 12}, {0, 0}, {0, 0}, {0, 0}, {0, 0}  },
+	},
+
 	[IPA_5_5] = {
 		/* UL  DL  unused  unused  URLLC UC_RX_Q N/A */
 		[IPA_v5_0_RSRC_GRP_TYPE_SRC_PKT_CONTEXTS] = {
@@ -631,6 +655,20 @@ static const struct rsrc_min_max ipa3_rsrc_src_grp_config
 		{9, 9}, {24, 24}, {0, 0}, {0, 0}, {20, 20}, {0, 0}, {0, 0},  },
 		[IPA_v5_0_RSRC_GRP_TYPE_SRC_HPS_DMARS] = {
 		{0, 63}, {0, 63}, {0, 63}, {0, 63}, {1, 63}, {0, 63}, {0, 0},  },
+		[IPA_v5_0_RSRC_GRP_TYPE_SRC_ACK_ENTRIES] = {
+		{22, 22}, {16, 16}, {0, 0}, {0, 0}, {16, 16}, {0, 0}, {0, 0},  },
+	},
+
+	[IPA_5_5_XR] = {
+		/* UL  DL  DMA  QDSS  URLLC UC_RX_Q N/A */
+		[IPA_v5_0_RSRC_GRP_TYPE_SRC_PKT_CONTEXTS] = {
+		{3, 9}, {4, 10}, {0, 0}, {0, 0}, {3, 0x3f}, {0, 0x3f}, {0, 0},  },
+		[IPA_v5_0_RSRC_GRP_TYPE_SRC_DESCRIPTOR_LISTS] = {
+		{9, 9}, {12, 12}, {0, 0}, {0, 0}, {10, 10}, {0, 0}, {0, 0},  },
+		[IPA_v5_0_RSRC_GRP_TYPE_SRC_DESCRIPTOR_BUFF] = {
+		{9, 9}, {24, 24}, {0, 0}, {0, 0}, {20, 20}, {0, 0}, {0, 0},  },
+		[IPA_v5_0_RSRC_GRP_TYPE_SRC_HPS_DMARS] = {
+		{0, 0x3f}, {0, 0x3f}, {0, 0x3f}, {0, 0x3f}, {1, 0x3f}, {0, 0x3f}, {0, 0},  },
 		[IPA_v5_0_RSRC_GRP_TYPE_SRC_ACK_ENTRIES] = {
 		{22, 22}, {16, 16}, {0, 0}, {0, 0}, {16, 16}, {0, 0}, {0, 0},  },
 	},
@@ -798,12 +836,34 @@ static const struct rsrc_min_max ipa3_rsrc_dst_grp_config
 		{1, 63}, {1, 63}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0},  },
 	},
 
+	[IPA_5_2_IOT] = {
+		/* UL  DL  unused  unused unused  UC_RX_Q DRBIP N/A */
+		[IPA_v5_0_RSRC_GRP_TYPE_DST_DATA_SECTORS] = {
+		{3, 3}, {3, 3}, {0, 0}, {23, 23}, {0, 0}, {0, 0}, {0, 0},  },
+
+		[IPA_v5_0_RSRC_GRP_TYPE_DST_DPS_DMARS] = {
+		{1, 2}, {1, 2}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0},  },
+		[IPA_v5_0_RSRC_GRP_TYPE_DST_ULSO_SEGMENTS] = {
+		{1, 63}, {1, 63}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0},  },
+	},
+
+
 	[IPA_5_5] = {
 		/* UL  DL  unused  unused unused  UC_RX_Q DRBIP N/A */
 		[IPA_v5_0_RSRC_GRP_TYPE_DST_DATA_SECTORS] = {
 		{6, 6}, {5, 5}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {39, 39},  },
 		[IPA_v5_0_RSRC_GRP_TYPE_DST_DPS_DMARS] = {
 		{0, 3}, {0, 3}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0},  },
+		[IPA_v5_0_RSRC_GRP_TYPE_DST_ULSO_SEGMENTS] = {
+		{0, 0x3f}, {0, 0x3f}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0},  },
+	},
+
+	[IPA_5_5_XR] = {
+		/* UL  DL  DMA  QDSS unused  UC_RX_Q DRBIP N/A */
+		[IPA_v5_0_RSRC_GRP_TYPE_DST_DATA_SECTORS] = {
+		{6, 6}, {6, 6}, {0, 0}, {0, 0}, {10, 10}, {0, 0}, {0, 0},  },
+		[IPA_v5_0_RSRC_GRP_TYPE_DST_DPS_DMARS] = {
+		{0, 3}, {0, 3}, {0, 0}, {0, 0}, {1, 3}, {0, 0}, {0, 0},  },
 		[IPA_v5_0_RSRC_GRP_TYPE_DST_ULSO_SEGMENTS] = {
 		{0, 0x3f}, {0, 0x3f}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0},  },
 	},
@@ -918,11 +978,21 @@ static const struct rsrc_min_max ipa3_rsrc_rx_grp_config
 		[IPA_RSRC_GRP_TYPE_RX_HPS_CMDQ] = {
 		{3, 3}, {3, 3}, {3, 3}, {0, 0}, {0, 0}, {0, 0}  },
 	},
-
+	[IPA_5_2_IOT] = {
+		/* UL  DL  unused  unused  URLLC UC_RX_Q */
+		[IPA_RSRC_GRP_TYPE_RX_HPS_CMDQ] = {
+		{3, 3}, {3, 3}, {3, 3}, {0, 0}, {0, 0}, {0, 0}  },
+	},
 	[IPA_5_5] = {
 		/* UL  DL  unused  unused  URLLC UC_RX_Q */
 		[IPA_RSRC_GRP_TYPE_RX_HPS_CMDQ] = {
 		{3, 3}, {3, 3}, {0, 0}, {0, 0}, {3, 3}, {0, 0}  },
+	},
+
+	[IPA_5_5_XR] = {
+		/* UL  DL  DMA  QDSS  URLLC UC_RX_Q */
+		[IPA_RSRC_GRP_TYPE_RX_HPS_CMDQ] = {
+		{3, 3}, {3, 3}, {3, 3}, {3, 3}, {3, 3}, {0, 0}  },
 	},
 };
 
@@ -989,6 +1059,16 @@ static const struct ipa_rsrc_cfg ipa_rsrc_config[IPA_VER_MAX] = {
 		.src_grp_2nd_prio_index = 0,
 		.src_grp_2nd_prio_valid = 0,
 	},
+	[IPA_5_2_IOT] = {
+		.src_grp_index          = 2,
+		.src_grp_valid          = 1,
+		.dst_pipe_index         = 0,
+		.dst_pipe_valid         = 0,
+		.dst_grp_index          = 0,
+		.dst_grp_valid          = 0,
+		.src_grp_2nd_prio_index = 0,
+		.src_grp_2nd_prio_valid = 0,
+	},
 };
 
 enum ipa_qmb_instance_type {
@@ -1039,8 +1119,11 @@ static const struct ipa_qmb_outstanding ipa3_qmb_outstanding
 	[IPA_4_9][IPA_QMB_INSTANCE_DDR]	        = {16, 8, 120},
 	[IPA_4_11][IPA_QMB_INSTANCE_DDR] = {13, 12, 120},
 	[IPA_5_2][IPA_QMB_INSTANCE_DDR]		= {13, 13, 0},
+	[IPA_5_2_IOT][IPA_QMB_INSTANCE_DDR]	= {12, 8, 0},
 	[IPA_5_5][IPA_QMB_INSTANCE_DDR]		= {16, 12, 0},
 	[IPA_5_5][IPA_QMB_INSTANCE_PCIE]	= {16, 8, 0},
+	[IPA_5_5_XR][IPA_QMB_INSTANCE_DDR]	= {16, 12, 0},
+	[IPA_5_5_XR][IPA_QMB_INSTANCE_PCIE]	= {16, 8, 0},
 };
 
 enum ipa_tx_instance {
@@ -5409,6 +5492,217 @@ static const struct ipa_ep_configuration ipa3_ep_mapping
 			QMB_MASTER_SELECT_DDR, //UPDATE AS DDR
 			{ 20, 11, 5, 5, IPA_EE_AP, GSI_ESCAPE_BUF_ONLY, 0}, IPA_TX_INSTANCE_UL },
 
+	/* IPA_5_2_IOT */
+	/* For Cayennee Modem where Kuno EP configurations are used */
+	[IPA_5_2_IOT][IPA_CLIENT_USB_PROD] = {
+			true, IPA_v5_2_GROUP_UL,
+			true,
+			IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
+			QMB_MASTER_SELECT_DDR,
+			{ 0, 5, 8, 16, IPA_EE_AP, GSI_ESCAPE_BUF_ONLY, 0}, IPA_TX_INSTANCE_NA },
+
+	[IPA_5_2_IOT][IPA_CLIENT_ETHERNET_PROD] = {
+			true, IPA_v3_0_GROUP_UL, true,
+			IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
+			QMB_MASTER_SELECT_DDR,
+			{1, 15, 8, 16, IPA_EE_AP, GSI_SMART_PRE_FETCH, 3}, IPA_TX_INSTANCE_NA },
+
+	[IPA_5_2_IOT][IPA_CLIENT_APPS_WAN_PROD] = {
+			true, IPA_v5_2_GROUP_UL,
+			true,
+			IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
+			QMB_MASTER_SELECT_DDR,
+			{ 2, 0, 25, 32, IPA_EE_AP, GSI_SMART_PRE_FETCH, 3}, IPA_TX_INSTANCE_NA },
+
+	[IPA_5_2_IOT][IPA_CLIENT_APPS_WAN_LOW_LAT_PROD] = {
+			true, IPA_v5_2_GROUP_URLLC,
+			false,
+			IPA_DPS_HPS_SEQ_TYPE_DMA_ONLY,
+			QMB_MASTER_SELECT_DDR,
+			{ 3, 9, 8, 16, IPA_EE_AP, GSI_SMART_PRE_FETCH, 3}, IPA_TX_INSTANCE_NA },
+
+	[IPA_5_2_IOT][IPA_CLIENT_ODU_PROD] = {
+			true, IPA_v5_2_GROUP_URLLC,
+			false,
+			IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
+			QMB_MASTER_SELECT_DDR,
+			{ 4, 16, 8, 16, IPA_EE_AP, GSI_SMART_PRE_FETCH, 3}, IPA_TX_INSTANCE_NA },
+
+	[IPA_5_2_IOT][IPA_CLIENT_WLAN2_PROD] = {
+			true, IPA_v5_2_GROUP_UL,
+			true,
+			IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
+			QMB_MASTER_SELECT_DDR,
+			{ 5, 3, 8, 16, IPA_EE_AP, GSI_SMART_PRE_FETCH, 2}, IPA_TX_INSTANCE_NA },
+
+	[IPA_5_2_IOT][IPA_CLIENT_WLAN1_PROD] = {
+			true, IPA_v5_2_GROUP_UL,
+			true,
+			IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
+			QMB_MASTER_SELECT_DDR,
+			{ 5, 0, 8, 16, IPA_EE_UC, GSI_SMART_PRE_FETCH, 2}, IPA_TX_INSTANCE_NA },
+
+	[IPA_5_2_IOT][IPA_CLIENT_APPS_LAN_PROD] = {
+			true, IPA_v5_2_GROUP_UL,
+			false,
+			IPA_DPS_HPS_SEQ_TYPE_PKT_PROCESS_NO_DEC_NO_UCP,
+			QMB_MASTER_SELECT_DDR,
+			{ 6, 4, 25, 32, IPA_EE_AP, GSI_SMART_PRE_FETCH, 4}, IPA_TX_INSTANCE_NA },
+
+	[IPA_5_2_IOT][IPA_CLIENT_Q6_WAN_PROD] = {
+			true, IPA_v5_2_GROUP_DL,
+			true,
+			IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_DEC_UCP,
+			QMB_MASTER_SELECT_DDR,
+			{ 7, 0, 16, 28, IPA_EE_Q6, GSI_SMART_PRE_FETCH, 2}, IPA_TX_INSTANCE_NA },
+
+	[IPA_5_2_IOT][IPA_CLIENT_Q6_CMD_PROD] = {
+			true, IPA_v5_2_GROUP_UL,
+			false,
+			IPA_DPS_HPS_SEQ_TYPE_PKT_PROCESS_NO_DEC_NO_UCP,
+			QMB_MASTER_SELECT_DDR,
+			{ 8, 1, 20, 24, IPA_EE_Q6, GSI_ESCAPE_BUF_ONLY, 0}, IPA_TX_INSTANCE_NA },
+
+	[IPA_5_2_IOT][IPA_CLIENT_APPS_CMD_PROD] = {
+			true, IPA_v5_2_GROUP_UL,
+			false,
+			IPA_DPS_HPS_SEQ_TYPE_DMA_ONLY,
+			QMB_MASTER_SELECT_DDR,
+			{ 9, 13, 20, 24, IPA_EE_AP, GSI_ESCAPE_BUF_ONLY, 0}, IPA_TX_INSTANCE_NA },
+
+	[IPA_5_2_IOT][IPA_CLIENT_Q6_DL_NLO_DATA_PROD] = {
+			true, IPA_v5_2_GROUP_DL,
+			true,
+			IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_DEC_UCP,
+			QMB_MASTER_SELECT_DDR,
+			{ 10, 2, 28, 32, IPA_EE_Q6, GSI_FREE_PRE_FETCH, 3}, IPA_TX_INSTANCE_NA },
+
+	[IPA_5_2_IOT][IPA_CLIENT_APPS_LAN_CONS] = {
+			true, IPA_v5_2_GROUP_UL,
+			false,
+			IPA_DPS_HPS_SEQ_TYPE_INVALID,
+			QMB_MASTER_SELECT_DDR,
+			{ 11, 14, 9, 9, IPA_EE_AP, GSI_ESCAPE_BUF_ONLY, 0}, IPA_TX_INSTANCE_UL },
+
+	[IPA_5_2_IOT][IPA_CLIENT_Q6_LAN_CONS] = {
+			true, IPA_v5_2_GROUP_DL,
+			false,
+			IPA_DPS_HPS_SEQ_TYPE_INVALID,
+			QMB_MASTER_SELECT_DDR,
+			{ 12, 3, 9, 9, IPA_EE_Q6, GSI_ESCAPE_BUF_ONLY, 0}, IPA_TX_INSTANCE_UL },
+
+	[IPA_5_2_IOT][IPA_CLIENT_Q6_QBAP_STATUS_CONS] = {
+			true, IPA_v5_2_GROUP_UL,
+			false,
+			IPA_DPS_HPS_SEQ_TYPE_INVALID,
+			QMB_MASTER_SELECT_DDR,
+			{ 13, 4, 9, 9, IPA_EE_Q6, GSI_ESCAPE_BUF_ONLY, 0}, IPA_TX_INSTANCE_UL },
+
+	[IPA_5_2_IOT][IPA_CLIENT_Q6_UL_NLO_DATA_CONS] = {
+			true, IPA_v5_2_GROUP_UL,
+			false,
+			IPA_DPS_HPS_SEQ_TYPE_INVALID,
+			QMB_MASTER_SELECT_DDR,
+			{ 14, 5, 5, 5, IPA_EE_Q6, GSI_SMART_PRE_FETCH, 2}, IPA_TX_INSTANCE_UL },
+
+	[IPA_5_2_IOT][IPA_CLIENT_Q6_UL_NLO_ACK_CONS] = {
+			true, IPA_v5_2_GROUP_UL,
+			false,
+			IPA_DPS_HPS_SEQ_TYPE_INVALID,
+			QMB_MASTER_SELECT_DDR,
+			{ 15, 6, 5, 5, IPA_EE_Q6, GSI_SMART_PRE_FETCH, 2}, IPA_TX_INSTANCE_UL },
+
+	[IPA_5_2_IOT][IPA_CLIENT_Q6_WAN_CONS] = {
+			true, IPA_v5_2_GROUP_UL,
+			false,
+			IPA_DPS_HPS_SEQ_TYPE_INVALID,
+			QMB_MASTER_SELECT_DDR,
+			{ 16, 7, 9, 9, IPA_EE_Q6, GSI_ESCAPE_BUF_ONLY, 0}, IPA_TX_INSTANCE_UL },
+
+	[IPA_5_2_IOT][IPA_CLIENT_APPS_WAN_CONS] = {
+			true, IPA_v5_2_GROUP_DL,
+			false,
+			IPA_DPS_HPS_SEQ_TYPE_INVALID,
+			QMB_MASTER_SELECT_DDR,
+			{ 17, 1, 9, 9, IPA_EE_AP, GSI_SMART_PRE_FETCH, 3}, IPA_TX_INSTANCE_UL },
+
+	[IPA_5_2_IOT][IPA_CLIENT_WLAN3_CONS] = {
+			true, IPA_v5_2_GROUP_DL,
+			false,
+			IPA_DPS_HPS_SEQ_TYPE_INVALID,
+			QMB_MASTER_SELECT_DDR,
+			{ 18, 17, 9, 9, IPA_EE_AP, GSI_SMART_PRE_FETCH, 4}, IPA_TX_INSTANCE_UL },
+
+	[IPA_5_2_IOT][IPA_CLIENT_USB_DPL_CONS] = {
+			true, IPA_v5_2_GROUP_DL,
+			false,
+			IPA_DPS_HPS_SEQ_TYPE_INVALID,
+			QMB_MASTER_SELECT_DDR,
+			{ 19, 2, 5, 5, IPA_EE_AP, GSI_ESCAPE_BUF_ONLY, 0}, IPA_TX_INSTANCE_UL },
+
+	[IPA_5_2_IOT][IPA_CLIENT_ODL_DPL_CONS] = {
+			true, IPA_v5_2_GROUP_DL,
+			false,
+			IPA_DPS_HPS_SEQ_TYPE_INVALID,
+			QMB_MASTER_SELECT_DDR,
+			{ 18, 17, 9, 9, IPA_EE_AP, GSI_ESCAPE_BUF_ONLY, 0}, IPA_TX_INSTANCE_UL },
+
+	[IPA_5_2_IOT][IPA_CLIENT_ETHERNET_CONS] = {
+			true, IPA_v5_2_GROUP_DL,
+			false,
+			IPA_DPS_HPS_SEQ_TYPE_INVALID,
+			QMB_MASTER_SELECT_DDR,
+			{ 20, 6, 9, 9, IPA_EE_AP, GSI_SMART_PRE_FETCH, 3}, IPA_TX_INSTANCE_UL },
+
+	[IPA_5_2_IOT][IPA_CLIENT_WLAN2_CONS] = {
+			true, IPA_v5_2_GROUP_DL,
+			false,
+			IPA_DPS_HPS_SEQ_TYPE_INVALID,
+			QMB_MASTER_SELECT_DDR,
+			{ 21, 7, 8, 14, IPA_EE_AP, GSI_SMART_PRE_FETCH, 3}, IPA_TX_INSTANCE_UL },
+
+	[IPA_5_2_IOT][IPA_CLIENT_WLAN1_CONS] = {
+			true, IPA_v5_2_GROUP_DL,
+			false,
+			IPA_DPS_HPS_SEQ_TYPE_INVALID,
+			QMB_MASTER_SELECT_DDR,
+			{ 21, 1, 8, 14, IPA_EE_UC, GSI_SMART_PRE_FETCH, 3}, IPA_TX_INSTANCE_UL },
+
+	[IPA_5_2_IOT][IPA_CLIENT_WLAN2_CONS1] = {
+			true, IPA_v5_2_GROUP_DL,
+			false,
+			IPA_DPS_HPS_SEQ_TYPE_INVALID,
+			QMB_MASTER_SELECT_DDR,
+			{ 22, 8, 8, 14, IPA_EE_AP, GSI_SMART_PRE_FETCH, 3}, IPA_TX_INSTANCE_UL },
+
+	[IPA_5_2_IOT][IPA_CLIENT_WLAN4_CONS] = {
+			true, IPA_v5_2_GROUP_DL,
+			false,
+			IPA_DPS_HPS_SEQ_TYPE_INVALID,
+			QMB_MASTER_SELECT_DDR,
+			{ 22, 8, 8, 14, IPA_EE_AP, GSI_SMART_PRE_FETCH, 3}, IPA_TX_INSTANCE_UL },
+
+	[IPA_5_2_IOT][IPA_CLIENT_USB_CONS] = {
+			true, IPA_v5_2_GROUP_DL,
+			false,
+			IPA_DPS_HPS_SEQ_TYPE_INVALID,
+			QMB_MASTER_SELECT_DDR,
+			{ 23, 11, 9, 9, IPA_EE_AP, GSI_SMART_PRE_FETCH, 3}, IPA_TX_INSTANCE_UL },
+
+	[IPA_5_2_IOT][IPA_CLIENT_APPS_WAN_LOW_LAT_CONS] = {
+			true, IPA_v5_2_GROUP_DL,
+			false,
+			IPA_DPS_HPS_SEQ_TYPE_INVALID,
+			QMB_MASTER_SELECT_DDR,
+			{ 24, 10, 9, 9, IPA_EE_AP, GSI_SMART_PRE_FETCH, 3}, IPA_TX_INSTANCE_UL },
+
+	[IPA_5_2_IOT][IPA_CLIENT_TPUT_CONS] = {
+			true, IPA_v5_0_GROUP_UL,
+			false,
+			IPA_DPS_HPS_SEQ_TYPE_INVALID,
+			QMB_MASTER_SELECT_DDR,
+			{ 25, 12, 9, 9, IPA_EE_AP, GSI_SMART_PRE_FETCH, 3},IPA_TX_INSTANCE_UL },
+
 	/* IPA_5_5 */
 	[IPA_5_5][IPA_CLIENT_USB_PROD] = {
 			true, IPA_v5_5_GROUP_UL,
@@ -5429,7 +5723,7 @@ static const struct ipa_ep_configuration ipa3_ep_mapping
 	[IPA_5_5][IPA_CLIENT_APPS_WAN_LOW_LAT_PROD] = {
 			true, IPA_v5_5_GROUP_URLLC,
 			false,
-			IPA_DPS_HPS_SEQ_TYPE_DMA_ONLY,
+			IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
 			QMB_MASTER_SELECT_DDR,
 			{ 4, 9, 8, 16, IPA_EE_AP, GSI_SMART_PRE_FETCH, 3	},
 			IPA_TX_INSTANCE_NA },
@@ -5737,6 +6031,94 @@ static const struct ipa_ep_configuration ipa3_ep_mapping
 			IPA_DPS_HPS_SEQ_TYPE_INVALID,
 			QMB_MASTER_SELECT_DDR,
 			{ 24, 1, 9, 9, IPA_EE_AP, GSI_SMART_PRE_FETCH, 3 },
+			IPA_TX_INSTANCE_DL },
+
+	/* IPA_5_5_XR */
+
+	[IPA_5_5_XR][IPA_CLIENT_APPS_LAN_PROD] = {
+			true, IPA_v5_5_GROUP_DL,
+			false,
+			IPA_DPS_HPS_SEQ_TYPE_PKT_PROCESS_NO_DEC_UCP,
+			QMB_MASTER_SELECT_DDR,
+			{ 9, 19, 26, 32, IPA_EE_AP, GSI_SMART_PRE_FETCH, 4},
+			IPA_TX_INSTANCE_NA },
+	[IPA_5_5_XR][IPA_CLIENT_APPS_CMD_PROD] = {
+			true, IPA_v5_5_GROUP_DL,
+			false,
+			IPA_DPS_HPS_SEQ_TYPE_DMA_ONLY,
+			QMB_MASTER_SELECT_DDR,
+			{ 14, 11, 20, 24, IPA_EE_AP, GSI_ESCAPE_BUF_ONLY, 0},
+			IPA_TX_INSTANCE_NA },
+	[IPA_5_5_XR][IPA_CLIENT_WLAN2_PROD] = {
+			true, IPA_v5_5_GROUP_DL,
+			true,
+			IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
+			QMB_MASTER_SELECT_DDR,
+			{ 6, 16, 8, 16, IPA_EE_AP, GSI_SMART_PRE_FETCH, 2},
+			IPA_TX_INSTANCE_NA },
+
+	[IPA_5_5_XR][IPA_CLIENT_USB_PROD] = {
+			true, IPA_v5_5_GROUP_UL,
+			true,
+			IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP,
+			QMB_MASTER_SELECT_DDR,
+			{ 1, 0, 8, 16, IPA_EE_AP, GSI_ESCAPE_BUF_ONLY, 0},
+			IPA_TX_INSTANCE_NA },
+
+	[IPA_5_5_XR][IPA_CLIENT_APPS_LAN_CONS] = {
+			true, IPA_v5_5_GROUP_DL,
+			false,
+			IPA_DPS_HPS_SEQ_TYPE_INVALID,
+			QMB_MASTER_SELECT_DDR,
+			{ 17, 13, 9, 9, IPA_EE_AP, GSI_ESCAPE_BUF_ONLY, 0},
+			IPA_TX_INSTANCE_UL },
+
+	[IPA_5_5_XR][IPA_CLIENT_WLAN2_CONS] = {
+			true, IPA_v5_5_GROUP_DL,
+			false,
+			IPA_DPS_HPS_SEQ_TYPE_INVALID,
+			QMB_MASTER_SELECT_DDR,
+			{ 28, 3, 8, 14, IPA_EE_AP, GSI_SMART_PRE_FETCH, 3},
+			IPA_TX_INSTANCE_DL },
+
+	[IPA_5_5_XR][IPA_CLIENT_UC_RTP1_CONS] = {
+			true, IPA_v5_5_GROUP_DL,
+			false,
+			IPA_DPS_HPS_SEQ_TYPE_INVALID,
+			QMB_MASTER_SELECT_DDR,
+			{ 31, 2, 9, 9, IPA_EE_UC, GSI_SMART_PRE_FETCH, 3},
+			IPA_TX_INSTANCE_DL},
+
+	[IPA_5_5_XR][IPA_CLIENT_UC_RTP2_CONS] = {
+			true, IPA_v5_5_GROUP_DL,
+			false,
+			IPA_DPS_HPS_SEQ_TYPE_INVALID,
+			QMB_MASTER_SELECT_DDR,
+			{ 32, 3, 9, 9, IPA_EE_UC, GSI_SMART_PRE_FETCH, 3},
+			IPA_TX_INSTANCE_DL},
+
+	[IPA_5_5_XR][IPA_CLIENT_UC_RTP3_CONS] = {
+			true, IPA_v5_5_GROUP_DL,
+			false,
+			IPA_DPS_HPS_SEQ_TYPE_INVALID,
+			QMB_MASTER_SELECT_DDR,
+			{ 33, 4, 9, 9, IPA_EE_UC, GSI_SMART_PRE_FETCH, 3},
+			IPA_TX_INSTANCE_DL},
+
+	[IPA_5_5_XR][IPA_CLIENT_UC_RTP4_CONS] = {
+			true, IPA_v5_5_GROUP_DL,
+			false,
+			IPA_DPS_HPS_SEQ_TYPE_INVALID,
+			QMB_MASTER_SELECT_DDR,
+			{ 34, 5, 9, 9, IPA_EE_UC, GSI_SMART_PRE_FETCH, 3},
+			IPA_TX_INSTANCE_DL},
+
+	[IPA_5_5_XR][IPA_CLIENT_USB_CONS] = {
+			true, IPA_v5_5_GROUP_DL,
+			false,
+			IPA_DPS_HPS_SEQ_TYPE_INVALID,
+			QMB_MASTER_SELECT_DDR,
+			{ 27, 26, 9, 9, IPA_EE_AP, GSI_SMART_PRE_FETCH, 3},
 			IPA_TX_INSTANCE_DL },
 };
 
@@ -6696,24 +7078,24 @@ static struct ipa3_mem_partition ipa_5_2_mem_part = {
 	.end_ofst = 0x3fe8,
 };
 
-static struct ipa3_mem_partition ipa_5_5_mem_part = {
+static struct ipa3_mem_partition ipa_5_2_iot_mem_part = {
 	.uc_descriptor_ram_ofst = 0x0,
-	.uc_descriptor_ram_size = 0x1000,
-	.uc_ofst = 0x1000,
+	.uc_descriptor_ram_size = 0x600,
+	.uc_ofst = 0x600,
 	.uc_size = 0x80,
-	.uc_info_ofst = 0x1080,
+	.uc_info_ofst = 0x680,
 	.uc_info_size = 0x200,
-	.ofst_start = 0x1280,
-	.v4_flt_hash_ofst = 0x1288,
+	.ofst_start = 0x880,
+	.v4_flt_hash_ofst = 0x888,
 	.v4_flt_hash_size = 0x78,
 	.v4_flt_hash_size_ddr = 0x4000,
-	.v4_flt_nhash_ofst = 0x1308,
+	.v4_flt_nhash_ofst = 0x908,
 	.v4_flt_nhash_size = 0x78,
 	.v4_flt_nhash_size_ddr = 0x4000,
-	.v6_flt_hash_ofst = 0x1388,
+	.v6_flt_hash_ofst = 0x988,
 	.v6_flt_hash_size = 0x78,
 	.v6_flt_hash_size_ddr = 0x4000,
-	.v6_flt_nhash_ofst = 0x1408,
+	.v6_flt_nhash_ofst = 0xA08,
 	.v6_flt_nhash_size = 0x78,
 	.v6_flt_nhash_size_ddr = 0x4000,
 	.v4_rt_num_index = 0x13,
@@ -6721,10 +7103,10 @@ static struct ipa3_mem_partition ipa_5_5_mem_part = {
 	.v4_modem_rt_index_hi = 0xa,
 	.v4_apps_rt_index_lo = 0xb,
 	.v4_apps_rt_index_hi = 0x12,
-	.v4_rt_hash_ofst = 0x1488,
+	.v4_rt_hash_ofst = 0xA88,
 	.v4_rt_hash_size = 0x98,
 	.v4_rt_hash_size_ddr = 0x4000,
-	.v4_rt_nhash_ofst = 0x1528,
+	.v4_rt_nhash_ofst = 0xB28,
 	.v4_rt_nhash_size = 0x98,
 	.v4_rt_nhash_size_ddr = 0x4000,
 	.v6_rt_num_index = 0x13,
@@ -6732,27 +7114,27 @@ static struct ipa3_mem_partition ipa_5_5_mem_part = {
 	.v6_modem_rt_index_hi = 0xa,
 	.v6_apps_rt_index_lo = 0xb,
 	.v6_apps_rt_index_hi = 0x12,
-	.v6_rt_hash_ofst = 0x15c8,
+	.v6_rt_hash_ofst = 0xBc8,
 	.v6_rt_hash_size = 0x98,
 	.v6_rt_hash_size_ddr = 0x4000,
-	.v6_rt_nhash_ofst = 0x1668,
+	.v6_rt_nhash_ofst = 0xc68,
 	.v6_rt_nhash_size = 0x098,
 	.v6_rt_nhash_size_ddr = 0x4000,
-	.modem_hdr_ofst = 0x1708,
+	.modem_hdr_ofst = 0xD08,
 	.modem_hdr_size = 0x240,
-	.apps_hdr_ofst = 0x1948,
+	.apps_hdr_ofst = 0xF48,
 	.apps_hdr_size = 0x1e0,
-	.apps_hdr_size_ddr = 0x800,
-	.modem_hdr_proc_ctx_ofst = 0x1b40,
+	.apps_hdr_size_ddr = 0x7ff,
+	.modem_hdr_proc_ctx_ofst = 0x1140,
 	.modem_hdr_proc_ctx_size = 0xb20,
-	.apps_hdr_proc_ctx_ofst = 0x2660,
+	.apps_hdr_proc_ctx_ofst = 0x1C60,
 	.apps_hdr_proc_ctx_size = 0x200,
 	.apps_hdr_proc_ctx_size_ddr = 0x0,
-	.stats_quota_q6_ofst = 0x2868,
+	.stats_quota_q6_ofst = 0x1E68,
 	.stats_quota_q6_size = 0x60,
-	.stats_quota_ap_ofst = 0x28C8,
+	.stats_quota_ap_ofst = 0x1EC8,
 	.stats_quota_ap_size = 0x48,
-	.stats_tethering_ofst = 0x2910,
+	.stats_tethering_ofst = 0x1F10,
 	.stats_tethering_size = 0x3c0,
 	.stats_flt_v4_ofst = 0,
 	.stats_flt_v4_size = 0,
@@ -6762,15 +7144,209 @@ static struct ipa3_mem_partition ipa_5_5_mem_part = {
 	.stats_rt_v4_size = 0,
 	.stats_rt_v6_ofst = 0,
 	.stats_rt_v6_size = 0,
-	.stats_fnr_ofst = 0x2cd0,
-	.stats_fnr_size = 0xc40,
-	.stats_drop_ofst = 0x3910,
+	.stats_fnr_ofst = 0x22d0,
+	.stats_fnr_size = 0x870,
+	.stats_drop_ofst = 0x2B40,
+	.stats_drop_size = 0x30,
+	.modem_comp_decomp_ofst = 0x0,
+	.modem_comp_decomp_size = 0x0,
+	.modem_ofst = 0x2B78,
+	.modem_size = 0xd48,
+	.nat_tbl_ofst = 0x38c0,
+	.nat_tbl_size = 0x900,
+	.apps_v4_flt_nhash_ofst = 0x2B50,
+	.apps_v4_flt_nhash_size = 0x0,
+	.apps_v6_flt_nhash_ofst = 0x2B50,
+	.apps_v6_flt_nhash_size = 0x0,
+	.apps_v4_flt_hash_ofst = 0x2B50,
+	.apps_v4_flt_hash_size = 0x0,
+	.apps_v6_flt_hash_ofst = 0x2B50,
+	.apps_v6_flt_hash_size = 0x0,
+	.apps_v4_rt_hash_ofst = 0x2B50,
+	.apps_v4_rt_hash_size = 0x0,
+	.apps_v4_rt_nhash_ofst = 0x2B50,
+	.apps_v4_rt_nhash_size = 0x0,
+	.apps_v6_rt_hash_ofst = 0x2B50,
+	.apps_v6_rt_hash_size = 0x0,
+	.apps_v6_rt_nhash_ofst = 0x2B50,
+	.apps_v6_rt_nhash_size = 0x0,
+	.pdn_config_ofst = 0x41C8,
+	.pdn_config_size = 0x100,
+	.end_ofst = 0x42C8,
+};
+
+static struct ipa3_mem_partition ipa_5_5_XR_mem_part = {
+ 	.uc_descriptor_ram_ofst = 0x0,
+ 	.uc_descriptor_ram_size = 0x1000,
+ 	.uc_ofst = 0x1000,
+ 	.uc_size = 0x80,
+ 	.uc_info_ofst = 0x1080,
+ 	.uc_info_size = 0x200,
+ 	.ofst_start = 0x1280,
+ 	.v4_flt_hash_ofst = 0x1288,
+ 	.v4_flt_hash_size = 0x78,
+ 	.v4_flt_hash_size_ddr = 0x4000,
+ 	.v4_flt_nhash_ofst = 0x1308,
+ 	.v4_flt_nhash_size = 0x78,
+ 	.v4_flt_nhash_size_ddr = 0x4000,
+ 	.v6_flt_hash_ofst = 0x1388,
+ 	.v6_flt_hash_size = 0x78,
+ 	.v6_flt_hash_size_ddr = 0x4000,
+ 	.v6_flt_nhash_ofst = 0x1408,
+ 	.v6_flt_nhash_size = 0x78,
+ 	.v6_flt_nhash_size_ddr = 0x4000,
+ 	.v4_rt_num_index = 0x13,
+ 	.v4_modem_rt_index_lo = 0x0,
+ 	.v4_modem_rt_index_hi = 0xa,
+ 	.v4_apps_rt_index_lo = 0xb,
+ 	.v4_apps_rt_index_hi = 0x12,
+ 	.v4_rt_hash_ofst = 0x1488,
+ 	.v4_rt_hash_size = 0x98,
+ 	.v4_rt_hash_size_ddr = 0x4000,
+ 	.v4_rt_nhash_ofst = 0x1528,
+ 	.v4_rt_nhash_size = 0x98,
+ 	.v4_rt_nhash_size_ddr = 0x4000,
+ 	.v6_rt_num_index = 0x13,
+ 	.v6_modem_rt_index_lo = 0x0,
+ 	.v6_modem_rt_index_hi = 0xa,
+ 	.v6_apps_rt_index_lo = 0xb,
+ 	.v6_apps_rt_index_hi = 0x12,
+ 	.v6_rt_hash_ofst = 0x15c8,
+ 	.v6_rt_hash_size = 0x98,
+ 	.v6_rt_hash_size_ddr = 0x4000,
+ 	.v6_rt_nhash_ofst = 0x1668,
+ 	.v6_rt_nhash_size = 0x098,
+ 	.v6_rt_nhash_size_ddr = 0x4000,
+ 	.modem_hdr_ofst = 0x1708,
+ 	.modem_hdr_size = 0x240,
+ 	.apps_hdr_ofst = 0x1948,
+ 	.apps_hdr_size = 0x1e0,
+ 	.apps_hdr_size_ddr = 0x800,
+ 	.modem_hdr_proc_ctx_ofst = 0x1b40,
+ 	.modem_hdr_proc_ctx_size = 0xb20,
+ 	.apps_hdr_proc_ctx_ofst = 0x2660,
+ 	.apps_hdr_proc_ctx_size = 0x200,
+ 	.apps_hdr_proc_ctx_size_ddr = 0x0,
+ 	.stats_quota_q6_ofst = 0x2868,
+ 	.stats_quota_q6_size = 0x60,
+ 	.stats_quota_ap_ofst = 0x28C8,
+ 	.stats_quota_ap_size = 0x48,
+ 	.stats_tethering_ofst = 0x2910,
+ 	.stats_tethering_size = 0x3c0,
+ 	.stats_flt_v4_ofst = 0,
+ 	.stats_flt_v4_size = 0,
+ 	.stats_flt_v6_ofst = 0,
+ 	.stats_flt_v6_size = 0,
+ 	.stats_rt_v4_ofst = 0,
+ 	.stats_rt_v4_size = 0,
+ 	.stats_rt_v6_ofst = 0,
+ 	.stats_rt_v6_size = 0,
+ 	.stats_fnr_ofst = 0x2cd0,
+ 	.stats_fnr_size = 0xba0,
+ 	.stats_drop_ofst = 0x3870,
+ 	.stats_drop_size = 0x20,
+ 	.modem_comp_decomp_ofst = 0x0,
+ 	.modem_comp_decomp_size = 0x0,
+ 	.modem_ofst = 0x3898,
+ 	.modem_size = 0xd48,
+ 	.nat_tbl_ofst = 0x45e0,
+ 	.nat_tbl_size = 0x900,
+ 	.apps_v4_flt_hash_ofst = 0x2718,
+ 	.apps_v4_flt_hash_size = 0x0,
+ 	.apps_v4_flt_nhash_ofst = 0x2718,
+ 	.apps_v4_flt_nhash_size = 0x0,
+ 	.apps_v6_flt_hash_ofst = 0x2718,
+ 	.apps_v6_flt_hash_size = 0x0,
+ 	.apps_v6_flt_nhash_ofst = 0x2718,
+ 	.apps_v6_flt_nhash_size = 0x0,
+ 	.apps_v4_rt_hash_ofst = 0x2718,
+ 	.apps_v4_rt_hash_size = 0x0,
+ 	.apps_v4_rt_nhash_ofst = 0x2718,
+ 	.apps_v4_rt_nhash_size = 0x0,
+ 	.apps_v6_rt_hash_ofst = 0x2718,
+ 	.apps_v6_rt_hash_size = 0x0,
+ 	.apps_v6_rt_nhash_ofst = 0x2718,
+ 	.apps_v6_rt_nhash_size = 0x0,
+ 	.pdn_config_ofst = 0x4ee8,
+ 	.pdn_config_size = 0x100,
+ 	.end_ofst = 0x4fe8,
+ };
+
+static struct ipa3_mem_partition ipa_5_5_mem_part = {
+	.uc_descriptor_ram_ofst = 0x0,
+	.uc_descriptor_ram_size = 0x300,
+	.uc_ofst = 0x300,
+	.uc_size = 0x80,
+	.uc_info_ofst = 0x380,
+	.uc_info_size = 0x80,
+	.ofst_start = 0x400,
+	.v4_flt_hash_ofst = 0x408,
+	.v4_flt_hash_size = 0x78,
+	.v4_flt_hash_size_ddr = 0x4000,
+	.v4_flt_nhash_ofst = 0x488,
+	.v4_flt_nhash_size = 0x78,
+	.v4_flt_nhash_size_ddr = 0x4000,
+	.v6_flt_hash_ofst = 0x508,
+	.v6_flt_hash_size = 0x78,
+	.v6_flt_hash_size_ddr = 0x4000,
+	.v6_flt_nhash_ofst = 0x588,
+	.v6_flt_nhash_size = 0x78,
+	.v6_flt_nhash_size_ddr = 0x4000,
+	.v4_rt_num_index = 0x13,
+	.v4_modem_rt_index_lo = 0x0,
+	.v4_modem_rt_index_hi = 0xa,
+	.v4_apps_rt_index_lo = 0xb,
+	.v4_apps_rt_index_hi = 0x12,
+	.v4_rt_hash_ofst = 0x608,
+	.v4_rt_hash_size = 0x98,
+	.v4_rt_hash_size_ddr = 0x4000,
+	.v4_rt_nhash_ofst = 0x6A8,
+	.v4_rt_nhash_size = 0x98,
+	.v4_rt_nhash_size_ddr = 0x4000,
+	.v6_rt_num_index = 0x13,
+	.v6_modem_rt_index_lo = 0x0,
+	.v6_modem_rt_index_hi = 0xa,
+	.v6_apps_rt_index_lo = 0xb,
+	.v6_apps_rt_index_hi = 0x12,
+	.v6_rt_hash_ofst = 0x748,
+	.v6_rt_hash_size = 0x98,
+	.v6_rt_hash_size_ddr = 0x4000,
+	.v6_rt_nhash_ofst = 0x7E8,
+	.v6_rt_nhash_size = 0x098,
+	.v6_rt_nhash_size_ddr = 0x4000,
+	.modem_hdr_ofst = 0x888,
+	.modem_hdr_size = 0x240,
+	.apps_hdr_ofst = 0xAC8,
+	.apps_hdr_size = 0x1e0,
+	.apps_hdr_size_ddr = 0x800,
+	.modem_hdr_proc_ctx_ofst = 0xCC0,
+	.modem_hdr_proc_ctx_size = 0xb20,
+	.apps_hdr_proc_ctx_ofst = 0x17E0,
+	.apps_hdr_proc_ctx_size = 0x200,
+	.apps_hdr_proc_ctx_size_ddr = 0x0,
+	.stats_quota_q6_ofst = 0x19E8,
+	.stats_quota_q6_size = 0x60,
+	.stats_quota_ap_ofst = 0x1A48,
+	.stats_quota_ap_size = 0x48,
+	.stats_tethering_ofst = 0x1A90,
+	.stats_tethering_size = 0x3c0,
+	.stats_flt_v4_ofst = 0,
+	.stats_flt_v4_size = 0,
+	.stats_flt_v6_ofst = 0,
+	.stats_flt_v6_size = 0,
+	.stats_rt_v4_ofst = 0,
+	.stats_rt_v4_size = 0,
+	.stats_rt_v6_ofst = 0,
+	.stats_rt_v6_size = 0,
+	.stats_fnr_ofst = 0x1E50,
+	.stats_fnr_size = 0x1000,
+	.stats_drop_ofst = 0x2E50,
 	.stats_drop_size = 0x20,
 	.modem_comp_decomp_ofst = 0x0,
 	.modem_comp_decomp_size = 0x0,
-	.modem_ofst = 0x3938,
+	.modem_ofst = 0x2E78,
 	.modem_size = 0xd48,
-	.nat_tbl_ofst = 0x4680,
+	.nat_tbl_ofst = 0x3BC0,
 	.nat_tbl_size = 0x900,
 	.apps_v4_flt_hash_ofst = 0x2718,
 	.apps_v4_flt_hash_size = 0x0,
@@ -6788,9 +7364,9 @@ static struct ipa3_mem_partition ipa_5_5_mem_part = {
 	.apps_v6_rt_hash_size = 0x0,
 	.apps_v6_rt_nhash_ofst = 0x2718,
 	.apps_v6_rt_nhash_size = 0x0,
-	.pdn_config_ofst = 0x4f88,
+	.pdn_config_ofst = 0x44C8,
 	.pdn_config_size = 0x50,
-	.end_ofst = 0x4fd8,
+	.end_ofst = 0x4518,
 };
 
 const char *ipa_clients_strings[IPA_CLIENT_MAX] = {
@@ -7530,9 +8106,13 @@ u8 ipa3_get_hw_type_index(void)
 		break;
 	case IPA_HW_v5_2:
 		hw_type_index = IPA_5_2;
+		if (ipa3_ctx->ipa_config_is_iot)
+			hw_type_index = IPA_5_2_IOT;
 		break;
 	case IPA_HW_v5_5:
 		hw_type_index = IPA_5_5;
+		if (ipa3_ctx->platform_type == IPA_PLAT_TYPE_XR)
+			hw_type_index = IPA_5_5_XR;
 		break;
 	default:
 		IPAERR("Incorrect IPA version %d\n", ipa3_ctx->ipa_hw_type);
@@ -7600,19 +8180,19 @@ void _ipa_sram_settings_read_v3_0(void)
 int ipa3_cfg_route(struct ipahal_reg_route *route)
 {
 
-	IPADBG("disable_route_block=%d, default_pipe=%d, default_hdr_tbl=%d\n",
+	IPADBG_BOOTUP("disable_route_block=%d, default_pipe=%d, default_hdr_tbl=%d\n",
 		route->route_dis,
 		route->route_def_pipe,
 		route->route_def_hdr_table);
-	IPADBG("default_hdr_ofst=%d, default_frag_pipe=%d\n",
+	IPADBG_BOOTUP("default_hdr_ofst=%d, default_frag_pipe=%d\n",
 		route->route_def_hdr_ofst,
 		route->route_frag_def_pipe);
 
-	IPADBG("default_retain_hdr=%d\n",
+	IPADBG_BOOTUP("default_retain_hdr=%d\n",
 		route->route_def_retain_hdr);
 
 	if (route->route_dis) {
-		IPAERR("Route disable is not supported!\n");
+		IPAERR_BOOTUP("Route disable is not supported!\n");
 		return -EPERM;
 	}
 
@@ -7650,11 +8230,11 @@ static int ipa_disable_hashing_rt_flt_v4_2(void)
 	 * use alternative
 	 */
 	if (ipa3_ctx->ipa_hw_type >= IPA_HW_v5_0) {
-		IPAERR("reg deprecated\n");
+		IPAERR_BOOTUP("reg deprecated\n");
 		WARN_ON(1);
 		return -EPERM;
 	}
-	IPADBG("Disable hashing for filter and route table in IPA 4.2 HW\n");
+	IPADBG_BOOTUP("Disable hashing for filter and route table in IPA 4.2 HW\n");
 	ipahal_write_reg(IPA_FILT_ROUT_HASH_EN,
 					IPA_FILT_ROUT_HASH_REG_VAL_v4_2);
 	return 0;
@@ -7794,10 +8374,10 @@ static void ipa_cfg_qtime(void)
 	ts_cfg.tag_timestamp_lsb = IPA_TAG_TIMER_TIMESTAMP_SHFT;
 	ts_cfg.nat_timestamp_lsb = IPA_NAT_TIMER_TIMESTAMP_SHFT;
 	val = ipahal_read_reg(IPA_QTIME_TIMESTAMP_CFG);
-	IPADBG("qtime timestamp before cfg: 0x%x\n", val);
+	IPADBG_BOOTUP("qtime timestamp before cfg: 0x%x\n", val);
 	ipahal_write_reg_fields(IPA_QTIME_TIMESTAMP_CFG, &ts_cfg);
 	val = ipahal_read_reg(IPA_QTIME_TIMESTAMP_CFG);
-	IPADBG("qtime timestamp after cfg: 0x%x\n", val);
+	IPADBG_BOOTUP("qtime timestamp after cfg: 0x%x\n", val);
 
 	/* Configure timers pulse generators granularity */
 	memset(&gran_cfg, 0, sizeof(gran_cfg));
@@ -7816,15 +8396,15 @@ static void ipa_cfg_qtime(void)
 		gran_cfg.gran_3 = IPA_TIMERS_TIME_GRAN_10_MSEC;
 	}
 	val = ipahal_read_reg(IPA_TIMERS_PULSE_GRAN_CFG);
-	IPADBG("timer pulse granularity before cfg: 0x%x\n", val);
+	IPADBG_BOOTUP("timer pulse granularity before cfg: 0x%x\n", val);
 	ipahal_write_reg_fields(IPA_TIMERS_PULSE_GRAN_CFG, &gran_cfg);
 	val = ipahal_read_reg(IPA_TIMERS_PULSE_GRAN_CFG);
-	IPADBG("timer pulse granularity after cfg: 0x%x\n", val);
+	IPADBG_BOOTUP("timer pulse granularity after cfg: 0x%x\n", val);
 
 	/* Configure timers XO Clock divider */
 	memset(&div_cfg, 0, sizeof(div_cfg));
 	ipahal_read_reg_fields(IPA_TIMERS_XO_CLK_DIV_CFG, &div_cfg);
-	IPADBG("timer XO clk divider before cfg: enabled=%d divider=%u\n",
+	IPADBG_BOOTUP("timer XO clk divider before cfg: enabled=%d divider=%u\n",
 		div_cfg.enable, div_cfg.value);
 
 	/* Make sure divider is disabled */
@@ -7845,7 +8425,7 @@ static void ipa_cfg_qtime(void)
 	div_cfg.enable = true; /* Enable the divider */
 	ipahal_write_reg_fields(IPA_TIMERS_XO_CLK_DIV_CFG, &div_cfg);
 	ipahal_read_reg_fields(IPA_TIMERS_XO_CLK_DIV_CFG, &div_cfg);
-	IPADBG("timer XO clk divider after cfg: enabled=%d divider=%u\n",
+	IPADBG_BOOTUP("timer XO clk divider after cfg: enabled=%d divider=%u\n",
 		div_cfg.enable, div_cfg.value);
 }
 
@@ -7863,7 +8443,7 @@ int ipa3_init_hw(void)
 
 	/* Read IPA version and make sure we have access to the registers */
 	ipa_version = ipahal_read_reg(IPA_VERSION);
-	IPADBG("IPA_VERSION=%u\n", ipa_version);
+	IPADBG_BOOTUP("IPA_VERSION=%u\n", ipa_version);
 	if (ipa_version == 0)
 		return -EFAULT;
 
@@ -7884,7 +8464,7 @@ int ipa3_init_hw(void)
 		ipahal_write_reg(IPA_BCR, IPA_BCR_REG_VAL_v4_2);
 		break;
 	default:
-		IPADBG("Do not update BCR - hw_type=%d\n",
+		IPADBG_BOOTUP("Do not update BCR - hw_type=%d\n",
 			ipa3_ctx->ipa_hw_type);
 		break;
 	}
@@ -7934,7 +8514,7 @@ int ipa3_init_hw(void)
 		master_cfg.coal_ipv4_id_ignore = ipa3_ctx->coal_ipv4_id_ignore;
 		ipahal_write_reg_fields(IPA_COAL_MASTER_CFG, &master_cfg);
 
-		IPADBG(
+		IPADBG_BOOTUP(
 			": coal-ipv4-id-ignore = %s\n",
 			master_cfg.coal_ipv4_id_ignore ?
 			"True" : "False");
@@ -8331,12 +8911,12 @@ int ipa3_cfg_ep_seq(u32 clnt_hdl, const struct ipa_ep_cfg_seq *seq_cfg)
 
 	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes ||
 	    ipa3_ctx->ep[clnt_hdl].valid == 0) {
-		IPAERR("bad param, clnt_hdl = %d", clnt_hdl);
+		IPAERR_CFG("bad param, clnt_hdl = %d", clnt_hdl);
 		return -EINVAL;
 	}
 
 	if (IPA_CLIENT_IS_CONS(ipa3_ctx->ep[clnt_hdl].client)) {
-		IPAERR("SEQ does not apply to IPA consumer EP %d\n", clnt_hdl);
+		IPAERR_CFG("SEQ does not apply to IPA consumer EP %d\n", clnt_hdl);
 		return -EINVAL;
 	}
 
@@ -8345,7 +8925,7 @@ int ipa3_cfg_ep_seq(u32 clnt_hdl, const struct ipa_ep_cfg_seq *seq_cfg)
 	 * These are configured dynamically in ipa3_cfg_ep_mode
 	 */
 	if (IPA_CLIENT_IS_TEST(ipa3_ctx->ep[clnt_hdl].client)) {
-		IPADBG("Skip sequencers configuration for test clients\n");
+		IPADBG_CFG("Skip sequencers configuration for test clients\n");
 		return 0;
 	}
 
@@ -8358,20 +8938,20 @@ int ipa3_cfg_ep_seq(u32 clnt_hdl, const struct ipa_ep_cfg_seq *seq_cfg)
 	if (type != IPA_DPS_HPS_SEQ_TYPE_INVALID) {
 		if (ipa3_ctx->ep[clnt_hdl].cfg.mode.mode == IPA_DMA &&
 			!IPA_DPS_HPS_SEQ_TYPE_IS_DMA(type)) {
-			IPAERR("Configuring non-DMA SEQ type to DMA pipe\n");
+			IPAERR_CFG("Configuring non-DMA SEQ type to DMA pipe\n");
 			WARN_ON(1);
 			return -EINVAL;
 		}
 		IPA_ACTIVE_CLIENTS_INC_EP(ipa3_get_client_mapping(clnt_hdl));
 		/* Configure sequencers type*/
 
-		IPADBG("set sequencers to sequence 0x%x, ep = %d\n", type,
+		IPADBG_CFG("set sequencers to sequence 0x%x, ep = %d\n", type,
 				clnt_hdl);
 		ipahal_write_reg_n(IPA_ENDP_INIT_SEQ_n, clnt_hdl, type);
 
 		IPA_ACTIVE_CLIENTS_DEC_EP(ipa3_get_client_mapping(clnt_hdl));
 	} else {
-		IPADBG("should not set sequencer type of ep = %d\n", clnt_hdl);
+		IPADBG_CFG("should not set sequencer type of ep = %d\n", clnt_hdl);
 	}
 
 	return 0;
@@ -8395,7 +8975,7 @@ int ipa3_cfg_ep(u32 clnt_hdl, const struct ipa_ep_cfg *ipa_ep_cfg)
 
 	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes ||
 	    ipa3_ctx->ep[clnt_hdl].valid == 0 || ipa_ep_cfg == NULL) {
-		IPAERR("bad parm.\n");
+		IPAERR_CFG("bad parm.\n");
 		return -EINVAL;
 	}
 
@@ -8415,7 +8995,7 @@ int ipa3_cfg_ep(u32 clnt_hdl, const struct ipa_ep_cfg *ipa_ep_cfg)
 	if (result)
 		return result;
 
-	if (ipa3_is_ulso_supported()) {
+	if (ipa3_is_ulso_supported() && ipa_ep_cfg->ulso.is_ulso_pipe) {
 		result = ipa3_cfg_ep_ulso(clnt_hdl,
 			&ipa_ep_cfg->ulso);
 		if (result)
@@ -8505,18 +9085,18 @@ int ipa3_cfg_ep_nat(u32 clnt_hdl, const struct ipa_ep_cfg_nat *ep_nat)
 {
 	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes ||
 	    ipa3_ctx->ep[clnt_hdl].valid == 0 || ep_nat == NULL) {
-		IPAERR("bad parm, clnt_hdl = %d , ep_valid = %d\n",
+		IPAERR_CFG("bad parm, clnt_hdl = %d , ep_valid = %d\n",
 					clnt_hdl,
 					ipa3_ctx->ep[clnt_hdl].valid);
 		return -EINVAL;
 	}
 
 	if (IPA_CLIENT_IS_CONS(ipa3_ctx->ep[clnt_hdl].client)) {
-		IPAERR("NAT does not apply to IPA out EP %d\n", clnt_hdl);
+		IPAERR_CFG("NAT does not apply to IPA out EP %d\n", clnt_hdl);
 		return -EINVAL;
 	}
 
-	IPADBG("pipe=%d, nat_en=%d(%s), nat_exc_suppress=%d\n",
+	IPADBG_CFG("pipe=%d, nat_en=%d(%s), nat_exc_suppress=%d\n",
 			clnt_hdl,
 			ep_nat->nat_en,
 			ipa3_get_nat_en_str(ep_nat->nat_en),
@@ -8553,18 +9133,18 @@ int ipa3_cfg_ep_conn_track(u32 clnt_hdl,
 {
 	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes ||
 		ipa3_ctx->ep[clnt_hdl].valid == 0 || ep_conn_track == NULL) {
-		IPAERR("bad parm, clnt_hdl = %d , ep_valid = %d\n",
+		IPAERR_CFG("bad parm, clnt_hdl = %d , ep_valid = %d\n",
 			clnt_hdl,
 			ipa3_ctx->ep[clnt_hdl].valid);
 		return -EINVAL;
 	}
 
 	if (IPA_CLIENT_IS_CONS(ipa3_ctx->ep[clnt_hdl].client)) {
-		IPAERR("IPv6CT does not apply to IPA out EP %d\n", clnt_hdl);
+		IPAERR_CFG("IPv6CT does not apply to IPA out EP %d\n", clnt_hdl);
 		return -EINVAL;
 	}
 
-	IPADBG("pipe=%d, conn_track_en=%d(%s)\n",
+	IPADBG_CFG("pipe=%d, conn_track_en=%d(%s)\n",
 		clnt_hdl,
 		ep_conn_track->conn_track_en,
 		ipa3_get_ipv6ct_en_str(ep_conn_track->conn_track_en));
@@ -8597,13 +9177,13 @@ int ipa3_cfg_ep_status(u32 clnt_hdl,
 {
 	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes ||
 	    ipa3_ctx->ep[clnt_hdl].valid == 0 || ep_status == NULL) {
-		IPAERR("bad parm, clnt_hdl = %d , ep_valid = %d\n",
+		IPAERR_CFG("bad parm, clnt_hdl = %d , ep_valid = %d\n",
 					clnt_hdl,
 					ipa3_ctx->ep[clnt_hdl].valid);
 		return -EINVAL;
 	}
 
-	IPADBG("pipe=%d, status_en=%d status_ep=%d status_location=%d\n",
+	IPADBG_CFG("pipe=%d, status_en=%d status_ep=%d status_location=%d\n",
 			clnt_hdl,
 			ep_status->status_en,
 			ep_status->status_ep,
@@ -8637,7 +9217,6 @@ void ipa3_cfg_ep_cfg_pipe_replicate(u32 clnt_hdl)
 		case IPA_CLIENT_APPS_WAN_PROD:
 		case IPA_CLIENT_WLAN2_PROD:
 		case IPA_CLIENT_WIGIG_PROD:
-		case IPA_CLIENT_APPS_LAN_PROD:
 		case IPA_CLIENT_APPS_WAN_LOW_LAT_DATA_PROD:
 		case IPA_CLIENT_APPS_LAN_COAL_CONS:
 		case IPA_CLIENT_APPS_LAN_CONS:
@@ -8682,7 +9261,7 @@ int ipa3_cfg_ep_cfg(u32 clnt_hdl, const struct ipa_ep_cfg_cfg *cfg)
 
 	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes ||
 	    ipa3_ctx->ep[clnt_hdl].valid == 0 || cfg == NULL) {
-		IPAERR("bad parm, clnt_hdl = %d , ep_valid = %d\n",
+		IPAERR_CFG("bad parm, clnt_hdl = %d , ep_valid = %d\n",
 					clnt_hdl,
 					ipa3_ctx->ep[clnt_hdl].valid);
 		return -EINVAL;
@@ -8696,7 +9275,7 @@ int ipa3_cfg_ep_cfg(u32 clnt_hdl, const struct ipa_ep_cfg_cfg *cfg)
 	/* Override QMB master selection */
 	qmb_master_sel = ipa3_get_qmb_master_sel(ipa3_ctx->ep[clnt_hdl].client);
 	ipa3_ctx->ep[clnt_hdl].cfg.cfg.gen_qmb_master_sel = qmb_master_sel;
-	IPADBG(
+	IPADBG_CFG(
 	       "pipe=%d, frag_ofld_en=%d cs_ofld_en=%d mdata_hdr_ofst=%d "
 	       "gen_qmb_master_sel=%d pipe_replicate_en=%d\n",
 			clnt_hdl,
@@ -8715,7 +9294,7 @@ int ipa3_cfg_ep_cfg(u32 clnt_hdl, const struct ipa_ep_cfg_cfg *cfg)
 		IPA_CLIENT_IS_CONS(ipa3_ctx->ep[clnt_hdl].client)) {
 		tx_instance = ipa3_get_tx_instance(ipa3_ctx->ep[clnt_hdl].client);
 		if (tx_instance == -EINVAL) {
-			IPAERR("bad parm, clnt_hdl = %d , ep_valid = %d\n",
+			IPAERR_CFG("bad parm, clnt_hdl = %d , ep_valid = %d\n",
 				clnt_hdl,
 				ipa3_ctx->ep[clnt_hdl].valid);
 			IPA_ACTIVE_CLIENTS_DEC_EP(ipa3_get_client_mapping(clnt_hdl));
@@ -8748,7 +9327,7 @@ int ipa3_cfg_ep_prod_cfg(u32 clnt_hdl, const struct ipa_ep_cfg_prod_cfg *prod_cf
 	    ipa3_ctx->ep[clnt_hdl].valid == 0 ||
 	    IPA_CLIENT_IS_PROD(ipa3_ctx->ep[clnt_hdl].client) ||
 	    prod_cfg == NULL) {
-		IPAERR("bad parm, clnt_hdl = %d , ep_valid = %d\n",
+		IPAERR_CFG("bad parm, clnt_hdl = %d , ep_valid = %d\n",
 					clnt_hdl,
 					ipa3_ctx->ep[clnt_hdl].valid);
 		return -EINVAL;
@@ -8759,7 +9338,7 @@ int ipa3_cfg_ep_prod_cfg(u32 clnt_hdl, const struct ipa_ep_cfg_prod_cfg *prod_cf
 
 	tx_instance = ipa3_get_tx_instance(ipa3_ctx->ep[clnt_hdl].client);
 	if (tx_instance == -EINVAL) {
-		IPAERR("bad parm, clnt_hdl = %d , ep_valid = %d\n",
+		IPAERR_CFG("bad parm, clnt_hdl = %d , ep_valid = %d\n",
 			clnt_hdl,
 			ipa3_ctx->ep[clnt_hdl].valid);
 		return -EINVAL;
@@ -8793,13 +9372,13 @@ int ipa3_cfg_ep_metadata_mask(u32 clnt_hdl,
 {
 	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes ||
 	    ipa3_ctx->ep[clnt_hdl].valid == 0 || metadata_mask == NULL) {
-		IPAERR("bad parm, clnt_hdl = %d , ep_valid = %d\n",
+		IPAERR_CFG("bad parm, clnt_hdl = %d , ep_valid = %d\n",
 					clnt_hdl,
 					ipa3_ctx->ep[clnt_hdl].valid);
 		return -EINVAL;
 	}
 
-	IPADBG("pipe=%d, metadata_mask=0x%x\n",
+	IPADBG_CFG("pipe=%d, metadata_mask=0x%x\n",
 			clnt_hdl,
 			metadata_mask->metadata_mask);
 
@@ -8831,24 +9410,24 @@ int ipa3_cfg_ep_hdr(u32 clnt_hdl, const struct ipa_ep_cfg_hdr *ep_hdr)
 
 	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes ||
 	    ipa3_ctx->ep[clnt_hdl].valid == 0 || ep_hdr == NULL) {
-		IPAERR("bad parm, clnt_hdl = %d , ep_valid = %d\n",
+		IPAERR_CFG("bad parm, clnt_hdl = %d , ep_valid = %d\n",
 				clnt_hdl, ipa3_ctx->ep[clnt_hdl].valid);
 		return -EINVAL;
 	}
-	IPADBG("pipe=%d metadata_reg_valid=%d\n",
+	IPADBG_CFG("pipe=%d metadata_reg_valid=%d\n",
 		clnt_hdl,
 		ep_hdr->hdr_metadata_reg_valid);
 
-	IPADBG("remove_additional=%d, a5_mux=%d, ofst_pkt_size=0x%x\n",
+	IPADBG_CFG("remove_additional=%d, a5_mux=%d, ofst_pkt_size=0x%x\n",
 		ep_hdr->hdr_remove_additional,
 		ep_hdr->hdr_a5_mux,
 		ep_hdr->hdr_ofst_pkt_size);
 
-	IPADBG("ofst_pkt_size_valid=%d, additional_const_len=0x%x\n",
+	IPADBG_CFG("ofst_pkt_size_valid=%d, additional_const_len=0x%x\n",
 		ep_hdr->hdr_ofst_pkt_size_valid,
 		ep_hdr->hdr_additional_const_len);
 
-	IPADBG("ofst_metadata=0x%x, ofst_metadata_valid=%d, len=0x%x\n",
+	IPADBG_CFG("ofst_metadata=0x%x, ofst_metadata_valid=%d, len=0x%x\n",
 		ep_hdr->hdr_ofst_metadata,
 		ep_hdr->hdr_ofst_metadata_valid,
 		ep_hdr->hdr_len);
@@ -8883,23 +9462,23 @@ int ipa3_cfg_ep_hdr_ext(u32 clnt_hdl,
 
 	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes ||
 	    ipa3_ctx->ep[clnt_hdl].valid == 0 || ep_hdr_ext == NULL) {
-		IPAERR("bad parm, clnt_hdl = %d , ep_valid = %d\n",
+		IPAERR_CFG("bad parm, clnt_hdl = %d , ep_valid = %d\n",
 				clnt_hdl, ipa3_ctx->ep[clnt_hdl].valid);
 		return -EINVAL;
 	}
 
-	IPADBG("pipe=%d hdr_pad_to_alignment=%d\n",
+	IPADBG_CFG("pipe=%d hdr_pad_to_alignment=%d\n",
 		clnt_hdl,
 		ep_hdr_ext->hdr_pad_to_alignment);
 
-	IPADBG("hdr_total_len_or_pad_offset=%d\n",
+	IPADBG_CFG("hdr_total_len_or_pad_offset=%d\n",
 		ep_hdr_ext->hdr_total_len_or_pad_offset);
 
-	IPADBG("hdr_payload_len_inc_padding=%d hdr_total_len_or_pad=%d\n",
+	IPADBG_CFG("hdr_payload_len_inc_padding=%d hdr_total_len_or_pad=%d\n",
 		ep_hdr_ext->hdr_payload_len_inc_padding,
 		ep_hdr_ext->hdr_total_len_or_pad);
 
-	IPADBG("hdr_total_len_or_pad_valid=%d hdr_little_endian=%d\n",
+	IPADBG_CFG("hdr_total_len_or_pad_valid=%d hdr_little_endian=%d\n",
 		ep_hdr_ext->hdr_total_len_or_pad_valid,
 		ep_hdr_ext->hdr_little_endian);
 
@@ -8913,7 +9492,6 @@ int ipa3_cfg_ep_hdr_ext(u32 clnt_hdl,
 
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_HDR_EXT_n, clnt_hdl,
 		&ep->cfg.hdr_ext);
-
 	IPA_ACTIVE_CLIENTS_DEC_EP(ipa3_get_client_mapping(clnt_hdl));
 
 	return 0;
@@ -8934,12 +9512,12 @@ int ipa3_cfg_ep_ulso(u32 clnt_hdl, const struct ipa_ep_cfg_ulso *ep_ulso)
 
 	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes ||
 	    ipa3_ctx->ep[clnt_hdl].valid == 0 || ep_ulso == NULL) {
-		IPAERR("bad parm, clnt_hdl = %d , ep_valid = %d\n",
+		IPAERR_CFG("bad parm, clnt_hdl = %d , ep_valid = %d\n",
 				clnt_hdl, ipa3_ctx->ep[clnt_hdl].valid);
 		return -EINVAL;
 	}
 
-	IPADBG("pipe=%d ipid_min_max_idx=%d is_ulso_pipe=%d\n",
+	IPADBG_CFG("pipe=%d ipid_min_max_idx=%d is_ulso_pipe=%d\n",
 		clnt_hdl, ep_ulso->ipid_min_max_idx, ep_ulso->is_ulso_pipe);
 
 	ep = &ipa3_ctx->ep[clnt_hdl];
@@ -9063,20 +9641,20 @@ int ipa3_cfg_ep_mode(u32 clnt_hdl, const struct ipa_ep_cfg_mode *ep_mode)
 
 	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes ||
 	    ipa3_ctx->ep[clnt_hdl].valid == 0 || ep_mode == NULL) {
-		IPAERR("bad params clnt_hdl=%d , ep_valid=%d ep_mode=%pK\n",
+		IPAERR_CFG("bad params clnt_hdl=%d , ep_valid=%d ep_mode=%pK\n",
 				clnt_hdl, ipa3_ctx->ep[clnt_hdl].valid,
 				ep_mode);
 		return -EINVAL;
 	}
 
 	if (IPA_CLIENT_IS_CONS(ipa3_ctx->ep[clnt_hdl].client)) {
-		IPAERR("MODE does not apply to IPA out EP %d\n", clnt_hdl);
+		IPAERR_CFG("MODE does not apply to IPA out EP %d\n", clnt_hdl);
 		return -EINVAL;
 	}
 
 	ep = ipa_get_ep_mapping(ep_mode->dst);
 	if (ep == -1 && ep_mode->mode == IPA_DMA) {
-		IPAERR("dst %d does not exist in DMA mode\n", ep_mode->dst);
+		IPAERR_CFG("dst %d does not exist in DMA mode\n", ep_mode->dst);
 		return -EINVAL;
 	}
 
@@ -9085,7 +9663,7 @@ int ipa3_cfg_ep_mode(u32 clnt_hdl, const struct ipa_ep_cfg_mode *ep_mode)
 	if (!IPA_CLIENT_IS_CONS(ep_mode->dst))
 		ep = ipa_get_ep_mapping(IPA_CLIENT_APPS_LAN_CONS);
 
-	IPADBG("pipe=%d mode=%d(%s), dst_client_number=%d\n",
+	IPADBG_CFG("pipe=%d mode=%d(%s), dst_client_number=%d\n",
 			clnt_hdl,
 			ep_mode->mode,
 			ipa3_get_mode_type_str(ep_mode->mode),
@@ -9114,7 +9692,7 @@ int ipa3_cfg_ep_mode(u32 clnt_hdl, const struct ipa_ep_cfg_mode *ep_mode)
 				type =
 			IPA_DPS_HPS_SEQ_TYPE_2ND_PKT_PROCESS_PASS_NO_DEC_UCP;
 
-		IPADBG(" set sequencers to sequance 0x%x, ep = %d\n", type,
+		IPADBG_CFG(" set sequencers to sequance 0x%x, ep = %d\n", type,
 				clnt_hdl);
 		ipahal_write_reg_n(IPA_ENDP_INIT_SEQ_n, clnt_hdl, type);
 	}
@@ -9140,8 +9718,10 @@ const char *ipa3_get_aggr_enable_str(enum ipa_aggr_en_type aggr_en)
 const char *ipa3_get_aggr_type_str(enum ipa_aggr_type aggr_type)
 {
 	switch (aggr_type) {
+	case (IPA_NCM_16):
+		return "NCM_16";
 	case (IPA_MBIM_16):
-			return "MBIM_16";
+		return "MBIM_16";
 	case (IPA_HDLC):
 		return "HDLC";
 	case (IPA_TLP):
@@ -9269,19 +9849,19 @@ int ipa3_cfg_ep_aggr(u32 clnt_hdl, const struct ipa_ep_cfg_aggr *ep_aggr)
 
 	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes ||
 	    ipa3_ctx->ep[clnt_hdl].valid == 0 || ep_aggr == NULL) {
-		IPAERR("bad parm, clnt_hdl = %d , ep_valid = %d\n",
+		IPAERR_CFG("bad parm, clnt_hdl = %d , ep_valid = %d\n",
 			clnt_hdl, ipa3_ctx->ep[clnt_hdl].valid);
 		return -EINVAL;
 	}
 
 	if (ep_aggr->aggr_en == IPA_ENABLE_DEAGGR &&
 	    !IPA_EP_SUPPORTS_DEAGGR(clnt_hdl)) {
-		IPAERR("pipe=%d cannot be configured to DEAGGR\n", clnt_hdl);
+		IPAERR_CFG("pipe=%d cannot be configured to DEAGGR\n", clnt_hdl);
 		WARN_ON(1);
 		return -EINVAL;
 	}
 
-	IPADBG("pipe=%d en=%d(%s), type=%d(%s), byte_limit=%d, time_limit=%d\n",
+	IPADBG_CFG("pipe=%d en=%d(%s), type=%d(%s), byte_limit=%d, time_limit=%d\n",
 			clnt_hdl,
 			ep_aggr->aggr_en,
 			ipa3_get_aggr_enable_str(ep_aggr->aggr_en),
@@ -9289,7 +9869,7 @@ int ipa3_cfg_ep_aggr(u32 clnt_hdl, const struct ipa_ep_cfg_aggr *ep_aggr)
 			ipa3_get_aggr_type_str(ep_aggr->aggr),
 			ep_aggr->aggr_byte_limit,
 			ep_aggr->aggr_time_limit);
-	IPADBG("hard_byte_limit_en=%d aggr_sw_eof_active=%d\n",
+	IPADBG_CFG("hard_byte_limit_en=%d aggr_sw_eof_active=%d\n",
 		ep_aggr->aggr_hard_byte_limit_en,
 		ep_aggr->aggr_sw_eof_active);
 
@@ -9303,7 +9883,7 @@ int ipa3_cfg_ep_aggr(u32 clnt_hdl, const struct ipa_ep_cfg_aggr *ep_aggr)
 			&ipa3_ctx->ep[clnt_hdl].cfg.aggr.pulse_generator,
 			&ipa3_ctx->ep[clnt_hdl].cfg.aggr.scaled_time);
 		if (res) {
-			IPAERR("failed to process AGGR timer tmr=%u\n",
+			IPAERR_CFG("failed to process AGGR timer tmr=%u\n",
 				ep_aggr->aggr_time_limit);
 			res = -EINVAL;
 			goto complete;
@@ -9319,7 +9899,7 @@ int ipa3_cfg_ep_aggr(u32 clnt_hdl, const struct ipa_ep_cfg_aggr *ep_aggr)
 		    ipa3_get_client_mapping(clnt_hdl) ==
 		    IPA_CLIENT_APPS_WAN_COAL_CONS &&
 		    ipa3_ctx->ep[clnt_hdl].cfg.aggr.pulse_generator != 0) {
-			IPAERR("coal pipe using GRAN_SEL = %d\n",
+			IPAERR_CFG("coal pipe using GRAN_SEL = %d\n",
 			       ipa3_ctx->ep[clnt_hdl].cfg.aggr.pulse_generator);
 			ipa_assert();
 		}
@@ -9331,7 +9911,7 @@ int ipa3_cfg_ep_aggr(u32 clnt_hdl, const struct ipa_ep_cfg_aggr *ep_aggr)
 		 * So finest granularity is 0.5msec
 		 */
 		if (ep_aggr->aggr_time_limit % 500) {
-			IPAERR("given time limit %u is not in 0.5msec\n",
+			IPAERR_CFG("given time limit %u is not in 0.5msec\n",
 				ep_aggr->aggr_time_limit);
 			WARN_ON(1);
 			res = -EINVAL;
@@ -9344,6 +9924,7 @@ int ipa3_cfg_ep_aggr(u32 clnt_hdl, const struct ipa_ep_cfg_aggr *ep_aggr)
 
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_AGGR_n, clnt_hdl,
 			&ipa3_ctx->ep[clnt_hdl].cfg.aggr);
+
 complete:
 	IPA_ACTIVE_CLIENTS_DEC_EP(ipa3_get_client_mapping(clnt_hdl));
 	return res;
@@ -9364,13 +9945,13 @@ int ipa3_cfg_ep_route(u32 clnt_hdl, const struct ipa_ep_cfg_route *ep_route)
 
 	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes ||
 	    ipa3_ctx->ep[clnt_hdl].valid == 0 || ep_route == NULL) {
-		IPAERR("bad parm, clnt_hdl = %d , ep_valid = %d\n",
+		IPAERR_CFG("bad parm, clnt_hdl = %d , ep_valid = %d\n",
 			clnt_hdl, ipa3_ctx->ep[clnt_hdl].valid);
 		return -EINVAL;
 	}
 
 	if (IPA_CLIENT_IS_CONS(ipa3_ctx->ep[clnt_hdl].client)) {
-		IPAERR("ROUTE does not apply to IPA out EP %d\n",
+		IPAERR_CFG("ROUTE does not apply to IPA out EP %d\n",
 				clnt_hdl);
 		return -EINVAL;
 	}
@@ -9380,15 +9961,15 @@ int ipa3_cfg_ep_route(u32 clnt_hdl, const struct ipa_ep_cfg_route *ep_route)
 	 * success
 	 */
 	if (ipa3_ctx->ep[clnt_hdl].cfg.mode.mode == IPA_DMA) {
-		IPADBG("DMA enabled for ep %d, dst pipe is part of DMA\n",
+		IPADBG_CFG("DMA enabled for ep %d, dst pipe is part of DMA\n",
 				clnt_hdl);
 		return 0;
 	}
 
 	if (ep_route->rt_tbl_hdl)
-		IPAERR("client specified non-zero RT TBL hdl - ignore it\n");
+		IPAERR_CFG("client specified non-zero RT TBL hdl - ignore it\n");
 
-	IPADBG("pipe=%d, rt_tbl_hdl=%d\n",
+	IPADBG_CFG("pipe=%d, rt_tbl_hdl=%d\n",
 			clnt_hdl,
 			ep_route->rt_tbl_hdl);
 
@@ -9457,12 +10038,12 @@ int ipa3_cfg_ep_holb(u32 clnt_hdl, const struct ipa_ep_cfg_holb *ep_holb)
 	    ipa3_ctx->ep[clnt_hdl].valid == 0 || ep_holb == NULL ||
 	    ep_holb->tmr_val > ipa3_ctx->ctrl->max_holb_tmr_val ||
 	    ep_holb->en > 1) {
-		IPAERR("bad parm.\n");
+		IPAERR_CFG("bad parm.\n");
 		return -EINVAL;
 	}
 
 	if (IPA_CLIENT_IS_PROD(ipa3_ctx->ep[clnt_hdl].client)) {
-		IPAERR("HOLB does not apply to IPA in EP %d\n", clnt_hdl);
+		IPAERR_CFG("HOLB does not apply to IPA in EP %d\n", clnt_hdl);
 		return -EINVAL;
 	}
 
@@ -9495,7 +10076,7 @@ int ipa3_cfg_ep_holb(u32 clnt_hdl, const struct ipa_ep_cfg_holb *ep_holb)
 			&ipa3_ctx->ep[clnt_hdl].holb.pulse_generator,
 			&ipa3_ctx->ep[clnt_hdl].holb.scaled_time);
 		if (res) {
-			IPAERR("failed to process HOLB timer tmr=%u\n",
+			IPAERR_CFG("failed to process HOLB timer tmr=%u\n",
 				ep_holb->tmr_val);
 			ipa_assert();
 			return res;
@@ -9516,7 +10097,7 @@ int ipa3_cfg_ep_holb(u32 clnt_hdl, const struct ipa_ep_cfg_holb *ep_holb)
 
 success:
 	IPA_ACTIVE_CLIENTS_DEC_EP(ipa3_get_client_mapping(clnt_hdl));
-	IPADBG("cfg holb %u ep=%d tmr=%d\n", ep_holb->en, clnt_hdl,
+	IPADBG_CFG("cfg holb %u ep=%d tmr=%d\n", ep_holb->en, clnt_hdl,
 		ep_holb->tmr_val);
 	return 0;
 }
@@ -9628,26 +10209,26 @@ int ipa3_cfg_ep_deaggr(u32 clnt_hdl,
 
 	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes ||
 	    ipa3_ctx->ep[clnt_hdl].valid == 0 || ep_deaggr == NULL) {
-		IPAERR("bad parm, clnt_hdl = %d , ep_valid = %d\n",
+		IPAERR_CFG("bad parm, clnt_hdl = %d , ep_valid = %d\n",
 				clnt_hdl, ipa3_ctx->ep[clnt_hdl].valid);
 		return -EINVAL;
 	}
 
-	IPADBG("pipe=%d deaggr_hdr_len=%d\n",
+	IPADBG_CFG("pipe=%d deaggr_hdr_len=%d\n",
 		clnt_hdl,
 		ep_deaggr->deaggr_hdr_len);
 
-	IPADBG("syspipe_err_detection=%d\n",
+	IPADBG_CFG("syspipe_err_detection=%d\n",
 		ep_deaggr->syspipe_err_detection);
 
-	IPADBG("packet_offset_valid=%d\n",
+	IPADBG_CFG("packet_offset_valid=%d\n",
 		ep_deaggr->packet_offset_valid);
 
-	IPADBG("packet_offset_location=%d max_packet_len=%d\n",
+	IPADBG_CFG("packet_offset_location=%d max_packet_len=%d\n",
 		ep_deaggr->packet_offset_location,
 		ep_deaggr->max_packet_len);
 
-	IPADBG("ignore_min_pkt_err=%d\n",
+	IPADBG_CFG("ignore_min_pkt_err=%d\n",
 		ep_deaggr->ignore_min_pkt_err);
 
 	ep = &ipa3_ctx->ep[clnt_hdl];
@@ -9659,7 +10240,6 @@ int ipa3_cfg_ep_deaggr(u32 clnt_hdl,
 
 	ipahal_write_reg_n_fields(IPA_ENDP_INIT_DEAGGR_n, clnt_hdl,
 		&ep->cfg.deaggr);
-
 	IPA_ACTIVE_CLIENTS_DEC_EP(ipa3_get_client_mapping(clnt_hdl));
 
 	return 0;
@@ -9681,12 +10261,12 @@ int ipa3_cfg_ep_metadata(u32 clnt_hdl, const struct ipa_ep_cfg_metadata *ep_md)
 
 	if (clnt_hdl >= ipa3_ctx->ipa_num_pipes ||
 		ipa3_ctx->ep[clnt_hdl].valid == 0 || ep_md == NULL) {
-		IPAERR("bad parm, clnt_hdl = %d , ep_valid = %d\n",
+		IPAERR_CFG("bad parm, clnt_hdl = %d , ep_valid = %d\n",
 					clnt_hdl, ipa3_ctx->ep[clnt_hdl].valid);
 		return -EINVAL;
 	}
 
-	IPADBG("pipe=%d, mux id=%d\n", clnt_hdl, ep_md->qmap_id);
+	IPADBG_CFG("pipe=%d, mux id=%d\n", clnt_hdl, ep_md->qmap_id);
 
 	/* copy over EP cfg */
 	ipa3_ctx->ep[clnt_hdl].cfg.meta = *ep_md;
@@ -9719,7 +10299,8 @@ int ipa3_cfg_ep_metadata(u32 clnt_hdl, const struct ipa_ep_cfg_metadata *ep_md)
 		ipahal_write_reg_n_fields(IPA_ENDP_INIT_HDR_n, clnt_hdl,
 			&ipa3_ctx->ep[clnt_hdl].cfg.hdr);
 	}
-
+	IPADBG_CFG("hdr reg value = 0x%x\n", ipahal_read_reg_n_fields(IPA_ENDP_INIT_HDR_n,
+				clnt_hdl, &ipa3_ctx->ep[clnt_hdl].cfg.hdr));
 	IPA_ACTIVE_CLIENTS_DEC_EP(ipa3_get_client_mapping(clnt_hdl));
 
 	return 0;
@@ -9952,10 +10533,16 @@ int ipa3_init_mem_partition(enum ipa_hw_type type)
 		ipa3_ctx->ctrl->mem_partition = &ipa_5_1_mem_part;
 		break;
 	case IPA_HW_v5_2:
-		ipa3_ctx->ctrl->mem_partition = &ipa_5_2_mem_part;
+		if (ipa3_ctx->ipa_config_is_iot)
+			ipa3_ctx->ctrl->mem_partition = &ipa_5_2_iot_mem_part;
+		else
+			ipa3_ctx->ctrl->mem_partition = &ipa_5_2_mem_part;
 		break;
 	case IPA_HW_v5_5:
-		ipa3_ctx->ctrl->mem_partition = &ipa_5_5_mem_part;
+		if (ipa3_ctx->platform_type == IPA_PLAT_TYPE_XR)
+			ipa3_ctx->ctrl->mem_partition = &ipa_5_5_XR_mem_part;
+		else
+			ipa3_ctx->ctrl->mem_partition = &ipa_5_5_mem_part;
 		break;
 	case IPA_HW_None:
 	case IPA_HW_v1_0:
@@ -9972,179 +10559,179 @@ int ipa3_init_mem_partition(enum ipa_hw_type type)
 	case IPA_HW_v3_5_1:
 	case IPA_HW_v4_0:
 	default:
-		IPAERR("unsupported version %d\n", type);
+		IPAERR_BOOTUP("unsupported version %d\n", type);
 		return -EPERM;
 	}
 
-	IPADBG("UC OFST 0x%x SIZE 0x%x\n",
+	IPADBG_BOOTUP("UC OFST 0x%x SIZE 0x%x\n",
 		IPA_MEM_PART(uc_ofst), IPA_MEM_PART(uc_size));
 
 	if (IPA_MEM_PART(uc_info_ofst) & 3) {
-		IPAERR("UC INFO OFST 0x%x is unaligned\n",
+		IPAERR_BOOTUP("UC INFO OFST 0x%x is unaligned\n",
 			IPA_MEM_PART(uc_info_ofst));
 		return -ENODEV;
 	}
 
-	IPADBG("UC INFO OFST 0x%x SIZE 0x%x\n",
+	IPADBG_BOOTUP("UC INFO OFST 0x%x SIZE 0x%x\n",
 		IPA_MEM_PART(uc_info_ofst), IPA_MEM_PART(uc_info_size));
 
-	IPADBG("RAM OFST 0x%x\n", IPA_MEM_PART(ofst_start));
+	IPADBG_BOOTUP("RAM OFST 0x%x\n", IPA_MEM_PART(ofst_start));
 
 	if (IPA_MEM_PART(v4_flt_hash_ofst) & 7) {
-		IPAERR("V4 FLT HASHABLE OFST 0x%x is unaligned\n",
+		IPAERR_BOOTUP("V4 FLT HASHABLE OFST 0x%x is unaligned\n",
 			IPA_MEM_PART(v4_flt_hash_ofst));
 		return -ENODEV;
 	}
 
-	IPADBG("V4 FLT HASHABLE OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
+	IPADBG_BOOTUP("V4 FLT HASHABLE OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
 		IPA_MEM_PART(v4_flt_hash_ofst),
 		IPA_MEM_PART(v4_flt_hash_size),
 		IPA_MEM_PART(v4_flt_hash_size_ddr));
 
 	if (IPA_MEM_PART(v4_flt_nhash_ofst) & 7) {
-		IPAERR("V4 FLT NON-HASHABLE OFST 0x%x is unaligned\n",
+		IPAERR_BOOTUP("V4 FLT NON-HASHABLE OFST 0x%x is unaligned\n",
 			IPA_MEM_PART(v4_flt_nhash_ofst));
 		return -ENODEV;
 	}
 
-	IPADBG("V4 FLT NON-HASHABLE OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
+	IPADBG_BOOTUP("V4 FLT NON-HASHABLE OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
 		IPA_MEM_PART(v4_flt_nhash_ofst),
 		IPA_MEM_PART(v4_flt_nhash_size),
 		IPA_MEM_PART(v4_flt_nhash_size_ddr));
 
 	if (IPA_MEM_PART(v6_flt_hash_ofst) & 7) {
-		IPAERR("V6 FLT HASHABLE OFST 0x%x is unaligned\n",
+		IPAERR_BOOTUP("V6 FLT HASHABLE OFST 0x%x is unaligned\n",
 			IPA_MEM_PART(v6_flt_hash_ofst));
 		return -ENODEV;
 	}
 
-	IPADBG("V6 FLT HASHABLE OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
+	IPADBG_BOOTUP("V6 FLT HASHABLE OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
 		IPA_MEM_PART(v6_flt_hash_ofst), IPA_MEM_PART(v6_flt_hash_size),
 		IPA_MEM_PART(v6_flt_hash_size_ddr));
 
 	if (IPA_MEM_PART(v6_flt_nhash_ofst) & 7) {
-		IPAERR("V6 FLT NON-HASHABLE OFST 0x%x is unaligned\n",
+		IPAERR_BOOTUP("V6 FLT NON-HASHABLE OFST 0x%x is unaligned\n",
 			IPA_MEM_PART(v6_flt_nhash_ofst));
 		return -ENODEV;
 	}
 
-	IPADBG("V6 FLT NON-HASHABLE OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
+	IPADBG_BOOTUP("V6 FLT NON-HASHABLE OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
 		IPA_MEM_PART(v6_flt_nhash_ofst),
 		IPA_MEM_PART(v6_flt_nhash_size),
 		IPA_MEM_PART(v6_flt_nhash_size_ddr));
 
-	IPADBG("V4 RT NUM INDEX 0x%x\n", IPA_MEM_PART(v4_rt_num_index));
+	IPADBG_BOOTUP("V4 RT NUM INDEX 0x%x\n", IPA_MEM_PART(v4_rt_num_index));
 
-	IPADBG("V4 RT MODEM INDEXES 0x%x - 0x%x\n",
+	IPADBG_BOOTUP("V4 RT MODEM INDEXES 0x%x - 0x%x\n",
 		IPA_MEM_PART(v4_modem_rt_index_lo),
 		IPA_MEM_PART(v4_modem_rt_index_hi));
 
-	IPADBG("V4 RT APPS INDEXES 0x%x - 0x%x\n",
+	IPADBG_BOOTUP("V4 RT APPS INDEXES 0x%x - 0x%x\n",
 		IPA_MEM_PART(v4_apps_rt_index_lo),
 		IPA_MEM_PART(v4_apps_rt_index_hi));
 
 	if (IPA_MEM_PART(v4_rt_hash_ofst) & 7) {
-		IPAERR("V4 RT HASHABLE OFST 0x%x is unaligned\n",
+		IPAERR_BOOTUP("V4 RT HASHABLE OFST 0x%x is unaligned\n",
 			IPA_MEM_PART(v4_rt_hash_ofst));
 		return -ENODEV;
 	}
 
-	IPADBG("V4 RT HASHABLE OFST 0x%x\n", IPA_MEM_PART(v4_rt_hash_ofst));
+	IPADBG_BOOTUP("V4 RT HASHABLE OFST 0x%x\n", IPA_MEM_PART(v4_rt_hash_ofst));
 
-	IPADBG("V4 RT HASHABLE SIZE 0x%x DDR SIZE 0x%x\n",
+	IPADBG_BOOTUP("V4 RT HASHABLE SIZE 0x%x DDR SIZE 0x%x\n",
 		IPA_MEM_PART(v4_rt_hash_size),
 		IPA_MEM_PART(v4_rt_hash_size_ddr));
 
 	if (IPA_MEM_PART(v4_rt_nhash_ofst) & 7) {
-		IPAERR("V4 RT NON-HASHABLE OFST 0x%x is unaligned\n",
+		IPAERR_BOOTUP("V4 RT NON-HASHABLE OFST 0x%x is unaligned\n",
 			IPA_MEM_PART(v4_rt_nhash_ofst));
 		return -ENODEV;
 	}
 
-	IPADBG("V4 RT NON-HASHABLE OFST 0x%x\n",
+	IPADBG_BOOTUP("V4 RT NON-HASHABLE OFST 0x%x\n",
 		IPA_MEM_PART(v4_rt_nhash_ofst));
 
-	IPADBG("V4 RT HASHABLE SIZE 0x%x DDR SIZE 0x%x\n",
+	IPADBG_BOOTUP("V4 RT HASHABLE SIZE 0x%x DDR SIZE 0x%x\n",
 		IPA_MEM_PART(v4_rt_nhash_size),
 		IPA_MEM_PART(v4_rt_nhash_size_ddr));
 
-	IPADBG("V6 RT NUM INDEX 0x%x\n", IPA_MEM_PART(v6_rt_num_index));
+	IPADBG_BOOTUP("V6 RT NUM INDEX 0x%x\n", IPA_MEM_PART(v6_rt_num_index));
 
-	IPADBG("V6 RT MODEM INDEXES 0x%x - 0x%x\n",
+	IPADBG_BOOTUP("V6 RT MODEM INDEXES 0x%x - 0x%x\n",
 		IPA_MEM_PART(v6_modem_rt_index_lo),
 		IPA_MEM_PART(v6_modem_rt_index_hi));
 
-	IPADBG("V6 RT APPS INDEXES 0x%x - 0x%x\n",
+	IPADBG_BOOTUP("V6 RT APPS INDEXES 0x%x - 0x%x\n",
 		IPA_MEM_PART(v6_apps_rt_index_lo),
 		IPA_MEM_PART(v6_apps_rt_index_hi));
 
 	if (IPA_MEM_PART(v6_rt_hash_ofst) & 7) {
-		IPAERR("V6 RT HASHABLE OFST 0x%x is unaligned\n",
+		IPAERR_BOOTUP("V6 RT HASHABLE OFST 0x%x is unaligned\n",
 			IPA_MEM_PART(v6_rt_hash_ofst));
 		return -ENODEV;
 	}
 
-	IPADBG("V6 RT HASHABLE OFST 0x%x\n", IPA_MEM_PART(v6_rt_hash_ofst));
+	IPADBG_BOOTUP("V6 RT HASHABLE OFST 0x%x\n", IPA_MEM_PART(v6_rt_hash_ofst));
 
-	IPADBG("V6 RT HASHABLE SIZE 0x%x DDR SIZE 0x%x\n",
+	IPADBG_BOOTUP("V6 RT HASHABLE SIZE 0x%x DDR SIZE 0x%x\n",
 		IPA_MEM_PART(v6_rt_hash_size),
 		IPA_MEM_PART(v6_rt_hash_size_ddr));
 
 	if (IPA_MEM_PART(v6_rt_nhash_ofst) & 7) {
-		IPAERR("V6 RT NON-HASHABLE OFST 0x%x is unaligned\n",
+		IPAERR_BOOTUP("V6 RT NON-HASHABLE OFST 0x%x is unaligned\n",
 			IPA_MEM_PART(v6_rt_nhash_ofst));
 		return -ENODEV;
 	}
 
-	IPADBG("V6 RT NON-HASHABLE OFST 0x%x\n",
+	IPADBG_BOOTUP("V6 RT NON-HASHABLE OFST 0x%x\n",
 		IPA_MEM_PART(v6_rt_nhash_ofst));
 
-	IPADBG("V6 RT NON-HASHABLE SIZE 0x%x DDR SIZE 0x%x\n",
+	IPADBG_BOOTUP("V6 RT NON-HASHABLE SIZE 0x%x DDR SIZE 0x%x\n",
 		IPA_MEM_PART(v6_rt_nhash_size),
 		IPA_MEM_PART(v6_rt_nhash_size_ddr));
 
 	if (IPA_MEM_PART(modem_hdr_ofst) & 7) {
-		IPAERR("MODEM HDR OFST 0x%x is unaligned\n",
+		IPAERR_BOOTUP("MODEM HDR OFST 0x%x is unaligned\n",
 			IPA_MEM_PART(modem_hdr_ofst));
 		return -ENODEV;
 	}
 
-	IPADBG("MODEM HDR OFST 0x%x SIZE 0x%x\n",
+	IPADBG_BOOTUP("MODEM HDR OFST 0x%x SIZE 0x%x\n",
 		IPA_MEM_PART(modem_hdr_ofst), IPA_MEM_PART(modem_hdr_size));
 
 	if (IPA_MEM_PART(apps_hdr_ofst) & 7) {
-		IPAERR("APPS HDR OFST 0x%x is unaligned\n",
+		IPAERR_BOOTUP("APPS HDR OFST 0x%x is unaligned\n",
 			IPA_MEM_PART(apps_hdr_ofst));
 		return -ENODEV;
 	}
 
-	IPADBG("APPS HDR OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
+	IPADBG_BOOTUP("APPS HDR OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
 		IPA_MEM_PART(apps_hdr_ofst), IPA_MEM_PART(apps_hdr_size),
 		IPA_MEM_PART(apps_hdr_size_ddr));
 
 	if (IPA_MEM_PART(modem_hdr_proc_ctx_ofst) & 7) {
-		IPAERR("MODEM HDR PROC CTX OFST 0x%x is unaligned\n",
+		IPAERR_BOOTUP("MODEM HDR PROC CTX OFST 0x%x is unaligned\n",
 			IPA_MEM_PART(modem_hdr_proc_ctx_ofst));
 		return -ENODEV;
 	}
 
-	IPADBG("MODEM HDR PROC CTX OFST 0x%x SIZE 0x%x\n",
+	IPADBG_BOOTUP("MODEM HDR PROC CTX OFST 0x%x SIZE 0x%x\n",
 		IPA_MEM_PART(modem_hdr_proc_ctx_ofst),
 		IPA_MEM_PART(modem_hdr_proc_ctx_size));
 
 	if (IPA_MEM_PART(apps_hdr_proc_ctx_ofst) & 7) {
-		IPAERR("APPS HDR PROC CTX OFST 0x%x is unaligned\n",
+		IPAERR_BOOTUP("APPS HDR PROC CTX OFST 0x%x is unaligned\n",
 			IPA_MEM_PART(apps_hdr_proc_ctx_ofst));
 		return -ENODEV;
 	}
 
-	IPADBG("APPS HDR PROC CTX OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
+	IPADBG_BOOTUP("APPS HDR PROC CTX OFST 0x%x SIZE 0x%x DDR SIZE 0x%x\n",
 		IPA_MEM_PART(apps_hdr_proc_ctx_ofst),
 		IPA_MEM_PART(apps_hdr_proc_ctx_size),
 		IPA_MEM_PART(apps_hdr_proc_ctx_size_ddr));
 
 	if (IPA_MEM_PART(pdn_config_ofst) & 7) {
-		IPAERR("PDN CONFIG OFST 0x%x is unaligned\n",
+		IPAERR_BOOTUP("PDN CONFIG OFST 0x%x is unaligned\n",
 			IPA_MEM_PART(pdn_config_ofst));
 		return -ENODEV;
 	}
@@ -10158,7 +10745,7 @@ int ipa3_init_mem_partition(enum ipa_hw_type type)
 	 * rule will be modem_hdr_proc_ctx_size >> 5 (32B).
 	 */
 	if (IPA_MEM_PART(modem_hdr_proc_ctx_size) & 31) {
-		IPAERR("MODEM HDR PROC CTX SIZE 0x%x is not 32B aligned\n",
+		IPAERR_BOOTUP("MODEM HDR PROC CTX SIZE 0x%x is not 32B aligned\n",
 			IPA_MEM_PART(modem_hdr_proc_ctx_size));
 		return -ENODEV;
 	}
@@ -10172,131 +10759,131 @@ int ipa3_init_mem_partition(enum ipa_hw_type type)
 	if (IPA_MEM_PART(apps_hdr_proc_ctx_ofst) !=
 		IPA_MEM_PART(modem_hdr_proc_ctx_ofst) +
 		IPA_MEM_PART(modem_hdr_proc_ctx_size)) {
-		IPAERR("APPS HDR PROC CTX SIZE not adjacent to MODEM one!\n");
+		IPAERR_BOOTUP("APPS HDR PROC CTX SIZE not adjacent to MODEM one!\n");
 		return -ENODEV;
 	}
 
-	IPADBG("NAT TBL OFST 0x%x SIZE 0x%x\n",
+	IPADBG_BOOTUP("NAT TBL OFST 0x%x SIZE 0x%x\n",
 		   IPA_MEM_PART(nat_tbl_ofst),
 		   IPA_MEM_PART(nat_tbl_size));
 
 	if (IPA_MEM_PART(nat_tbl_ofst) & 31) {
-		IPAERR("NAT TBL OFST 0x%x is not aligned properly\n",
+		IPAERR_BOOTUP("NAT TBL OFST 0x%x is not aligned properly\n",
 			   IPA_MEM_PART(nat_tbl_ofst));
 		return -ENODEV;
 	}
 
-	IPADBG("PDN CONFIG OFST 0x%x SIZE 0x%x\n",
+	IPADBG_BOOTUP("PDN CONFIG OFST 0x%x SIZE 0x%x\n",
 		IPA_MEM_PART(pdn_config_ofst),
 		IPA_MEM_PART(pdn_config_size));
 
 	if (IPA_MEM_PART(pdn_config_ofst) & 7) {
-		IPAERR("PDN CONFIG OFST 0x%x is unaligned\n",
+		IPAERR_BOOTUP("PDN CONFIG OFST 0x%x is unaligned\n",
 			IPA_MEM_PART(pdn_config_ofst));
 		return -ENODEV;
 	}
 
-	IPADBG("Q6 QUOTA STATS OFST 0x%x SIZE 0x%x\n",
+	IPADBG_BOOTUP("Q6 QUOTA STATS OFST 0x%x SIZE 0x%x\n",
 		IPA_MEM_PART(stats_quota_q6_ofst),
 		IPA_MEM_PART(stats_quota_q6_size));
 
 	if (IPA_MEM_PART(stats_quota_q6_ofst) & 7) {
-		IPAERR("Q6 QUOTA STATS OFST 0x%x is unaligned\n",
+		IPAERR_BOOTUP("Q6 QUOTA STATS OFST 0x%x is unaligned\n",
 			IPA_MEM_PART(stats_quota_q6_ofst));
 		return -ENODEV;
 	}
 
-	IPADBG("AP QUOTA STATS OFST 0x%x SIZE 0x%x\n",
+	IPADBG_BOOTUP("AP QUOTA STATS OFST 0x%x SIZE 0x%x\n",
 		IPA_MEM_PART(stats_quota_ap_ofst),
 		IPA_MEM_PART(stats_quota_ap_size));
 
 	if (IPA_MEM_PART(stats_quota_ap_ofst) & 7) {
-		IPAERR("AP QUOTA STATS OFST 0x%x is unaligned\n",
+		IPAERR_BOOTUP("AP QUOTA STATS OFST 0x%x is unaligned\n",
 			IPA_MEM_PART(stats_quota_ap_ofst));
 		return -ENODEV;
 	}
 
-	IPADBG("TETHERING STATS OFST 0x%x SIZE 0x%x\n",
+	IPADBG_BOOTUP("TETHERING STATS OFST 0x%x SIZE 0x%x\n",
 		IPA_MEM_PART(stats_tethering_ofst),
 		IPA_MEM_PART(stats_tethering_size));
 
 	if (IPA_MEM_PART(stats_tethering_ofst) & 7) {
-		IPAERR("TETHERING STATS OFST 0x%x is unaligned\n",
+		IPAERR_BOOTUP("TETHERING STATS OFST 0x%x is unaligned\n",
 			IPA_MEM_PART(stats_tethering_ofst));
 		return -ENODEV;
 	}
 
-	IPADBG("FILTER AND ROUTING STATS OFST 0x%x SIZE 0x%x\n",
+	IPADBG_BOOTUP("FILTER AND ROUTING STATS OFST 0x%x SIZE 0x%x\n",
 		IPA_MEM_PART(stats_fnr_ofst),
 		IPA_MEM_PART(stats_fnr_size));
 
 	if (IPA_MEM_PART(stats_fnr_ofst) & 7) {
-		IPAERR("FILTER AND ROUTING STATS OFST 0x%x is unaligned\n",
+		IPAERR_BOOTUP("FILTER AND ROUTING STATS OFST 0x%x is unaligned\n",
 			IPA_MEM_PART(stats_fnr_ofst));
 		return -ENODEV;
 	}
 
-	IPADBG("DROP STATS OFST 0x%x SIZE 0x%x\n",
+	IPADBG_BOOTUP("DROP STATS OFST 0x%x SIZE 0x%x\n",
 	IPA_MEM_PART(stats_drop_ofst),
 		IPA_MEM_PART(stats_drop_size));
 
 	if (IPA_MEM_PART(stats_drop_ofst) & 7) {
-		IPAERR("DROP STATS OFST 0x%x is unaligned\n",
+		IPAERR_BOOTUP("DROP STATS OFST 0x%x is unaligned\n",
 			IPA_MEM_PART(stats_drop_ofst));
 		return -ENODEV;
 	}
 
-	IPADBG("V4 APPS HASHABLE FLT OFST 0x%x SIZE 0x%x\n",
+	IPADBG_BOOTUP("V4 APPS HASHABLE FLT OFST 0x%x SIZE 0x%x\n",
 		IPA_MEM_PART(apps_v4_flt_hash_ofst),
 		IPA_MEM_PART(apps_v4_flt_hash_size));
 
-	IPADBG("V4 APPS NON-HASHABLE FLT OFST 0x%x SIZE 0x%x\n",
+	IPADBG_BOOTUP("V4 APPS NON-HASHABLE FLT OFST 0x%x SIZE 0x%x\n",
 		IPA_MEM_PART(apps_v4_flt_nhash_ofst),
 		IPA_MEM_PART(apps_v4_flt_nhash_size));
 
-	IPADBG("V6 APPS HASHABLE FLT OFST 0x%x SIZE 0x%x\n",
+	IPADBG_BOOTUP("V6 APPS HASHABLE FLT OFST 0x%x SIZE 0x%x\n",
 		IPA_MEM_PART(apps_v6_flt_hash_ofst),
 		IPA_MEM_PART(apps_v6_flt_hash_size));
 
-	IPADBG("V6 APPS NON-HASHABLE FLT OFST 0x%x SIZE 0x%x\n",
+	IPADBG_BOOTUP("V6 APPS NON-HASHABLE FLT OFST 0x%x SIZE 0x%x\n",
 		IPA_MEM_PART(apps_v6_flt_nhash_ofst),
 		IPA_MEM_PART(apps_v6_flt_nhash_size));
 
-	IPADBG("RAM END OFST 0x%x\n",
+	IPADBG_BOOTUP("RAM END OFST 0x%x\n",
 		IPA_MEM_PART(end_ofst));
 
-	IPADBG("V4 APPS HASHABLE RT OFST 0x%x SIZE 0x%x\n",
+	IPADBG_BOOTUP("V4 APPS HASHABLE RT OFST 0x%x SIZE 0x%x\n",
 		IPA_MEM_PART(apps_v4_rt_hash_ofst),
 		IPA_MEM_PART(apps_v4_rt_hash_size));
 
-	IPADBG("V4 APPS NON-HASHABLE RT OFST 0x%x SIZE 0x%x\n",
+	IPADBG_BOOTUP("V4 APPS NON-HASHABLE RT OFST 0x%x SIZE 0x%x\n",
 		IPA_MEM_PART(apps_v4_rt_nhash_ofst),
 		IPA_MEM_PART(apps_v4_rt_nhash_size));
 
-	IPADBG("V6 APPS HASHABLE RT OFST 0x%x SIZE 0x%x\n",
+	IPADBG_BOOTUP("V6 APPS HASHABLE RT OFST 0x%x SIZE 0x%x\n",
 		IPA_MEM_PART(apps_v6_rt_hash_ofst),
 		IPA_MEM_PART(apps_v6_rt_hash_size));
 
-	IPADBG("V6 APPS NON-HASHABLE RT OFST 0x%x SIZE 0x%x\n",
+	IPADBG_BOOTUP("V6 APPS NON-HASHABLE RT OFST 0x%x SIZE 0x%x\n",
 		IPA_MEM_PART(apps_v6_rt_nhash_ofst),
 		IPA_MEM_PART(apps_v6_rt_nhash_size));
 
 	if (IPA_MEM_PART(modem_ofst) & 7) {
-		IPAERR("MODEM OFST 0x%x is unaligned\n",
+		IPAERR_BOOTUP("MODEM OFST 0x%x is unaligned\n",
 			IPA_MEM_PART(modem_ofst));
 		return -ENODEV;
 	}
 
-	IPADBG("MODEM OFST 0x%x SIZE 0x%x\n", IPA_MEM_PART(modem_ofst),
+	IPADBG_BOOTUP("MODEM OFST 0x%x SIZE 0x%x\n", IPA_MEM_PART(modem_ofst),
 		IPA_MEM_PART(modem_size));
 
 	if (IPA_MEM_PART(uc_descriptor_ram_ofst) & 1023) {
-		IPAERR("UC DESCRIPTOR RAM OFST 0x%x is unaligned\n",
+		IPAERR_BOOTUP("UC DESCRIPTOR RAM OFST 0x%x is unaligned\n",
 			IPA_MEM_PART(uc_descriptor_ram_ofst));
 		return -ENODEV;
 	}
 
-	IPADBG("UC DESCRIPTOR RAM OFST 0x%x SIZE 0x%x\n",
+	IPADBG_BOOTUP("UC DESCRIPTOR RAM OFST 0x%x SIZE 0x%x\n",
 		IPA_MEM_PART(uc_descriptor_ram_ofst),
 		IPA_MEM_PART(uc_descriptor_ram_size));
 
@@ -10316,7 +10903,17 @@ int ipa3_init_mem_partition(enum ipa_hw_type type)
 int ipa3_controller_static_bind(struct ipa3_controller *ctrl,
 		enum ipa_hw_type hw_type, u32 ipa_cfg_offset)
 {
-	if (hw_type >= IPA_HW_v5_0) {
+	if (hw_type >= IPA_HW_v5_5) {
+		ctrl->ipa_clk_rate_turbo = IPA_V5_5_CLK_RATE_TURBO;
+		ctrl->ipa_clk_rate_nominal = IPA_V5_5_CLK_RATE_NOMINAL;
+		ctrl->ipa_clk_rate_svs = IPA_V5_5_CLK_RATE_SVS;
+		ctrl->ipa_clk_rate_svs2 = IPA_V5_5_CLK_RATE_SVS2;
+	} else if (hw_type >= IPA_HW_v5_2 && ipa3_ctx->ipa_config_is_iot) {
+		ctrl->ipa_clk_rate_turbo = IPA_V5_2_IOT_CLK_RATE_TURBO;
+		ctrl->ipa_clk_rate_nominal = IPA_V5_2_IOT_CLK_RATE_NOMINAL;
+		ctrl->ipa_clk_rate_svs = IPA_V5_2_IOT_CLK_RATE_SVS;
+		ctrl->ipa_clk_rate_svs2 = IPA_V5_2_IOT_CLK_RATE_SVS2;
+	} else if (hw_type >= IPA_HW_v5_0) {
 		ctrl->ipa_clk_rate_turbo = IPA_V5_0_CLK_RATE_TURBO;
 		ctrl->ipa_clk_rate_nominal = IPA_V5_0_CLK_RATE_NOMINAL;
 		ctrl->ipa_clk_rate_svs = IPA_V5_0_CLK_RATE_SVS;
@@ -10736,7 +11333,8 @@ int ipa3_tag_process(struct ipa3_desc desc[],
 		tag_desc = kzalloc(sizeof(*tag_desc) * IPA_TAG_MAX_DESC, GFP_KERNEL);
 		if (tag_desc)
 			break;
-		usleep_range(ALLOC_MIN_SLEEP_RX, ALLOC_MAX_SLEEP_RX);
+		else
+			usleep_range(ALLOC_MIN_SLEEP_RX, ALLOC_MAX_SLEEP_RX);
 	}
 	if (!tag_desc) {
 		IPAERR("failed to allocate memory\n");
@@ -10794,7 +11392,8 @@ int ipa3_tag_process(struct ipa3_desc desc[],
 				&cmd.phys_base, GFP_KERNEL);
 			if (cmd.base)
 				break;
-			usleep_range(ALLOC_MIN_SLEEP_RX, ALLOC_MAX_SLEEP_RX);
+			else
+				usleep_range(ALLOC_MIN_SLEEP_RX, ALLOC_MAX_SLEEP_RX);
 		}
 		if (cmd.base == NULL) {
 			res = -ENOMEM;
@@ -10869,7 +11468,8 @@ int ipa3_tag_process(struct ipa3_desc desc[],
 		comp = kzalloc(sizeof(*comp), GFP_KERNEL);
 		if (comp)
 			break;
-		usleep_range(ALLOC_MIN_SLEEP_RX, ALLOC_MAX_SLEEP_RX);
+		else
+			usleep_range(ALLOC_MIN_SLEEP_RX, ALLOC_MAX_SLEEP_RX);
 	}
 	if (!comp) {
 		IPAERR("no mem\n");
@@ -10886,7 +11486,8 @@ int ipa3_tag_process(struct ipa3_desc desc[],
 		dummy_skb = alloc_skb(sizeof(comp), GFP_KERNEL);
 		if (dummy_skb)
 			break;
-		usleep_range(ALLOC_MIN_SLEEP_RX, ALLOC_MAX_SLEEP_RX);
+		else
+			usleep_range(ALLOC_MIN_SLEEP_RX, ALLOC_MAX_SLEEP_RX);
 	}
 	if (!dummy_skb) {
 		IPAERR("failed to allocate memory\n");
@@ -11227,7 +11828,7 @@ bool ipa3_get_modem_cfg_emb_pipe_flt(void)
 	if (ipa3_ctx)
 		return ipa3_ctx->modem_cfg_emb_pipe_flt;
 
-	IPAERR("IPA driver has not been initialized\n");
+	IPADBG_BOOTUP("IPA driver has not been initialized\n");
 
 	return false;
 }
@@ -11406,7 +12007,7 @@ static void ipa3_write_rsrc_grp_type_reg(int group_index,
 					n, val);
 				break;
 			default:
-				IPAERR(
+				IPAERR_BOOTUP(
 				" Invalid source resource group,index #%d\n",
 				group_index);
 				break;
@@ -11432,7 +12033,7 @@ static void ipa3_write_rsrc_grp_type_reg(int group_index,
 					n, val);
 				break;
 			default:
-				IPAERR(
+				IPAERR_BOOTUP(
 				" Invalid destination resource group,index #%d\n",
 				group_index);
 				break;
@@ -11457,7 +12058,7 @@ static void ipa3_write_rsrc_grp_type_reg(int group_index,
 					n, val);
 				break;
 			default:
-				IPAERR(
+				IPAERR_BOOTUP(
 				" Invalid source resource group,index #%d\n",
 				group_index);
 				break;
@@ -11476,7 +12077,7 @@ static void ipa3_write_rsrc_grp_type_reg(int group_index,
 					n, val);
 				break;
 			default:
-				IPAERR(
+				IPAERR_BOOTUP(
 				" Invalid destination resource group,index #%d\n",
 				group_index);
 				break;
@@ -11503,7 +12104,7 @@ static void ipa3_write_rsrc_grp_type_reg(int group_index,
 					n, val);
 				break;
 			default:
-				IPAERR(
+				IPAERR_BOOTUP(
 				" Invalid source resource group,index #%d\n",
 				group_index);
 				break;
@@ -11523,7 +12124,7 @@ static void ipa3_write_rsrc_grp_type_reg(int group_index,
 					n, val);
 				break;
 			default:
-				IPAERR(
+				IPAERR_BOOTUP(
 				" Invalid destination resource group,index #%d\n",
 				group_index);
 				break;
@@ -11539,7 +12140,7 @@ static void ipa3_write_rsrc_grp_type_reg(int group_index,
 					n, val);
 				break;
 			default:
-				IPAERR(
+				IPAERR_BOOTUP(
 				" Invalid source resource group,index #%d\n",
 				group_index);
 				break;
@@ -11552,7 +12153,7 @@ static void ipa3_write_rsrc_grp_type_reg(int group_index,
 					n, val);
 				break;
 			default:
-				IPAERR(
+				IPAERR_BOOTUP(
 				" Invalid destination resource group,index #%d\n",
 				group_index);
 				break;
@@ -11584,7 +12185,7 @@ static void ipa3_write_rsrc_grp_type_reg(int group_index,
 					n, val);
 				break;
 			default:
-				IPAERR(
+				IPAERR_BOOTUP(
 				" Invalid source resource group,index #%d\n",
 				group_index);
 				break;
@@ -11609,7 +12210,7 @@ static void ipa3_write_rsrc_grp_type_reg(int group_index,
 					n, val);
 				break;
 			default:
-				IPAERR(
+				IPAERR_BOOTUP(
 				" Invalid destination resource group,index #%d\n",
 				group_index);
 				break;
@@ -11625,7 +12226,7 @@ static void ipa3_write_rsrc_grp_type_reg(int group_index,
 					n, val);
 				break;
 			default:
-				IPAERR(
+				IPAERR_BOOTUP(
 				" Invalid source resource group,index #%d\n",
 				group_index);
 				break;
@@ -11638,7 +12239,7 @@ static void ipa3_write_rsrc_grp_type_reg(int group_index,
 					n, val);
 				break;
 			default:
-				IPAERR(
+				IPAERR_BOOTUP(
 				" Invalid destination resource group,index #%d\n",
 				group_index);
 				break;
@@ -11660,7 +12261,7 @@ static void ipa3_write_rsrc_grp_type_reg(int group_index,
 					n, val);
 				break;
 			default:
-				IPAERR(
+				IPAERR_BOOTUP(
 				" Invalid source resource group,index #%d\n",
 				group_index);
 				break;
@@ -11680,7 +12281,7 @@ static void ipa3_write_rsrc_grp_type_reg(int group_index,
 					n, val);
 				break;
 			default:
-				IPAERR(
+				IPAERR_BOOTUP(
 				" Invalid destination resource group,index #%d\n",
 				group_index);
 				break;
@@ -11696,7 +12297,7 @@ static void ipa3_write_rsrc_grp_type_reg(int group_index,
 						n, val);
 					break;
 				default:
-					IPAERR(
+					IPAERR_BOOTUP(
 					" Invalid source resource group,index #%d\n",
 					group_index);
 					break;
@@ -11714,7 +12315,7 @@ static void ipa3_write_rsrc_grp_type_reg(int group_index,
 							n, val);
 					break;
 				default:
-					IPAERR(
+					IPAERR_BOOTUP(
 					" Invalid destination resource group,index #%d\n",
 					group_index);
 					break;
@@ -11746,7 +12347,7 @@ static void ipa3_write_rsrc_grp_type_reg(int group_index,
 					n, val);
 				break;
 			default:
-				IPAERR(
+				IPAERR_BOOTUP(
 				" Invalid source resource group,index #%d\n",
 				group_index);
 				break;
@@ -11777,7 +12378,7 @@ static void ipa3_write_rsrc_grp_type_reg(int group_index,
 					n, val);
 				break;
 			default:
-				IPAERR(
+				IPAERR_BOOTUP(
 				" Invalid destination resource group,index #%d\n",
 				group_index);
 				break;
@@ -11786,6 +12387,7 @@ static void ipa3_write_rsrc_grp_type_reg(int group_index,
 		break;
 
 	case IPA_5_2:
+	case IPA_5_2_IOT:
 		if (src) {
 			switch (group_index) {
 			case IPA_v5_2_GROUP_UL:
@@ -11821,7 +12423,7 @@ static void ipa3_write_rsrc_grp_type_reg(int group_index,
 					n, val);
 				break;
 			default:
-				IPAERR(
+				IPAERR_BOOTUP(
 				" Invalid destination resource group,index #%d\n",
 				group_index);
 				break;
@@ -11830,6 +12432,7 @@ static void ipa3_write_rsrc_grp_type_reg(int group_index,
 		break;
 
 	case IPA_5_5:
+	case IPA_5_5_XR:
 		if (src) {
 			switch (group_index) {
 			case IPA_v5_5_GROUP_UL:
@@ -11851,7 +12454,7 @@ static void ipa3_write_rsrc_grp_type_reg(int group_index,
 					n, val);
 				break;
 			default:
-				IPAERR(
+				IPAERR_BOOTUP(
 				" Invalid source resource group,index #%d\n",
 				group_index);
 				break;
@@ -11882,7 +12485,7 @@ static void ipa3_write_rsrc_grp_type_reg(int group_index,
 					n, val);
 				break;
 			default:
-				IPAERR(
+				IPAERR_BOOTUP(
 				" Invalid destination resource group,index #%d\n",
 				group_index);
 				break;
@@ -11891,7 +12494,7 @@ static void ipa3_write_rsrc_grp_type_reg(int group_index,
 		break;
 
 	default:
-		IPAERR("invalid hw type\n");
+		IPAERR_BOOTUP("invalid hw type\n");
 		WARN_ON(1);
 		return;
 	}
@@ -11962,7 +12565,7 @@ static void ipa3_configure_rx_hps(void)
 {
 	int rx_hps_max_clnt_in_depth0;
 
-	IPADBG("Assign RX_HPS CMDQ rsrc groups min-max limits\n");
+	IPADBG_BOOTUP("Assign RX_HPS CMDQ rsrc groups min-max limits\n");
 
 	/* Starting IPA4.5 we have 5 RX_HPS_CMDQ */
 	if (ipa3_ctx->ipa_hw_type < IPA_HW_v4_5)
@@ -12001,7 +12604,7 @@ void ipa3_set_resorce_groups_min_max_limits(void)
 	struct ipahal_reg_rsrc_grp_xy_cfg val;
 	u8 hw_type_idx;
 
-	IPADBG("ENTER\n");
+	IPADBG_BOOTUP("ENTER\n");
 
 	hw_type_idx = ipa3_ctx->hw_type_index;
 
@@ -12077,24 +12680,26 @@ void ipa3_set_resorce_groups_min_max_limits(void)
 		dst_grp_idx_max = IPA_v5_0_DST_GROUP_MAX;
 		break;
 	case IPA_5_2:
+	case IPA_5_2_IOT:
 		src_rsrc_type_max = IPA_v5_0_RSRC_GRP_TYPE_SRC_MAX;
 		dst_rsrc_type_max = IPA_v5_0_RSRC_GRP_TYPE_DST_MAX;
 		src_grp_idx_max = IPA_v5_2_SRC_GROUP_MAX;
 		dst_grp_idx_max = IPA_v5_2_DST_GROUP_MAX;
 		break;
 	case IPA_5_5:
+	case IPA_5_5_XR:
 		src_rsrc_type_max = IPA_v5_0_RSRC_GRP_TYPE_SRC_MAX;
 		dst_rsrc_type_max = IPA_v5_0_RSRC_GRP_TYPE_DST_MAX;
 		src_grp_idx_max = IPA_v5_5_SRC_GROUP_MAX;
 		dst_grp_idx_max = IPA_v5_5_DST_GROUP_MAX;
 		break;
 	default:
-		IPAERR("invalid hw type index\n");
+		IPAERR_BOOTUP("invalid hw type index\n");
 		WARN_ON(1);
 		return;
 	}
 
-	IPADBG("Assign source rsrc groups min-max limits\n");
+	IPADBG_BOOTUP("Assign source rsrc groups min-max limits\n");
 	for (i = 0; i < src_rsrc_type_max; i++) {
 		for (j = 0; j < src_grp_idx_max; j = j + 2) {
 			val.x_min =
@@ -12111,7 +12716,7 @@ void ipa3_set_resorce_groups_min_max_limits(void)
 		}
 	}
 
-	IPADBG("Assign destination rsrc groups min-max limits\n");
+	IPADBG_BOOTUP("Assign destination rsrc groups min-max limits\n");
 	for (i = 0; i < dst_rsrc_type_max; i++) {
 		for (j = 0; j < dst_grp_idx_max; j = j + 2) {
 			val.x_min =
@@ -12137,7 +12742,7 @@ void ipa3_set_resorce_groups_min_max_limits(void)
 		ipa3_configure_rx_hps();
 	}
 
-	IPADBG("EXIT\n");
+	IPADBG_BOOTUP("EXIT\n");
 }
 
 void ipa3_set_resorce_groups_config(void)
@@ -12145,7 +12750,7 @@ void ipa3_set_resorce_groups_config(void)
 	struct ipahal_reg_rsrc_grp_cfg cfg;
 	struct ipahal_reg_rsrc_grp_cfg_ext cfg_ext;
 
-	IPADBG("ENTER\n");
+	IPADBG_BOOTUP("ENTER\n");
 
 	if (ipa3_ctx->ipa_hw_type >= IPA_HW_v5_0) {
 		cfg.src_grp_index = ipa_rsrc_config[ipa3_ctx->hw_type_index].src_grp_index;
@@ -12157,12 +12762,12 @@ void ipa3_set_resorce_groups_config(void)
 		cfg_ext.index = ipa_rsrc_config[ipa3_ctx->hw_type_index].src_grp_2nd_prio_index;
 		cfg_ext.valid = ipa_rsrc_config[ipa3_ctx->hw_type_index].src_grp_2nd_prio_valid;
 
-		IPADBG("Write IPA_RSRC_GRP_CFG\n");
+		IPADBG_BOOTUP("Write IPA_RSRC_GRP_CFG\n");
 		ipahal_write_reg_fields(IPA_RSRC_GRP_CFG, &cfg);
-		IPADBG("Write IPA_RSRC_GRP_CFG_EXT\n");
+		IPADBG_BOOTUP("Write IPA_RSRC_GRP_CFG_EXT\n");
 		ipahal_write_reg_fields(IPA_RSRC_GRP_CFG_EXT, &cfg_ext);
 	}
-	IPADBG("EXIT\n");
+	IPADBG_BOOTUP("EXIT\n");
 }
 
 static void ipa3_gsi_poll_after_suspend(struct ipa3_ep_context *ep)
@@ -12233,8 +12838,10 @@ static int __ipa_stop_gsi_channel(u32 clnt_hdl)
 	/* stop uC gsi dbg stats monitor */
 	if (ipa3_ctx->ipa_hw_type >= IPA_HW_v4_5 &&
 		ipa3_ctx->ipa_hw_type != IPA_HW_v4_7 &&
+		ipa3_ctx->ipa_hw_type != IPA_HW_v4_9 &&
 		ipa3_ctx->ipa_hw_type != IPA_HW_v4_11 &&
-		ipa3_ctx->ipa_hw_type != IPA_HW_v5_2) {
+		ipa3_ctx->ipa_hw_type != IPA_HW_v5_2 &&
+		ipa3_ctx->platform_type != IPA_PLAT_TYPE_XR) {
 		switch (client_type) {
 		case IPA_CLIENT_MHI_PRIME_TETH_PROD:
 			gsi_info = &ipa3_ctx->gsi_info[IPA_HW_PROTOCOL_MHIP];
@@ -12339,7 +12946,6 @@ static int _ipa_suspend_resume_pipe(enum ipa_client_type client, bool suspend)
 	int ipa_ep_idx, wan_coal_ep_idx, lan_coal_ep_idx;
 	struct ipa3_ep_context *ep;
 	int res;
-	struct ipa_ep_cfg_holb holb_cfg;
 
 	ipa_ep_idx = ipa_get_ep_mapping(client);
 	if (ipa_ep_idx < 0) {
@@ -12389,28 +12995,6 @@ static int _ipa_suspend_resume_pipe(enum ipa_client_type client, bool suspend)
 		}
 	}
 
-	if ((ipa3_ctx->ipa_hw_type >= IPA_HW_v5_2 && client == IPA_CLIENT_APPS_WAN_CONS)
-			|| (ipa3_ctx->ipa_hw_type >= IPA_HW_v5_5 &&
-			 client == IPA_CLIENT_APPS_WAN_COAL_CONS) ||
-			client == IPA_CLIENT_ODL_DPL_CONS) {
-		ipa_ep_idx = ipa_get_ep_mapping(client);
-		if (ipa_ep_idx != IPA_EP_NOT_ALLOCATED && ipa3_ctx->ep[ipa_ep_idx].valid) {
-			memset(&holb_cfg, 0, sizeof(holb_cfg));
-			if (suspend)
-				holb_cfg.en = 0;
-			else
-				holb_cfg.en = 1;
-			IPADBG("Endpoint = %d HOLB mode = %d\n", ipa_ep_idx, holb_cfg.en);
-			ipahal_write_reg_n_fields(IPA_ENDP_INIT_HOL_BLOCK_EN_n,
-					ipa_ep_idx, &holb_cfg);
-			/* IPA4.5 issue requires HOLB_EN to be written twice */
-			if (ipa3_ctx->ipa_hw_type >= IPA_HW_v4_5 && holb_cfg.en)
-				ipahal_write_reg_n_fields(
-						IPA_ENDP_INIT_HOL_BLOCK_EN_n,
-						ipa_ep_idx, &holb_cfg);
-		}
-	}
-
 	/* Apps prod pipes use common event ring so cannot configure mode*/
 
 	/*
@@ -12422,9 +13006,9 @@ static int _ipa_suspend_resume_pipe(enum ipa_client_type client, bool suspend)
 
 	if (IPA_CLIENT_IS_APPS_PROD(client) ||
 		(client == IPA_CLIENT_APPS_WAN_CONS &&
-		 IPA_CLIENT_IS_MAPPED(IPA_CLIENT_APPS_WAN_COAL_CONS, wan_coal_ep_idx)) ||
+		 IPA_CLIENT_IS_MAPPED_VALID(IPA_CLIENT_APPS_WAN_COAL_CONS, wan_coal_ep_idx)) ||
 		(client == IPA_CLIENT_APPS_LAN_CONS &&
-		 IPA_CLIENT_IS_MAPPED(IPA_CLIENT_APPS_LAN_COAL_CONS, lan_coal_ep_idx)))
+		 IPA_CLIENT_IS_MAPPED_VALID(IPA_CLIENT_APPS_LAN_COAL_CONS, lan_coal_ep_idx)))
 		return 0;
 
 	if (suspend) {
@@ -12497,6 +13081,8 @@ void ipa3_force_close_coal(
 int ipa3_suspend_apps_pipes(bool suspend)
 {
 	int res, i;
+	struct ipa_ep_cfg_holb holb_cfg;
+	int odl_ep_idx;
 
 	if (suspend) {
 		stop_coalescing();
@@ -12536,6 +13122,24 @@ int ipa3_suspend_apps_pipes(bool suspend)
 	res = _ipa_suspend_resume_pipe(IPA_CLIENT_ODL_DPL_CONS, suspend);
 	if (res == -EAGAIN) {
 		goto undo_odl_cons;
+	}
+
+	odl_ep_idx = ipa_get_ep_mapping(IPA_CLIENT_ODL_DPL_CONS);
+	if (odl_ep_idx != IPA_EP_NOT_ALLOCATED && ipa3_ctx->ep[odl_ep_idx].valid) {
+		memset(&holb_cfg, 0, sizeof(holb_cfg));
+		if (suspend)
+			holb_cfg.en = 0;
+		else
+			holb_cfg.en = 1;
+
+		ipahal_write_reg_n_fields(IPA_ENDP_INIT_HOL_BLOCK_EN_n,
+				odl_ep_idx, &holb_cfg);
+		/* IPA4.5 issue requires HOLB_EN to be written twice */
+		if (ipa3_ctx->ipa_hw_type >= IPA_HW_v4_5 && holb_cfg.en)
+			ipahal_write_reg_n_fields(
+					IPA_ENDP_INIT_HOL_BLOCK_EN_n,
+					odl_ep_idx, &holb_cfg);
+
 	}
 
 	res = _ipa_suspend_resume_pipe(IPA_CLIENT_APPS_WAN_LOW_LAT_CONS,
@@ -12643,14 +13247,14 @@ int ipa3_allocate_dma_task_for_gsi(void)
 {
 	struct ipahal_imm_cmd_dma_task_32b_addr cmd = { 0 };
 
-	IPADBG("Allocate mem\n");
+	IPADBG_BOOTUP("Allocate mem\n");
 	ipa3_ctx->dma_task_info.mem.size = IPA_GSI_CHANNEL_STOP_PKT_SIZE;
 	ipa3_ctx->dma_task_info.mem.base = dma_alloc_coherent(ipa3_ctx->pdev,
 		ipa3_ctx->dma_task_info.mem.size,
 		&ipa3_ctx->dma_task_info.mem.phys_base,
 		GFP_KERNEL);
 	if (!ipa3_ctx->dma_task_info.mem.base) {
-		IPAERR("no mem\n");
+		IPAERR_BOOTUP("no mem\n");
 		return -EFAULT;
 	}
 
@@ -12661,7 +13265,7 @@ int ipa3_allocate_dma_task_for_gsi(void)
 	ipa3_ctx->dma_task_info.cmd_pyld = ipahal_construct_imm_cmd(
 			IPA_IMM_CMD_DMA_TASK_32B_ADDR, &cmd, false);
 	if (!ipa3_ctx->dma_task_info.cmd_pyld) {
-		IPAERR("failed to construct dma_task_32b_addr cmd\n");
+		IPAERR_BOOTUP("failed to construct dma_task_32b_addr cmd\n");
 		dma_free_coherent(ipa3_ctx->pdev,
 			ipa3_ctx->dma_task_info.mem.size,
 			ipa3_ctx->dma_task_info.mem.base,
@@ -12694,7 +13298,7 @@ int ipa3_allocate_coal_close_frame(void)
 
 	if ( IPA_CLIENT_IS_MAPPED(IPA_CLIENT_APPS_WAN_COAL_CONS, ep_idx) ) {
 
-		IPADBG("Allocate wan coal close frame cmd\n");
+		IPADBG_BOOTUP("Allocate wan coal close frame cmd\n");
 
 		reg_write_cmd.skip_pipeline_clear = false;
 		if (ipa3_ctx->ulso_wa) {
@@ -12717,7 +13321,7 @@ int ipa3_allocate_coal_close_frame(void)
 				IPA_IMM_CMD_REGISTER_WRITE,
 				&reg_write_cmd, false);
 		if (!ipa3_ctx->coal_cmd_pyld[WAN_COAL_SUB]) {
-			IPAERR("fail construct register_write imm cmd\n");
+			IPAERR_BOOTUP("fail construct register_write imm cmd\n");
 			ipa_assert();
 			return 0;
 		}
@@ -12726,7 +13330,7 @@ int ipa3_allocate_coal_close_frame(void)
 
 	if ( IPA_CLIENT_IS_MAPPED(IPA_CLIENT_APPS_LAN_COAL_CONS, ep_idx) ) {
 
-		IPADBG("Allocate lan coal close frame cmd\n");
+		IPADBG_BOOTUP("Allocate lan coal close frame cmd\n");
 
 		reg_write_cmd.skip_pipeline_clear = false;
 		if (ipa3_ctx->ulso_wa) {
@@ -12749,7 +13353,7 @@ int ipa3_allocate_coal_close_frame(void)
 				IPA_IMM_CMD_REGISTER_WRITE,
 				&reg_write_cmd, false);
 		if (!ipa3_ctx->coal_cmd_pyld[LAN_COAL_SUB]) {
-			IPAERR("fail construct register_write imm cmd\n");
+			IPAERR_BOOTUP("fail construct register_write imm cmd\n");
 			ipa_assert();
 			return 0;
 		}
@@ -12781,7 +13385,7 @@ int ipa3_allocate_coal_close_frame(void)
 				IPA_IMM_CMD_REGISTER_READ,
 				&dummy_reg_read, false);
 		if (!ipa3_ctx->coal_cmd_pyld[ULSO_COAL_SUB]) {
-			IPAERR("failed to construct DUMMY READ IC\n");
+			IPAERR_BOOTUP("failed to construct DUMMY READ IC\n");
 			ipa_assert();
 		}
 	}
@@ -12842,31 +13446,31 @@ static int ipa3_load_single_fw(const struct firmware *firmware,
 	const uint32_t *elf_data_ptr;
 
 	if (phdr->p_offset > firmware->size) {
-		IPAERR("Invalid ELF: offset=%u is beyond elf_size=%zu\n",
+		IPAERR_BOOTUP("Invalid ELF: offset=%u is beyond elf_size=%zu\n",
 			phdr->p_offset, firmware->size);
 		return -EINVAL;
 	}
 	if ((firmware->size - phdr->p_offset) < phdr->p_filesz) {
-		IPAERR("Invalid ELF: offset=%u filesz=%u elf_size=%zu\n",
+		IPAERR_BOOTUP("Invalid ELF: offset=%u filesz=%u elf_size=%zu\n",
 			phdr->p_offset, phdr->p_filesz, firmware->size);
 		return -EINVAL;
 	}
 
 	if (phdr->p_memsz % sizeof(uint32_t)) {
-		IPAERR("FW mem size %u doesn't align to 32bit\n",
+		IPAERR_BOOTUP("FW mem size %u doesn't align to 32bit\n",
 			phdr->p_memsz);
 		return -EFAULT;
 	}
 
 	if (phdr->p_filesz > phdr->p_memsz) {
-		IPAERR("FW image too big src_size=%u dst_size=%u\n",
+		IPAERR_BOOTUP("FW image too big src_size=%u dst_size=%u\n",
 			phdr->p_filesz, phdr->p_memsz);
 		return -EFAULT;
 	}
 
 	fw_mem_base = ioremap(phdr->p_vaddr, phdr->p_memsz);
 	if (!fw_mem_base) {
-		IPAERR("Failed to map 0x%x for the size of %u\n",
+		IPAERR_BOOTUP("Failed to map 0x%x for the size of %u\n",
 			phdr->p_vaddr, phdr->p_memsz);
 		return -ENOMEM;
 	}
@@ -12927,9 +13531,9 @@ static void ipa3_get_hps_dps_areas_absolute_addr_and_sz(
 	info->dps_sz = dps_area_end - dps_area_start + sizeof(u32);
 	info->hps_sz = hps_area_end - hps_area_start + sizeof(u32);
 
-	IPADBG("dps area: start offset=0x%x end offset=0x%x\n",
+	IPADBG_BOOTUP("dps area: start offset=0x%x end offset=0x%x\n",
 		dps_area_start, dps_area_end);
-	IPADBG("hps area: start offset=0x%x end offset=0x%x\n",
+	IPADBG_BOOTUP("hps area: start offset=0x%x end offset=0x%x\n",
 		hps_area_start, hps_area_end);
 }
 
@@ -12954,45 +13558,45 @@ static int emulator_load_single_fw(
 	const uint32_t *elf_data_ptr;
 	void __iomem *fw_base;
 
-	IPADBG("firmware(%pK) phdr(%pK) loc_to_map(0x%X) size_to_map(%u)\n",
+	IPADBG_BOOTUP("firmware(%pK) phdr(%pK) loc_to_map(0x%X) size_to_map(%u)\n",
 	       firmware, phdr, loc_to_map, size_to_map);
 
 	if (phdr->p_offset > firmware->size) {
-		IPAERR("Invalid ELF: offset=%u is beyond elf_size=%zu\n",
+		IPAERR_BOOTUP("Invalid ELF: offset=%u is beyond elf_size=%zu\n",
 			phdr->p_offset, firmware->size);
 		return -EINVAL;
 	}
 	if ((firmware->size - phdr->p_offset) < phdr->p_filesz) {
-		IPAERR("Invalid ELF: offset=%u filesz=%u elf_size=%zu\n",
+		IPAERR_BOOTUP("Invalid ELF: offset=%u filesz=%u elf_size=%zu\n",
 			phdr->p_offset, phdr->p_filesz, firmware->size);
 		return -EINVAL;
 	}
 
 	if (phdr->p_memsz % sizeof(uint32_t)) {
-		IPAERR("FW mem size %u doesn't align to 32bit\n",
+		IPAERR_BOOTUP("FW mem size %u doesn't align to 32bit\n",
 			phdr->p_memsz);
 		return -EFAULT;
 	}
 
 	if (phdr->p_filesz > phdr->p_memsz) {
-		IPAERR("FW image too big src_size=%u dst_size=%u\n",
+		IPAERR_BOOTUP("FW image too big src_size=%u dst_size=%u\n",
 			phdr->p_filesz, phdr->p_memsz);
 		return -EFAULT;
 	}
 
-	IPADBG("ELF: p_memsz(0x%x) p_filesz(0x%x) p_filesz/4(0x%x)\n",
+	IPADBG_BOOTUP("ELF: p_memsz(0x%x) p_filesz(0x%x) p_filesz/4(0x%x)\n",
 	       (uint32_t) phdr->p_memsz,
 	       (uint32_t) phdr->p_filesz,
 	       (uint32_t) (phdr->p_filesz/sizeof(uint32_t)));
 
 	fw_base = ioremap(loc_to_map, size_to_map);
 	if (!fw_base) {
-		IPAERR("Failed to map 0x%X for the size of %u\n",
+		IPAERR_BOOTUP("Failed to map 0x%X for the size of %u\n",
 		       loc_to_map, size_to_map);
 		return -ENOMEM;
 	}
 
-	IPADBG("Physical base(0x%X) mapped to virtual (%pK) with len (%u)\n",
+	IPADBG_BOOTUP("Physical base(0x%X) mapped to virtual (%pK) with len (%u)\n",
 	       loc_to_map,
 	       fw_base,
 	       size_to_map);
@@ -13040,19 +13644,19 @@ int ipa3_load_fws(const struct firmware *firmware, phys_addr_t gsi_mem_base,
 	struct ipa3_hps_dps_areas_info dps_hps_info;
 
 	if (gsi_ver == GSI_VER_ERR) {
-		IPAERR("Invalid GSI Version\n");
+		IPAERR_BOOTUP("Invalid GSI Version\n");
 		return -EINVAL;
 	}
 
 	if (!gsi_mem_base) {
-		IPAERR("Invalid GSI base address\n");
+		IPAERR_BOOTUP("Invalid GSI base address\n");
 		return -EINVAL;
 	}
 
 	ipa_assert_on(!firmware);
 	/* One program header per FW image: GSI, DPS and HPS */
 	if (firmware->size < (sizeof(*ehdr) + 3 * sizeof(*phdr))) {
-		IPAERR("Missing ELF and Program headers firmware size=%zu\n",
+		IPAERR_BOOTUP("Missing ELF and Program headers firmware size=%zu\n",
 			firmware->size);
 		return -EINVAL;
 	}
@@ -13060,7 +13664,7 @@ int ipa3_load_fws(const struct firmware *firmware, phys_addr_t gsi_mem_base,
 	ehdr = (struct elf32_hdr *) firmware->data;
 	ipa_assert_on(!ehdr);
 	if (ehdr->e_phnum != 3 && ehdr->e_phnum != 5) {
-		IPAERR("Unexpected number of ELF program headers\n");
+		IPAERR_BOOTUP("Unexpected number of ELF program headers\n");
 		return -EINVAL;
 	}
 
@@ -13080,13 +13684,13 @@ int ipa3_load_fws(const struct firmware *firmware, phys_addr_t gsi_mem_base,
 	gsi_get_inst_ram_offset_and_size(&gsi_iram_ofst, &gsi_iram_size,
 		gsi_ver);
 	if (phdr->p_vaddr != (gsi_mem_base + gsi_iram_ofst)) {
-		IPAERR(
+		IPAERR_BOOTUP(
 			"Invalid GSI FW img load addr vaddr=0x%x gsi_mem_base=%pa gsi_iram_ofst=0x%lx\n"
 			, phdr->p_vaddr, &gsi_mem_base, gsi_iram_ofst);
 		return -EINVAL;
 	}
 	if (phdr->p_memsz > gsi_iram_size) {
-		IPAERR("Invalid GSI FW img size memsz=%d gsi_iram_size=%lu\n",
+		IPAERR_BOOTUP("Invalid GSI FW img size memsz=%d gsi_iram_size=%lu\n",
 			phdr->p_memsz, gsi_iram_size);
 		return -EINVAL;
 	}
@@ -13099,13 +13703,13 @@ int ipa3_load_fws(const struct firmware *firmware, phys_addr_t gsi_mem_base,
 
 	/* Load IPA DPS FW image */
 	if (phdr->p_vaddr != dps_hps_info.dps_abs_addr) {
-		IPAERR(
+		IPAERR_BOOTUP(
 			"Invalid IPA DPS img load addr vaddr=0x%x dps_abs_addr=0x%x\n"
 			, phdr->p_vaddr, dps_hps_info.dps_abs_addr);
 		return -EINVAL;
 	}
 	if (phdr->p_memsz > dps_hps_info.dps_sz) {
-		IPAERR("Invalid IPA DPS img size memsz=%d dps_area_size=%u\n",
+		IPAERR_BOOTUP("Invalid IPA DPS img size memsz=%d dps_area_size=%u\n",
 			phdr->p_memsz, dps_hps_info.dps_sz);
 		return -EINVAL;
 	}
@@ -13117,13 +13721,13 @@ int ipa3_load_fws(const struct firmware *firmware, phys_addr_t gsi_mem_base,
 
 	/* Load IPA HPS FW image */
 	if (phdr->p_vaddr != dps_hps_info.hps_abs_addr) {
-		IPAERR(
+		IPAERR_BOOTUP(
 			"Invalid IPA HPS img load addr vaddr=0x%x hps_abs_addr=0x%x\n"
 			, phdr->p_vaddr, dps_hps_info.hps_abs_addr);
 		return -EINVAL;
 	}
 	if (phdr->p_memsz > dps_hps_info.hps_sz) {
-		IPAERR("Invalid IPA HPS img size memsz=%d hps_area_size=%u\n",
+		IPAERR_BOOTUP("Invalid IPA HPS img size memsz=%d hps_area_size=%u\n",
 			phdr->p_memsz, dps_hps_info.hps_sz);
 		return -EINVAL;
 	}
@@ -13131,7 +13735,7 @@ int ipa3_load_fws(const struct firmware *firmware, phys_addr_t gsi_mem_base,
 	if (rc)
 		return rc;
 
-	IPADBG("IPA FWs (GSI FW, DPS and HPS) loaded successfully\n");
+	IPADBG_BOOTUP("IPA FWs (GSI FW, DPS and HPS) loaded successfully\n");
 	return 0;
 }
 
@@ -13148,17 +13752,17 @@ static void ipa_gsi_setup_reg(void)
 	const struct ipa_gsi_ep_config *gsi_ep_info_cfg;
 	enum ipa_client_type type;
 
-	IPADBG("Setting up registers in preparation for firmware download\n");
+	IPADBG_BOOTUP("Setting up registers in preparation for firmware download\n");
 
 	/* setup IPA_ENDP_GSI_CFG_TLV_n reg */
 	start = 0;
 	ipa3_ctx->ipa_num_pipes = ipa3_get_num_pipes();
-	IPADBG("ipa_num_pipes=%u\n", ipa3_ctx->ipa_num_pipes);
+	IPADBG_BOOTUP("ipa_num_pipes=%u\n", ipa3_ctx->ipa_num_pipes);
 
 	for (i = 0; i < ipa3_ctx->ipa_num_pipes; i++) {
 		type = ipa3_get_client_by_pipe(i);
 		gsi_ep_info_cfg = ipa_get_gsi_ep_info(type);
-		IPAERR("for ep %d client is %d gsi_ep_info_cfg=%pK\n",
+		IPAERR_BOOTUP("for ep %d client is %d gsi_ep_info_cfg=%pK\n",
 			i, type, gsi_ep_info_cfg);
 		if (!gsi_ep_info_cfg)
 			continue;
@@ -13228,16 +13832,16 @@ int emulator_load_fws(
 	struct ipa3_hps_dps_areas_info dps_hps_info;
 	int rc;
 
-	IPADBG("Loading firmware(%pK)\n", firmware);
+	IPADBG_BOOTUP("Loading firmware(%pK)\n", firmware);
 
 	if (!firmware) {
-		IPAERR("firmware pointer passed to function is NULL\n");
+		IPAERR_BOOTUP("firmware pointer passed to function is NULL\n");
 		return -EINVAL;
 	}
 
 	/* One program header per FW image: GSI, DPS and HPS */
 	if (firmware->size < (sizeof(*ehdr) + 3 * sizeof(*phdr))) {
-		IPAERR(
+		IPAERR_BOOTUP(
 		    "Missing ELF and Program headers firmware size=%zu\n",
 		    firmware->size);
 		return -EINVAL;
@@ -13248,7 +13852,7 @@ int emulator_load_fws(
 	ipa_assert_on(!ehdr);
 
 	if (ehdr->e_phnum != 3) {
-		IPAERR("Unexpected number of ELF program headers\n");
+		IPAERR_BOOTUP("Unexpected number of ELF program headers\n");
 		return -EINVAL;
 	}
 
@@ -13277,17 +13881,17 @@ int emulator_load_fws(
 	 * Attempt to load IPA HPS FW image
 	 */
 	if (phdr->p_memsz > dps_hps_info.hps_sz) {
-		IPAERR("Invalid IPA HPS img size memsz=%d hps_size=%u\n",
+		IPAERR_BOOTUP("Invalid IPA HPS img size memsz=%d hps_size=%u\n",
 		       phdr->p_memsz, dps_hps_info.hps_sz);
 		return -EINVAL;
 	}
-	IPADBG("Loading HPS FW\n");
+	IPADBG_BOOTUP("Loading HPS FW\n");
 	rc = emulator_load_single_fw(
 		firmware, phdr,
 		dps_hps_info.hps_abs_addr, dps_hps_info.hps_sz);
 	if (rc)
 		return rc;
-	IPADBG("Loading HPS FW complete\n");
+	IPADBG_BOOTUP("Loading HPS FW complete\n");
 
 	--phdr;
 
@@ -13295,17 +13899,17 @@ int emulator_load_fws(
 	 * Attempt to load IPA DPS FW image
 	 */
 	if (phdr->p_memsz > dps_hps_info.dps_sz) {
-		IPAERR("Invalid IPA DPS img size memsz=%d dps_size=%u\n",
+		IPAERR_BOOTUP("Invalid IPA DPS img size memsz=%d dps_size=%u\n",
 		       phdr->p_memsz, dps_hps_info.dps_sz);
 		return -EINVAL;
 	}
-	IPADBG("Loading DPS FW\n");
+	IPADBG_BOOTUP("Loading DPS FW\n");
 	rc = emulator_load_single_fw(
 		firmware, phdr,
 		dps_hps_info.dps_abs_addr, dps_hps_info.dps_sz);
 	if (rc)
 		return rc;
-	IPADBG("Loading DPS FW complete\n");
+	IPADBG_BOOTUP("Loading DPS FW complete\n");
 
 	/*
 	 * Run gsi register setup which is normally done in TZ on
@@ -13321,20 +13925,20 @@ int emulator_load_fws(
 	 * Attempt to load GSI FW image
 	 */
 	if (phdr->p_memsz > gsi_ram_size) {
-		IPAERR(
+		IPAERR_BOOTUP(
 		    "Invalid GSI FW img size memsz=%d gsi_ram_size=%lu\n",
 		    phdr->p_memsz, gsi_ram_size);
 		return -EINVAL;
 	}
-	IPADBG("Loading GSI FW\n");
+	IPADBG_BOOTUP("Loading GSI FW\n");
 	rc = emulator_load_single_fw(
 		firmware, phdr,
 		transport_mem_base + (u32) gsi_offset, gsi_ram_size);
 	if (rc)
 		return rc;
-	IPADBG("Loading GSI FW complete\n");
+	IPADBG_BOOTUP("Loading GSI FW complete\n");
 
-	IPADBG("IPA FWs (GSI FW, DPS and HPS) loaded successfully\n");
+	IPADBG_BOOTUP("IPA FWs (GSI FW, DPS and HPS) loaded successfully\n");
 
 	return 0;
 }
@@ -13428,7 +14032,7 @@ void ipa3_disable_prefetch(enum ipa_client_type client)
 
 	qmb = ipa3_get_qmb_master_sel(client);
 
-	IPADBG("disabling prefetch for qmb %d\n", (int)qmb);
+	IPADBG_BOOTUP("disabling prefetch for qmb %d\n", (int)qmb);
 
 	ipahal_read_reg_fields(IPA_TX_CFG, &cfg);
 	/* QMB0 (DDR) correlates with TX0, QMB1(PCIE) correlates with TX1 */
@@ -14170,12 +14774,12 @@ int ipa3_setup_uc_act_tbl(void)
 
 	/* IPA version check */
 	if (ipa3_ctx->ipa_hw_type < IPA_HW_v4_5) {
-		IPAERR("Not support!\n");
+		IPAERR_BOOTUP("Not support!\n");
 		return -EPERM;
 	}
 
 	if (ipa3_ctx->uc_act_tbl_valid) {
-		IPAERR(" already allocate uC act tbl\n");
+		IPAERR_BOOTUP(" already allocate uC act tbl\n");
 		return -EEXIST;
 	}
 

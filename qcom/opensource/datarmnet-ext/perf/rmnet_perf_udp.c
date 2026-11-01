@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-only
-/* Copyright (c) 2023,Qualcomm Innovation Center, Inc. All rights reserved.
- *
- * RMNET PERF UDP framework
- *
+/*
+ * Copyright (c) 2023, 2025 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 #include <linux/types.h>
@@ -20,157 +18,417 @@
 #include <net/udp.h>
 #include <net/sock.h>
 #include "rmnet_private.h"
+
+#include "rmnet_perf.h"
 #include "rmnet_perf_udp.h"
-#define DATARMNET15dbec5cc0 ((0x16a8+1565-0x14f5))
-#define DATARMNET1b69f5599a ((0xdf7+6169-0x241c))
-#define DATARMNETe19b881e3e ((0xeb7+1158-0x132d))
-#define DATARMNET98862aed95 \
-	(const_ilog2(DATARMNETe19b881e3e))
-enum{DATARMNETcffce1f6da,DATARMNET1d79c7ae4b,DATARMNETf1cd747d89,
-DATARMNETf5e31b47ad,DATARMNETbaf32ca0ac,};struct DATARMNETee0c11924c{union{
-__be32 DATARMNETdfe430c2d6;struct in6_addr DATARMNET815cbb4bf5;};union{__be32 
-DATARMNET2cb607d686;struct in6_addr DATARMNETc3f31215b7;};union{struct{__be16 
-DATARMNET08e913477e;__be16 DATARMNETda7f7fa492;};u32 DATARMNET556bcfcf8f;};u8 
-DATARMNET0d956cc77a;};struct DATARMNETac2887e8c4{struct hlist_node hash;struct 
-rcu_head DATARMNET28bfe9e6ad;struct DATARMNETee0c11924c DATARMNET54338da2ff;
-struct sock*DATARMNETa3e9a18f1b;unsigned long DATARMNET763f2e5fac;u8 
-DATARMNET1717afebc7;};struct DATARMNET451f84b309{struct delayed_work 
-DATARMNET190b4452e8;bool DATARMNETcd94e0d3c7;};static DEFINE_SPINLOCK(
-DATARMNETa125272ee8);static DEFINE_HASHTABLE(DATARMNET187c01aba9,
-DATARMNET98862aed95);static u32 DATARMNETe0c4a54a69;static struct 
-DATARMNET451f84b309 DATARMNET3ed0b852e9;static u64 DATARMNETf41987fea1[
-DATARMNETbaf32ca0ac];module_param_array_named(rmnet_perf_udp_stat,
-DATARMNETf41987fea1,ullong,NULL,(0xcb7+5769-0x221c));static void 
-DATARMNET19b3edd6de(u32 DATARMNET248f120dd5){if(DATARMNET248f120dd5<
-DATARMNETbaf32ca0ac)DATARMNETf41987fea1[DATARMNET248f120dd5]+=(0xd26+209-0xdf6);
-}static bool DATARMNETa8d347a4e6(struct DATARMNETac2887e8c4*DATARMNET63b1a086d5,
-unsigned long DATARMNET763f2e5fac){unsigned long DATARMNETc2d5c71ce1;
-DATARMNETc2d5c71ce1=msecs_to_jiffies(DATARMNET15dbec5cc0);if(DATARMNET763f2e5fac
--DATARMNET63b1a086d5->DATARMNET763f2e5fac>DATARMNETc2d5c71ce1)return true;return
- false;}static void DATARMNETfcb3ce7715(struct rcu_head*DATARMNET5d432e897f){
-struct DATARMNETac2887e8c4*DATARMNET63b1a086d5;DATARMNET63b1a086d5=container_of(
-DATARMNET5d432e897f,struct DATARMNETac2887e8c4,DATARMNET28bfe9e6ad);if(!
-IS_ERR_OR_NULL(DATARMNET63b1a086d5->DATARMNETa3e9a18f1b))sock_put(
-DATARMNET63b1a086d5->DATARMNETa3e9a18f1b);kfree(DATARMNET63b1a086d5);}static 
-bool DATARMNET18d263f0ec(bool DATARMNETe78ad140cc){struct DATARMNETac2887e8c4*
-DATARMNET63b1a086d5;struct hlist_node*DATARMNET0386f6f82a;unsigned long 
-DATARMNET763f2e5fac;int DATARMNET5c2fd31d7b;DATARMNET763f2e5fac=jiffies;
-hash_for_each_safe(DATARMNET187c01aba9,DATARMNET5c2fd31d7b,DATARMNET0386f6f82a,
-DATARMNET63b1a086d5,hash){if(DATARMNET63b1a086d5->DATARMNET1717afebc7)continue;
-if(DATARMNETe78ad140cc||DATARMNETa8d347a4e6(DATARMNET63b1a086d5,
-DATARMNET763f2e5fac)){DATARMNET63b1a086d5->DATARMNET1717afebc7=(0xd26+209-0xdf6)
-;hash_del_rcu(&DATARMNET63b1a086d5->hash);call_rcu(&DATARMNET63b1a086d5->
-DATARMNET28bfe9e6ad,DATARMNETfcb3ce7715);DATARMNET19b3edd6de(DATARMNETf1cd747d89
-);DATARMNETe0c4a54a69--;}}return!!DATARMNETe0c4a54a69;}static void 
-DATARMNET47ed281d61(struct work_struct*DATARMNET190b4452e8){struct 
-DATARMNET451f84b309*DATARMNET3a3a7762bb;unsigned long DATARMNETfb0677cc3c;bool 
-DATARMNET6e1c466378;DATARMNET3a3a7762bb=container_of(to_delayed_work(
-DATARMNET190b4452e8),struct DATARMNET451f84b309,DATARMNET190b4452e8);
-spin_lock_irqsave(&DATARMNETa125272ee8,DATARMNETfb0677cc3c);DATARMNET6e1c466378=
-DATARMNET18d263f0ec(DATARMNET3a3a7762bb->DATARMNETcd94e0d3c7);if(
-DATARMNET6e1c466378){unsigned long DATARMNETf71ef1b8da;DATARMNETf71ef1b8da=
-msecs_to_jiffies(DATARMNET1b69f5599a);schedule_delayed_work(&DATARMNET3a3a7762bb
-->DATARMNET190b4452e8,DATARMNETf71ef1b8da);}spin_unlock_irqrestore(&
-DATARMNETa125272ee8,DATARMNETfb0677cc3c);}static bool DATARMNET47899a016a(struct
- DATARMNETee0c11924c*DATARMNETae0905b0b3,struct DATARMNETee0c11924c*
-DATARMNETdb49f21565){if(DATARMNETae0905b0b3->DATARMNET0d956cc77a!=
-DATARMNETdb49f21565->DATARMNET0d956cc77a||DATARMNETae0905b0b3->
-DATARMNET08e913477e!=DATARMNETdb49f21565->DATARMNET08e913477e||
-DATARMNETae0905b0b3->DATARMNETda7f7fa492!=DATARMNETdb49f21565->
-DATARMNETda7f7fa492)return false;if(DATARMNETae0905b0b3->DATARMNET0d956cc77a==
-(0xd11+230-0xdf3))return DATARMNETae0905b0b3->DATARMNETdfe430c2d6==
-DATARMNETdb49f21565->DATARMNETdfe430c2d6&&DATARMNETae0905b0b3->
-DATARMNET2cb607d686==DATARMNETdb49f21565->DATARMNET2cb607d686;return!
-ipv6_addr_cmp(&DATARMNETae0905b0b3->DATARMNET815cbb4bf5,&DATARMNETdb49f21565->
-DATARMNET815cbb4bf5)&&!ipv6_addr_cmp(&DATARMNETae0905b0b3->DATARMNETc3f31215b7,&
-DATARMNETdb49f21565->DATARMNETc3f31215b7);}static struct DATARMNETac2887e8c4*
-DATARMNET7b1084dc09(struct DATARMNETee0c11924c*DATARMNET3396919a68)__must_hold(&
-DATARMNETa125272ee8){struct DATARMNETac2887e8c4*DATARMNET63b1a086d5;
-DATARMNET63b1a086d5=kzalloc(sizeof(*DATARMNET63b1a086d5),GFP_ATOMIC);if(!
-DATARMNET63b1a086d5){DATARMNET19b3edd6de(DATARMNET1d79c7ae4b);return NULL;}
-INIT_HLIST_NODE(&DATARMNET63b1a086d5->hash);memcpy(&DATARMNET63b1a086d5->
-DATARMNET54338da2ff,DATARMNET3396919a68,sizeof(*DATARMNET3396919a68));
-DATARMNET63b1a086d5->DATARMNET763f2e5fac=jiffies;hash_add_rcu(
-DATARMNET187c01aba9,&DATARMNET63b1a086d5->hash,DATARMNET3396919a68->
-DATARMNET556bcfcf8f);DATARMNET19b3edd6de(DATARMNETcffce1f6da);if(!
-DATARMNETe0c4a54a69){unsigned long DATARMNETf71ef1b8da;DATARMNETf71ef1b8da=
-msecs_to_jiffies(DATARMNET1b69f5599a);schedule_delayed_work(&DATARMNET3ed0b852e9
-.DATARMNET190b4452e8,DATARMNETf71ef1b8da);}DATARMNETe0c4a54a69++;return 
-DATARMNET63b1a086d5;}static struct DATARMNETac2887e8c4*DATARMNET270a2369fc(
-struct DATARMNETee0c11924c*DATARMNET3396919a68)__must_hold(RCU){struct 
-DATARMNETac2887e8c4*DATARMNET63b1a086d5;unsigned long DATARMNETfb0677cc3c;
-spin_lock_irqsave(&DATARMNETa125272ee8,DATARMNETfb0677cc3c);
-hash_for_each_possible_rcu(DATARMNET187c01aba9,DATARMNET63b1a086d5,hash,
-DATARMNET3396919a68->DATARMNET556bcfcf8f){if(DATARMNET63b1a086d5->
-DATARMNET1717afebc7)continue;if(DATARMNET47899a016a(&DATARMNET63b1a086d5->
-DATARMNET54338da2ff,DATARMNET3396919a68))goto DATARMNETbf4095f79e;}
-DATARMNET63b1a086d5=DATARMNET7b1084dc09(DATARMNET3396919a68);DATARMNETbf4095f79e
-:spin_unlock_irqrestore(&DATARMNETa125272ee8,DATARMNETfb0677cc3c);return 
-DATARMNET63b1a086d5;}static struct sock*DATARMNETa9a99daddb(struct 
-DATARMNETee0c11924c*DATARMNET3396919a68,struct sk_buff*DATARMNET543491eb0f){
-struct sock*DATARMNET370b0f4269;if(DATARMNET3396919a68->DATARMNET0d956cc77a==
-(0xd11+230-0xdf3))DATARMNET370b0f4269=__udp4_lib_lookup(dev_net(
-DATARMNET543491eb0f->dev),DATARMNET3396919a68->DATARMNETdfe430c2d6,
-DATARMNET3396919a68->DATARMNET08e913477e,DATARMNET3396919a68->
-DATARMNET2cb607d686,DATARMNET3396919a68->DATARMNETda7f7fa492,inet_iif(
-DATARMNET543491eb0f),(0xd2d+202-0xdf7),&udp_table,NULL);else DATARMNET370b0f4269
-=__udp6_lib_lookup(dev_net(DATARMNET543491eb0f->dev),&DATARMNET3396919a68->
-DATARMNET815cbb4bf5,DATARMNET3396919a68->DATARMNET08e913477e,&
-DATARMNET3396919a68->DATARMNETc3f31215b7,DATARMNET3396919a68->
-DATARMNETda7f7fa492,inet6_iif(DATARMNET543491eb0f),(0xd2d+202-0xdf7),&udp_table,
-NULL);if(DATARMNET370b0f4269&&!refcount_inc_not_zero(&DATARMNET370b0f4269->
-sk_refcnt))DATARMNET370b0f4269=NULL;return DATARMNET370b0f4269;}static void 
-DATARMNET991df48508(struct DATARMNETac2887e8c4*DATARMNET63b1a086d5,struct 
-sk_buff*DATARMNET543491eb0f)__must_hold(RCU){struct rmnet_skb_cb*
-DATARMNET1ec4882bf7=RMNET_SKB_CB(DATARMNET543491eb0f);DATARMNET63b1a086d5->
-DATARMNET763f2e5fac=jiffies;if(IS_ERR(DATARMNET63b1a086d5->DATARMNETa3e9a18f1b))
-{DATARMNET1ec4882bf7->tethered=true;return;}if(!DATARMNET63b1a086d5->
-DATARMNETa3e9a18f1b){DATARMNET63b1a086d5->DATARMNETa3e9a18f1b=
-DATARMNETa9a99daddb(&DATARMNET63b1a086d5->DATARMNET54338da2ff,
-DATARMNET543491eb0f);if(!DATARMNET63b1a086d5->DATARMNETa3e9a18f1b){
-DATARMNET19b3edd6de(DATARMNETf5e31b47ad);DATARMNET63b1a086d5->
-DATARMNETa3e9a18f1b=ERR_PTR(-EINVAL);DATARMNET1ec4882bf7->tethered=true;return;}
-}}void DATARMNET2a6d02a6a5(struct sk_buff*DATARMNET543491eb0f){struct 
-DATARMNETee0c11924c DATARMNET3396919a68={};struct DATARMNETac2887e8c4*
-DATARMNET63b1a086d5;struct udphdr*DATARMNETa1abb4897c;if(!
-skb_transport_header_was_set(DATARMNET543491eb0f)||DATARMNET543491eb0f->
-ip_summed==CHECKSUM_NONE)return;DATARMNETa1abb4897c=udp_hdr(DATARMNET543491eb0f)
-;DATARMNET3396919a68.DATARMNET08e913477e=DATARMNETa1abb4897c->source;
-DATARMNET3396919a68.DATARMNETda7f7fa492=DATARMNETa1abb4897c->dest;if(
-DATARMNET543491eb0f->protocol==htons(ETH_P_IP)){struct iphdr*DATARMNET86f1f2cdc9
-=ip_hdr(DATARMNET543491eb0f);DATARMNET3396919a68.DATARMNETdfe430c2d6=
-DATARMNET86f1f2cdc9->saddr;DATARMNET3396919a68.DATARMNET2cb607d686=
-DATARMNET86f1f2cdc9->daddr;DATARMNET3396919a68.DATARMNET0d956cc77a=
-(0xd11+230-0xdf3);}else{struct ipv6hdr*DATARMNETbf55123e5b=ipv6_hdr(
-DATARMNET543491eb0f);memcpy(&DATARMNET3396919a68.DATARMNET815cbb4bf5,&
-DATARMNETbf55123e5b->saddr,sizeof(DATARMNETbf55123e5b->saddr));memcpy(&
-DATARMNET3396919a68.DATARMNETc3f31215b7,&DATARMNETbf55123e5b->daddr,sizeof(
-DATARMNETbf55123e5b->daddr));DATARMNET3396919a68.DATARMNET0d956cc77a=
-(0xd03+244-0xdf1);}rcu_read_lock();DATARMNET63b1a086d5=DATARMNET270a2369fc(&
-DATARMNET3396919a68);if(DATARMNET63b1a086d5){if(likely(!DATARMNETa8d347a4e6(
-DATARMNET63b1a086d5,jiffies)))DATARMNET991df48508(DATARMNET63b1a086d5,
-DATARMNET543491eb0f);}rcu_read_unlock();}void DATARMNET5ecc30669c(struct sk_buff
-*DATARMNET543491eb0f){struct DATARMNETee0c11924c DATARMNET3396919a68={};struct 
-DATARMNETac2887e8c4*DATARMNET63b1a086d5;struct udphdr*DATARMNETa1abb4897c;if(!
-skb_transport_header_was_set(DATARMNET543491eb0f))return;DATARMNETa1abb4897c=
-udp_hdr(DATARMNET543491eb0f);DATARMNET3396919a68.DATARMNET08e913477e=
-DATARMNETa1abb4897c->dest;DATARMNET3396919a68.DATARMNETda7f7fa492=
-DATARMNETa1abb4897c->source;if(DATARMNET543491eb0f->protocol==htons(ETH_P_IP)){
-struct iphdr*DATARMNET86f1f2cdc9=ip_hdr(DATARMNET543491eb0f);DATARMNET3396919a68
-.DATARMNETdfe430c2d6=DATARMNET86f1f2cdc9->daddr;DATARMNET3396919a68.
-DATARMNET2cb607d686=DATARMNET86f1f2cdc9->saddr;DATARMNET3396919a68.
-DATARMNET0d956cc77a=(0xd11+230-0xdf3);}else{struct ipv6hdr*DATARMNETbf55123e5b=
-ipv6_hdr(DATARMNET543491eb0f);memcpy(&DATARMNET3396919a68.DATARMNET815cbb4bf5,&
-DATARMNETbf55123e5b->daddr,sizeof(DATARMNETbf55123e5b->daddr));memcpy(&
-DATARMNET3396919a68.DATARMNETc3f31215b7,&DATARMNETbf55123e5b->saddr,sizeof(
-DATARMNETbf55123e5b->saddr));DATARMNET3396919a68.DATARMNET0d956cc77a=
-(0xd03+244-0xdf1);}rcu_read_lock();DATARMNET63b1a086d5=DATARMNET270a2369fc(&
-DATARMNET3396919a68);if(DATARMNET63b1a086d5){if(likely(!DATARMNETa8d347a4e6(
-DATARMNET63b1a086d5,jiffies)))DATARMNET991df48508(DATARMNET63b1a086d5,
-DATARMNET543491eb0f);}rcu_read_unlock();}int DATARMNETe80a33d544(void){
-INIT_DELAYED_WORK(&DATARMNET3ed0b852e9.DATARMNET190b4452e8,DATARMNET47ed281d61);
-return(0xd2d+202-0xdf7);}void DATARMNET4b5170a1ef(void){cancel_delayed_work_sync
-(&DATARMNET3ed0b852e9.DATARMNET190b4452e8);DATARMNET3ed0b852e9.
-DATARMNETcd94e0d3c7=true;schedule_delayed_work(&DATARMNET3ed0b852e9.
-DATARMNET190b4452e8,(0xd2d+202-0xdf7));cancel_delayed_work_sync(&
-DATARMNET3ed0b852e9.DATARMNET190b4452e8);}
+
+/* How long to keep a node, in millisecs */
+#define RMNET_PERF_UDP_TRACK_TIMEOUT (2000)
+/* How often to run the cleaning workqueue, in millisecs */
+#define RMNET_PERF_UDP_TRACK_WQ_INTERVAL (500)
+
+#define RMNET_PERF_UDP_TRACK_HASH_BKTS (16)
+#define RMNET_PERF_UDP_TRACK_HASH_BITS \
+	(const_ilog2(RMNET_PERF_UDP_TRACK_HASH_BKTS))
+
+enum {
+	RMNET_PERF_UDP_TRACK_STAT_NODE_ADD,
+	RMNET_PERF_UDP_TRACK_STAT_NODE_ADD_FAIL,
+	RMNET_PERF_UDP_TRACK_STAT_NODE_DEL,
+	RMNET_PERF_UDP_TRACK_STAT_NO_SK,
+	RMNET_PERF_UDP_TRACK_STAT_MAX,
+};
+
+struct rmnet_perf_udp_track_tuple {
+	union {
+		__be32 v4_saddr;
+		struct in6_addr v6_saddr;
+	};
+	union {
+		__be32 v4_daddr;
+		struct in6_addr v6_daddr;
+	};
+	union {
+		struct {
+			__be16 sport;
+			__be16 dport;
+		};
+		u32 hash_key;
+	};
+	u8 ip_proto;
+};
+
+struct rmnet_perf_udp_track_node {
+	struct hlist_node hash;
+	struct rcu_head rcu;
+	struct rmnet_perf_udp_track_tuple info;
+	struct sock *node_sk;
+	unsigned long ts;
+	u8 dead;
+};
+
+struct rmnet_perf_udp_work_struct {
+	struct delayed_work ws;
+	bool force_clean;
+};
+
+/* For tracking hash protection */
+static DEFINE_SPINLOCK(rmnet_perf_udp_track_lock);
+static DEFINE_HASHTABLE(rmnet_perf_udp_track_hash,
+			RMNET_PERF_UDP_TRACK_HASH_BITS);
+static u32 rmnet_perf_udp_track_hash_size;
+
+/* Periodic cleaning work struct for the hashtable */
+static struct rmnet_perf_udp_work_struct rmnet_perf_udp_work;
+
+/* Stats Array */
+static u64 rmnet_perf_udp_track_stats[RMNET_PERF_UDP_TRACK_STAT_MAX];
+module_param_array_named(rmnet_perf_udp_stat, rmnet_perf_udp_track_stats,
+			 ullong, NULL, 0444);
+
+static void rmnet_perf_udp_track_stats_update(u32 stat)
+{
+	if (stat < RMNET_PERF_UDP_TRACK_STAT_MAX)
+		rmnet_perf_udp_track_stats[stat] += 1;
+}
+
+static bool
+rmnet_perf_udp_track_node_expired(struct rmnet_perf_udp_track_node *node,
+				  unsigned long ts)
+{
+	unsigned long timeout;
+
+	timeout = msecs_to_jiffies(RMNET_PERF_UDP_TRACK_TIMEOUT);
+	if (ts - node->ts > timeout)
+		return true;
+
+	return false;
+}
+
+static void rmnet_perf_udp_track_node_free(struct rcu_head *head)
+{
+	struct rmnet_perf_udp_track_node *node;
+
+	node = container_of(head, struct rmnet_perf_udp_track_node, rcu);
+	if (!IS_ERR_OR_NULL(node->node_sk))
+		sock_put(node->node_sk);
+
+	kfree(node);
+}
+
+static bool rmnet_perf_udp_track_hash_clean(bool force)
+{
+	struct rmnet_perf_udp_track_node *node;
+	struct hlist_node *tmp;
+	unsigned long ts;
+	int bkt;
+
+	ts = jiffies;
+	hash_for_each_safe(rmnet_perf_udp_track_hash, bkt, tmp, node, hash) {
+		if (node->dead)
+			/* Node already marked as removed, but not yet
+			 * purged after a grace period. Skip it.
+			 */
+			continue;
+
+		if (force || rmnet_perf_udp_track_node_expired(node, ts)) {
+			node->dead = 1;
+			hash_del_rcu(&node->hash);
+			call_rcu(&node->rcu, rmnet_perf_udp_track_node_free);
+			rmnet_perf_udp_track_stats_update(RMNET_PERF_UDP_TRACK_STAT_NODE_DEL);
+			rmnet_perf_udp_track_hash_size--;
+		}
+	}
+
+	return !!rmnet_perf_udp_track_hash_size;
+}
+
+static void rmnet_perf_udp_work_process(struct work_struct *ws)
+{
+	struct rmnet_perf_udp_work_struct *udp_work;
+	unsigned long flags;
+	bool should_resched;
+
+	udp_work = container_of(to_delayed_work(ws),
+				struct rmnet_perf_udp_work_struct, ws);
+	spin_lock_irqsave(&rmnet_perf_udp_track_lock, flags);
+	should_resched = rmnet_perf_udp_track_hash_clean(udp_work->force_clean);
+	if (should_resched) {
+		unsigned long delay;
+
+		delay = msecs_to_jiffies(RMNET_PERF_UDP_TRACK_WQ_INTERVAL);
+		schedule_delayed_work(&udp_work->ws, delay);
+	}
+
+	spin_unlock_irqrestore(&rmnet_perf_udp_track_lock, flags);
+}
+
+static bool
+rmnet_perf_udp_track_tuple_match(struct rmnet_perf_udp_track_tuple *t1,
+				 struct rmnet_perf_udp_track_tuple *t2)
+{
+	if (t1->ip_proto != t2->ip_proto ||
+	    t1->sport != t2->sport ||
+	    t1->dport != t2->dport)
+		return false;
+
+	if (t1->ip_proto == 4)
+		return t1->v4_saddr == t2->v4_saddr &&
+		       t1->v4_daddr == t2->v4_daddr;
+
+	return !ipv6_addr_cmp(&t1->v6_saddr, &t2->v6_saddr) &&
+	       !ipv6_addr_cmp(&t1->v6_daddr, &t2->v6_daddr);
+}
+
+static struct rmnet_perf_udp_track_node *
+rmnet_perf_udp_track_node_add(struct rmnet_perf_udp_track_tuple *tuple)
+	__must_hold(&rmnet_perf_udp_track_lock)
+{
+	struct rmnet_perf_udp_track_node *node;
+
+	node = kzalloc(sizeof(*node), GFP_ATOMIC);
+	if (!node) {
+		rmnet_perf_udp_track_stats_update(RMNET_PERF_UDP_TRACK_STAT_NODE_ADD_FAIL);
+		return NULL;
+	}
+
+	INIT_HLIST_NODE(&node->hash);
+	memcpy(&node->info, tuple, sizeof(*tuple));
+	node->ts = jiffies;
+	hash_add_rcu(rmnet_perf_udp_track_hash, &node->hash, tuple->hash_key);
+	rmnet_perf_udp_track_stats_update(RMNET_PERF_UDP_TRACK_STAT_NODE_ADD);
+	if (!rmnet_perf_udp_track_hash_size) {
+		unsigned long delay;
+
+		delay = msecs_to_jiffies(RMNET_PERF_UDP_TRACK_WQ_INTERVAL);
+		schedule_delayed_work(&rmnet_perf_udp_work.ws, delay);
+	}
+
+	rmnet_perf_udp_track_hash_size++;
+	return node;
+}
+
+static struct rmnet_perf_udp_track_node *
+rmnet_perf_udp_track_tuple_find(struct rmnet_perf_udp_track_tuple *tuple)
+	__must_hold(RCU)
+{
+	struct rmnet_perf_udp_track_node *node;
+	unsigned long flags;
+
+	spin_lock_irqsave(&rmnet_perf_udp_track_lock, flags);
+	hash_for_each_possible_rcu(rmnet_perf_udp_track_hash, node, hash,
+				   tuple->hash_key) {
+		if (node->dead)
+			continue;
+
+		if (rmnet_perf_udp_track_tuple_match(&node->info, tuple))
+			goto out;
+	}
+
+	/* Make a new one */
+	node = rmnet_perf_udp_track_node_add(tuple);
+out:
+	spin_unlock_irqrestore(&rmnet_perf_udp_track_lock, flags);
+	return node;
+}
+
+static struct sock *
+rmnet_perf_udp_track_sk_lookup(struct rmnet_perf_udp_track_tuple *tuple,
+			       struct sk_buff *skb)
+{
+	struct sock *udp_sock;
+
+	/* UDP socket lookup is surprisingly involved. Fortunately, the
+	 * kernel does at least export these helpers. They HAVE nice wrappers,
+	 * but those aren't exported, naturally.
+	 */
+	if (tuple->ip_proto == 4)
+		udp_sock = __udp4_lib_lookup(dev_net(skb->dev), tuple->v4_saddr,
+					     tuple->sport, tuple->v4_daddr,
+					     tuple->dport, inet_iif(skb), 0,
+					     &udp_table, NULL);
+	else
+		udp_sock = __udp6_lib_lookup(dev_net(skb->dev),
+					     &tuple->v6_saddr, tuple->sport,
+					     &tuple->v6_daddr, tuple->dport,
+					     inet6_iif(skb), 0, &udp_table,
+					     NULL);
+
+	/* Also, neither of these helpers handle bumping the socket refcount!
+	 * We have to do that, in the manner of udp4/6_lib_lookup().
+	 */
+	if (udp_sock && !refcount_inc_not_zero(&udp_sock->sk_refcnt))
+		udp_sock = NULL;
+
+	return udp_sock;
+}
+
+static void
+rmnet_perf_udp_track_node_update(struct rmnet_perf_udp_track_node *node,
+				 struct sk_buff *skb)
+	__must_hold(RCU)
+{
+	struct rmnet_skb_cb *rmnet_cb = RMNET_SKB_CB(skb);
+
+	/* Poke the timestamp since the flow is still active */
+	node->ts = jiffies;
+	if (IS_ERR(node->node_sk)) {
+		/* No socket found */
+		rmnet_cb->tethered = true;
+		return;
+	}
+
+	if (!node->node_sk) {
+		/* Perform first-time socket lookup */
+		node->node_sk = rmnet_perf_udp_track_sk_lookup(&node->info,
+							       skb);
+		if (!node->node_sk) {
+			rmnet_perf_udp_track_stats_update(RMNET_PERF_UDP_TRACK_STAT_NO_SK);
+			node->node_sk = ERR_PTR(-EINVAL);
+			rmnet_cb->tethered = true;
+			return;
+		}
+	}
+
+	/* Graft in the socket since we have it? */
+}
+
+void rmnet_perf_ingress_handle_udp(struct sk_buff *skb)
+{
+	struct rmnet_perf_udp_track_tuple tuple = {};
+	struct rmnet_perf_udp_track_node *node;
+	struct udphdr *uh;
+
+	if (!skb_transport_header_was_set(skb) ||
+	    skb->ip_summed == CHECKSUM_NONE)
+		return;
+
+	uh = udp_hdr(skb);
+	tuple.sport = uh->source;
+	tuple.dport = uh->dest;
+	if (skb->protocol == htons(ETH_P_IP)) {
+		struct iphdr *iph = ip_hdr(skb);
+
+		tuple.v4_saddr = iph->saddr;
+		tuple.v4_daddr = iph->daddr;
+		tuple.ip_proto = 4;
+	} else {
+		struct ipv6hdr *ip6h = ipv6_hdr(skb);
+
+		memcpy(&tuple.v6_saddr, &ip6h->saddr, sizeof(ip6h->saddr));
+		memcpy(&tuple.v6_daddr, &ip6h->daddr, sizeof(ip6h->daddr));
+		tuple.ip_proto = 6;
+	}
+
+	rcu_read_lock();
+	node = rmnet_perf_udp_track_tuple_find(&tuple);
+	if (node) {
+		if (likely(!rmnet_perf_udp_track_node_expired(node, jiffies)))
+			rmnet_perf_udp_track_node_update(node, skb);
+	}
+
+	rcu_read_unlock();
+}
+
+void rmnet_perf_egress_handle_udp(struct sk_buff *skb)
+{
+	struct rmnet_perf_udp_track_tuple tuple = {};
+	struct rmnet_perf_udp_track_node *node;
+	struct udphdr *uh;
+
+	if (!skb_transport_header_was_set(skb))
+		return;
+
+	uh = udp_hdr(skb);
+	/* Node tuples are formatted in the DL direction. Swap SRC and DST */
+	tuple.sport = uh->dest;
+	tuple.dport = uh->source;
+	if (skb->protocol == htons(ETH_P_IP)) {
+		struct iphdr *iph = ip_hdr(skb);
+
+		tuple.v4_saddr = iph->daddr;
+		tuple.v4_daddr = iph->saddr;
+		tuple.ip_proto = 4;
+	} else {
+		struct ipv6hdr *ip6h = ipv6_hdr(skb);
+
+		memcpy(&tuple.v6_saddr, &ip6h->daddr, sizeof(ip6h->daddr));
+		memcpy(&tuple.v6_daddr, &ip6h->saddr, sizeof(ip6h->saddr));
+		tuple.ip_proto = 6;
+	}
+
+	rcu_read_lock();
+	node = rmnet_perf_udp_track_tuple_find(&tuple);
+	if (node) {
+		if (likely(!rmnet_perf_udp_track_node_expired(node, jiffies)))
+			rmnet_perf_udp_track_node_update(node, skb);
+	}
+
+	rcu_read_unlock();
+}
+
+/* Check for ECN handling on this packet, and possibly drop it */
+int rmnet_perf_ingress_udp_ecn(struct sk_buff *skb, int ip_len)
+{
+	struct rmnet_perf_ecn_node *node;
+	struct udphdr *uh, __uh;
+
+	rcu_read_lock();
+	node = xa_load(rmnet_perf_get_ecn_map(), skb->hash);
+	if (!node)
+		goto skip;
+
+	node->count++;
+	uh = skb_header_pointer(skb, ip_len, sizeof(*uh), &__uh);
+	if (!uh)
+		/* Well, we tried... */
+		goto skip;
+
+	if (node->count >= node->prob) {
+		node->count = 0;
+		node->drops++;
+		if (node->should_drop) {
+			kfree_skb(skb);
+			rcu_read_unlock();
+			return 1;
+		}
+
+		/* Try and set the ECN bits in the ip header. The stack expects
+		 * skb_network_header to work, so make sure it does.
+		 */
+		if (!pskb_may_pull(skb, ip_len)) {
+			/* Well, dropping it is... */
+			kfree_skb(skb);
+			rcu_read_unlock();
+			return 1;
+		}
+
+		/* You get to die another day */
+		INET_ECN_set_ce(skb);
+	}
+
+skip:
+	rcu_read_unlock();
+	return 0;
+}
+
+int rmnet_perf_udp_init(void)
+{
+	INIT_DELAYED_WORK(&rmnet_perf_udp_work.ws,
+			  rmnet_perf_udp_work_process);
+	return 0;
+}
+
+void rmnet_perf_udp_exit(void)
+{
+	/* Force the current work struct to finish deleting anything old
+	 * enough...
+	 */
+	cancel_delayed_work_sync(&rmnet_perf_udp_work.ws);
+
+	rmnet_perf_udp_work.force_clean = true;
+	schedule_delayed_work(&rmnet_perf_udp_work.ws, 0);
+
+	/* ...and force remove all the rest of the nodes */
+	cancel_delayed_work_sync(&rmnet_perf_udp_work.ws);
+}

@@ -2,7 +2,7 @@
 /*
  * Copyright (c) 2012-2020, The Linux Foundation. All rights reserved.
  *
- * Copyright (c) 2024, Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
  */
 
 #include "ipa_i.h"
@@ -2102,22 +2102,22 @@ void ipa3_delete_dl_opt_wdi_dpath_flt_rules(u32 ipa_ep_idx)
 int ipa3_set_flt_tuple_mask(int pipe_idx, struct ipahal_reg_hash_tuple *tuple)
 {
 	if (!tuple) {
-		IPAERR_RL("bad tuple\n");
+		IPAERR_BOOTUP("bad tuple\n");
 		return -EINVAL;
 	}
 
 	if (pipe_idx >= ipa3_ctx->ipa_num_pipes || pipe_idx < 0) {
-		IPAERR("bad pipe index!\n");
+		IPAERR_BOOTUP("bad pipe index!\n");
 		return -EINVAL;
 	}
 
 	if (!ipa_is_ep_support_flt(pipe_idx)) {
-		IPAERR("pipe %d not filtering pipe\n", pipe_idx);
+		IPAERR_BOOTUP("pipe %d not filtering pipe\n", pipe_idx);
 		return -EINVAL;
 	}
 
 	if (ipa_is_modem_pipe(pipe_idx)) {
-		IPAERR("modem pipe tuple is not configured by AP\n");
+		IPAERR_BOOTUP("modem pipe tuple is not configured by AP\n");
 		return -EINVAL;
 	}
 

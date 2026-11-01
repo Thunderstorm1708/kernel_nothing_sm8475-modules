@@ -2,7 +2,7 @@
 /*
  * Copyright (c) 2021, The Linux Foundation. All rights reserved.
  *
- * Copyright (c) 2022-2023, 2025 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
  */
 
 #include <linux/init.h>
@@ -1743,7 +1743,7 @@ static long ipa_lnx_stats_ioctl(struct file *filp,
 	unsigned long arg)
 {
 	int retval = IPA_LNX_STATS_SUCCESS;
-	struct ipa_lnx_consolidated_stats *consolidated_stats;
+	struct ipa_lnx_consolidated_stats *consolidated_stats = NULL;
 
 	if (_IOC_TYPE(cmd) != IPA_LNX_STATS_IOC_MAGIC) {
 		IPA_STATS_ERR("IOC type mismatch %d\n", cmd);
@@ -1860,15 +1860,85 @@ static long ipa_lnx_stats_ioctl(struct file *filp,
 	default:
 		retval = -ENOTTY;
 	}
+	if (consolidated_stats)
+		kfree(consolidated_stats);
 	mutex_unlock(&ipa_lnx_ctx_mutex);
 	return retval;
 }
+
+#ifdef CONFIG_COMPAT
+
+long compat_ipa_lnx_stats_ioctl(struct file *filp,
+	unsigned int cmd,
+	unsigned long arg)
+{
+	IPADBG("compat_ipa_lnx_stats_ioctl cmd=%x nr=%d\n", cmd, _IOC_NR(cmd));
+
+	if (_IOC_TYPE(cmd) != IPA_LNX_STATS_IOC_MAGIC) {
+		IPA_STATS_ERR("IOC type mismatch %d\n", cmd);
+		return -ENOTTY;
+	}
+	if(!ipa3_ctx) {
+		IPA_STATS_ERR("IPA driver is not up, rejecting the ioctl\n");
+		return -EPERM;
+	}
+	switch (_IOC_NR(cmd)) {
+	case IPA_LNX_CMD_GET_ALLOC_INFO:
+		if(_IOC_DIR(cmd) != _IOC_DIR(IPA_LNX_IOC_GET_ALLOC_INFO))
+			return -ENOTTY;
+		cmd = IPA_LNX_IOC_GET_ALLOC_INFO;
+		break;
+	case IPA_LNX_CMD_GENERIC_STATS:
+		if(_IOC_DIR(cmd) != _IOC_DIR(IPA_LNX_IOC_GET_GENERIC_STATS))
+			return -ENOTTY;
+		cmd = IPA_LNX_IOC_GET_GENERIC_STATS;
+		break;
+	case IPA_LNX_CMD_CLOCK_STATS:
+		if(_IOC_DIR(cmd) != _IOC_DIR(IPA_LNX_IOC_GET_CLOCK_STATS))
+			return -ENOTTY;
+		cmd = IPA_LNX_IOC_GET_CLOCK_STATS;
+		break;
+	case IPA_LNX_CMD_WLAN_INST_STATS:
+		if(_IOC_DIR(cmd) != _IOC_DIR(IPA_LNX_IOC_GET_WLAN_INST_STATS))
+			return -ENOTTY;
+		cmd = IPA_LNX_IOC_GET_WLAN_INST_STATS;
+		break;
+	case IPA_LNX_CMD_ETH_INST_STATS:
+		if(_IOC_DIR(cmd) != _IOC_DIR(IPA_LNX_IOC_GET_ETH_INST_STATS))
+			return -ENOTTY;
+		cmd = IPA_LNX_IOC_GET_ETH_INST_STATS;
+		break;
+	case IPA_LNX_CMD_USB_INST_STATS:
+		if(_IOC_DIR(cmd) != _IOC_DIR(IPA_LNX_IOC_GET_USB_INST_STATS))
+			return -ENOTTY;
+		cmd = IPA_LNX_IOC_GET_USB_INST_STATS;
+		break;
+	case IPA_LNX_CMD_MHIP_INST_STATS:
+		if(_IOC_DIR(cmd) != _IOC_DIR(IPA_LNX_IOC_GET_MHIP_INST_STATS))
+			return -ENOTTY;
+		cmd = IPA_LNX_IOC_GET_MHIP_INST_STATS;
+		break;
+	case IPA_LNX_CMD_CONSOLIDATED_STATS:
+		if(_IOC_DIR(cmd) != _IOC_DIR(IPA_LNX_IOC_GET_CONSOLIDATED_STATS))
+			return -ENOTTY;
+		cmd = IPA_LNX_IOC_GET_CONSOLIDATED_STATS;
+		break;
+	default:
+		return -ENOIOCTLCMD;
+	}
+	return ipa_lnx_stats_ioctl(filp, cmd, (unsigned long) compat_ptr(arg));
+}
+
+#endif
 
 const struct file_operations ipa_stats_fops = {
 	.owner = THIS_MODULE,
 	.open = ipa_stats_ioctl_open,
 	.read = NULL,
 	.unlocked_ioctl = ipa_lnx_stats_ioctl,
+#ifdef CONFIG_COMPAT
+	.compat_ioctl = compat_ipa_lnx_stats_ioctl,
+#endif
 };
 
 static int ipa_tlpd_stats_ioctl_init(void)

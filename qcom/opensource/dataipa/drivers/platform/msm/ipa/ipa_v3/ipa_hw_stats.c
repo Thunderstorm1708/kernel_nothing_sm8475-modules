@@ -1,16 +1,18 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2017-2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2022-2024 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
  */
 
-#include <linux/vmalloc.h>
 #include <linux/debugfs.h>
 #include <linux/kernel.h>
 #include <linux/delay.h>
 #include "ipa_i.h"
 #include "ipahal.h"
 #include "ipahal_hw_stats.h"
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 10, 0)
+#include <linux/vmalloc.h>
+#endif
 
 #define IPA_INIT_DROP_STATS_MAX_CMD_NUM 5
 #define IPA_INIT_TETH_STATS_MAX_CMD_NUM 5
@@ -40,7 +42,7 @@ int ipa_hw_stats_init(void)
 
 	ipa3_ctx->hw_stats = kzalloc(sizeof(*ipa3_ctx->hw_stats), GFP_KERNEL);
 	if (!ipa3_ctx->hw_stats) {
-		IPAERR("mem allocated failed!\n");
+		IPAERR_BOOTUP("mem allocated failed!\n");
 		return -ENOMEM;
 	}
 
@@ -53,7 +55,7 @@ int ipa_hw_stats_init(void)
 
 	teth_stats_init = kzalloc(sizeof(*teth_stats_init), GFP_KERNEL);
 	if (!teth_stats_init) {
-		IPAERR("mem allocated failed!\n");
+		IPAERR_BOOTUP("mem allocated failed!\n");
 		return -ENOMEM;
 	}
 	/* enable prod mask */
@@ -91,7 +93,7 @@ int ipa_hw_stats_init(void)
 			ep_index = ipa_get_ep_mapping(
 				IPA_CLIENT_MHI_PRIME_TETH_PROD);
 			if (ep_index == -1) {
-				IPAERR("Invalid client.\n");
+				IPAERR_BOOTUP("Invalid client.\n");
 				ret = -EINVAL;
 				goto fail_free_stats_ctx;
 			}
@@ -176,7 +178,7 @@ int ipa_hw_stats_init(void)
 			&reg_idx)) {
 			ep_index = ipa_get_ep_mapping(IPA_CLIENT_Q6_WAN_PROD);
 			if (ep_index == -1) {
-				IPAERR("Invalid client.\n");
+				IPAERR_BOOTUP("Invalid client.\n");
 				ret = -EINVAL;
 				goto fail_free_stats_ctx;
 			}
@@ -224,7 +226,7 @@ int ipa_hw_stats_init(void)
 			ep_index = ipa_get_ep_mapping(
 				IPA_CLIENT_Q6_DL_NLO_DATA_PROD);
 			if (ep_index == -1) {
-				IPAERR("Invalid client.\n");
+				IPAERR_BOOTUP("Invalid client.\n");
 				ret = -EINVAL;
 				goto fail_free_stats_ctx;
 			}
@@ -271,7 +273,7 @@ int ipa_hw_stats_init(void)
 			ep_index = ipa_get_ep_mapping(
 					IPA_CLIENT_Q6_DL_NLO_LL_DATA_PROD);
 			if (ep_index == -1) {
-				IPAERR("Invalid client.\n");
+				IPAERR_BOOTUP("Invalid client.\n");
 				ret = -EINVAL;
 				goto fail_free_stats_ctx;
 			}
@@ -318,7 +320,7 @@ int ipa_hw_stats_init(void)
 		&reg_idx)) {
 		ep_index = ipa_get_ep_mapping(IPA_CLIENT_USB_PROD);
 		if (ep_index == -1) {
-			IPAERR("Invalid client.\n");
+			IPAERR_BOOTUP("Invalid client.\n");
 			ret = -EINVAL;
 			goto fail_free_stats_ctx;
 		}
@@ -347,7 +349,7 @@ int ipa_hw_stats_init(void)
 		&reg_idx)) {
 		ep_index = ipa_get_ep_mapping(IPA_CLIENT_WLAN1_PROD);
 		if (ep_index == -1) {
-			IPAERR("Invalid client.\n");
+			IPAERR_BOOTUP("Invalid client.\n");
 			ret = -EINVAL;
 			goto fail_free_stats_ctx;
 		}
@@ -376,7 +378,7 @@ int ipa_hw_stats_init(void)
 		&reg_idx)) {
 		ep_index = ipa_get_ep_mapping(IPA_CLIENT_WLAN2_PROD);
 		if (ep_index == -1) {
-			IPAERR("Invalid client.\n");
+			IPAERR_BOOTUP("Invalid client.\n");
 			ret = -EINVAL;
 			goto fail_free_stats_ctx;
 		}
@@ -405,7 +407,7 @@ int ipa_hw_stats_init(void)
 		&reg_idx)) {
 		ep_index = ipa_get_ep_mapping(IPA_CLIENT_WIGIG_PROD);
 		if (ep_index == -1) {
-			IPAERR("Invalid client.\n");
+			IPAERR_BOOTUP("Invalid client.\n");
 			ret = -EINVAL;
 			goto fail_free_stats_ctx;
 		}
@@ -432,7 +434,7 @@ int ipa_hw_stats_init(void)
 
 	ret = ipa_init_teth_stats(teth_stats_init);
 	if (ret != 0) {
-		IPAERR("init teth stats fails\n");
+		IPAERR_BOOTUP("init teth stats fails\n");
 		goto fail_free_stats_ctx;
 	}
 
@@ -527,7 +529,7 @@ int ipa_init_quota_stats(u32 *pipe_bitmask)
 	pyld = ipahal_stats_generate_init_pyld(IPAHAL_HW_STATS_QUOTA,
 		&ipa3_ctx->hw_stats->quota.init, false);
 	if (!pyld) {
-		IPAERR("failed to generate pyld\n");
+		IPAERR_BOOTUP("failed to generate pyld\n");
 		return -EPERM;
 	}
 
@@ -541,7 +543,7 @@ int ipa_init_quota_stats(u32 *pipe_bitmask)
 		pyld->len,
 		DMA_TO_DEVICE);
 	if (dma_mapping_error(ipa3_ctx->pdev, dma_address)) {
-		IPAERR("failed to DMA map\n");
+		IPAERR_BOOTUP("failed to DMA map\n");
 		ret = -EPERM;
 		goto destroy_init_pyld;
 	}
@@ -551,7 +553,7 @@ int ipa_init_quota_stats(u32 *pipe_bitmask)
 	if (ipa_ep_idx != IPA_EP_NOT_ALLOCATED && !ipa3_ctx->ulso_wa) {
 		ipa_close_coal_frame(&coal_cmd_pyld);
 		if (!coal_cmd_pyld) {
-			IPAERR("failed to construct coal close IC\n");
+			IPAERR_BOOTUP("failed to construct coal close IC\n");
 			ret = -ENOMEM;
 			goto unmap;
 		}
@@ -571,7 +573,7 @@ int ipa_init_quota_stats(u32 *pipe_bitmask)
 			IPA_IMM_CMD_REGISTER_WRITE,
 			&quota_mask, false);
 		if (!quota_mask_pyld[0]) {
-			IPAERR("failed to construct register_write imm cmd\n");
+			IPAERR_BOOTUP("failed to construct register_write imm cmd\n");
 			ret = -ENOMEM;
 			goto destroy_coal_cmd;
 		}
@@ -593,7 +595,7 @@ int ipa_init_quota_stats(u32 *pipe_bitmask)
 			if (!quota_mask_pyld[i]) {
 				int j;
 
-				IPAERR(
+				IPAERR_BOOTUP(
 					"failed to construct register_write imm cmd\n"
 				);
 				for (j = i - 1; j >= 0; j--)
@@ -620,7 +622,7 @@ int ipa_init_quota_stats(u32 *pipe_bitmask)
 	quota_base_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_REGISTER_WRITE,
 		&quota_base, false);
 	if (!quota_base_pyld) {
-		IPAERR("failed to construct register_write imm cmd\n");
+		IPAERR_BOOTUP("failed to construct register_write imm cmd\n");
 		ret = -ENOMEM;
 		goto destroy_quota_mask;
 	}
@@ -640,7 +642,7 @@ int ipa_init_quota_stats(u32 *pipe_bitmask)
 	cmd_pyld = ipahal_construct_imm_cmd(
 		IPA_IMM_CMD_DMA_SHARED_MEM, &cmd, false);
 	if (!cmd_pyld) {
-		IPAERR("failed to construct dma_shared_mem imm cmd\n");
+		IPAERR_BOOTUP("failed to construct dma_shared_mem imm cmd\n");
 		ret = -ENOMEM;
 		goto destroy_quota_base;
 	}
@@ -652,7 +654,7 @@ int ipa_init_quota_stats(u32 *pipe_bitmask)
 
 	ret = ipa3_send_cmd(num_cmd, desc);
 	if (ret) {
-		IPAERR("failed to send immediate command (error %d)\n", ret);
+		IPAERR_BOOTUP("failed to send immediate command (error %d)\n", ret);
 		goto destroy_imm;
 	}
 
@@ -882,7 +884,7 @@ int ipa_init_teth_stats(struct ipa_teth_stats_endpoints *in)
 		return 0;
 
 	if (!in || (!in->prod_mask[0] && !in->prod_mask[1])) {
-		IPAERR("invalid params\n");
+		IPAERR_BOOTUP("invalid params\n");
 		return -EINVAL;
 	}
 
@@ -899,13 +901,13 @@ int ipa_init_teth_stats(struct ipa_teth_stats_endpoints *in)
 					has_cons = true;
 			}
 			if (!has_cons) {
-				IPAERR("prod %d doesn't have cons\n", i);
+				IPAERR_BOOTUP("prod %d doesn't have cons\n", i);
 				return -EINVAL;
 			}
 		}
 	}
 
-	IPADBG("prod_mask=[0x%x][0x%x]\n",
+	IPADBG_BOOTUP("prod_mask=[0x%x][0x%x]\n",
 		in->prod_mask[0], in->prod_mask[1]);
 
 	/* reset driver's cache */
@@ -932,7 +934,7 @@ int ipa_init_teth_stats(struct ipa_teth_stats_endpoints *in)
 	}
 
 	if (pyld->len > IPA_MEM_PART(stats_tethering_size)) {
-		IPAERR("SRAM partition too small: %d needed %d\n",
+		IPAERR_BOOTUP("SRAM partition too small: %d needed %d\n",
 			IPA_MEM_PART(stats_tethering_size), pyld->len);
 		ret = -EPERM;
 		goto destroy_init_pyld;
@@ -943,7 +945,7 @@ int ipa_init_teth_stats(struct ipa_teth_stats_endpoints *in)
 		pyld->len,
 		DMA_TO_DEVICE);
 	if (dma_mapping_error(ipa3_ctx->pdev, dma_address)) {
-		IPAERR("failed to DMA map\n");
+		IPAERR_BOOTUP("failed to DMA map\n");
 		ret = -EPERM;
 		goto destroy_init_pyld;
 	}
@@ -953,7 +955,7 @@ int ipa_init_teth_stats(struct ipa_teth_stats_endpoints *in)
 		IPA_EP_NOT_ALLOCATED && !ipa3_ctx->ulso_wa) {
 		ipa_close_coal_frame(&coal_cmd_pyld);
 		if (!coal_cmd_pyld) {
-			IPAERR("failed to construct coal close IC\n");
+			IPAERR_BOOTUP("failed to construct coal close IC\n");
 			ret = -ENOMEM;
 			goto unmap;
 		}
@@ -975,7 +977,7 @@ int ipa_init_teth_stats(struct ipa_teth_stats_endpoints *in)
 				IPA_IMM_CMD_REGISTER_WRITE,
 				&teth_mask, false);
 			if (!teth_mask_pyld[i]) {
-				IPAERR(
+				IPAERR_BOOTUP(
 				"failed to construct register_write imm cmd\n");
 				for (j = i - 1; j >= 0; j--) {
 					ipahal_destroy_imm_cmd(
@@ -1001,7 +1003,7 @@ int ipa_init_teth_stats(struct ipa_teth_stats_endpoints *in)
 			IPA_IMM_CMD_REGISTER_WRITE,
 			&teth_mask, false);
 		if (!teth_mask_pyld[0]) {
-			IPAERR("failed to construct register_write imm cmd\n");
+			IPAERR_BOOTUP("failed to construct register_write imm cmd\n");
 			ret = -ENOMEM;
 			goto destroy_coal_cmd;
 		}
@@ -1022,7 +1024,7 @@ int ipa_init_teth_stats(struct ipa_teth_stats_endpoints *in)
 	teth_base_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_REGISTER_WRITE,
 		&teth_base, false);
 	if (!teth_base_pyld) {
-		IPAERR("failed to construct register_write imm cmd\n");
+		IPAERR_BOOTUP("failed to construct register_write imm cmd\n");
 		ret = -ENOMEM;
 		goto destroy_teth_mask;
 	}
@@ -1042,7 +1044,7 @@ int ipa_init_teth_stats(struct ipa_teth_stats_endpoints *in)
 	cmd_pyld = ipahal_construct_imm_cmd(
 		IPA_IMM_CMD_DMA_SHARED_MEM, &cmd, false);
 	if (!cmd_pyld) {
-		IPAERR("failed to construct dma_shared_mem imm cmd\n");
+		IPAERR_BOOTUP("failed to construct dma_shared_mem imm cmd\n");
 		ret = -ENOMEM;
 		goto destroy_teth_base;
 	}
@@ -1054,7 +1056,7 @@ int ipa_init_teth_stats(struct ipa_teth_stats_endpoints *in)
 
 	ret = ipa3_send_cmd(num_cmd, desc);
 	if (ret) {
-		IPAERR("failed to send immediate command (error %d)\n", ret);
+		IPAERR_BOOTUP("failed to send immediate command (error %d)\n", ret);
 		goto destroy_imm;
 	}
 
@@ -1436,12 +1438,12 @@ int ipa_init_flt_rt_stats(void)
 	pyld = ipahal_stats_generate_init_pyld(IPAHAL_HW_STATS_FNR,
 		(void *)(uintptr_t)(IPA_MAX_FLT_RT_CNT_INDEX), false);
 	if (!pyld) {
-		IPAERR("failed to generate pyld\n");
+		IPAERR_BOOTUP("failed to generate pyld\n");
 		return -EPERM;
 	}
 
 	if (pyld->len > smem_size) {
-		IPAERR("SRAM partition too small: %d needed %d\n",
+		IPAERR_BOOTUP("SRAM partition too small: %d needed %d\n",
 			smem_size, pyld->len);
 		ret = -EPERM;
 		goto destroy_init_pyld;
@@ -1452,7 +1454,7 @@ int ipa_init_flt_rt_stats(void)
 		pyld->len,
 		DMA_TO_DEVICE);
 	if (dma_mapping_error(ipa3_ctx->pdev, dma_address)) {
-		IPAERR("failed to DMA map\n");
+		IPAERR_BOOTUP("failed to DMA map\n");
 		ret = -EPERM;
 		goto destroy_init_pyld;
 	}
@@ -1462,7 +1464,7 @@ int ipa_init_flt_rt_stats(void)
 		IPA_EP_NOT_ALLOCATED && !ipa3_ctx->ulso_wa) {
 		ipa_close_coal_frame(&coal_cmd_pyld);
 		if (!coal_cmd_pyld) {
-			IPAERR("failed to construct coal close IC\n");
+			IPAERR_BOOTUP("failed to construct coal close IC\n");
 			ret = -ENOMEM;
 			goto unmap;
 		}
@@ -1486,7 +1488,7 @@ int ipa_init_flt_rt_stats(void)
 	flt_v4_base_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_REGISTER_WRITE,
 		&flt_v4_base, false);
 	if (!flt_v4_base_pyld) {
-		IPAERR("failed to construct register_write imm cmd\n");
+		IPAERR_BOOTUP("failed to construct register_write imm cmd\n");
 		ret = -ENOMEM;
 		goto destroy_coal_cmd;
 	}
@@ -1506,7 +1508,7 @@ int ipa_init_flt_rt_stats(void)
 	flt_v6_base_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_REGISTER_WRITE,
 		&flt_v6_base, false);
 	if (!flt_v6_base_pyld) {
-		IPAERR("failed to construct register_write imm cmd\n");
+		IPAERR_BOOTUP("failed to construct register_write imm cmd\n");
 		ret = -ENOMEM;
 		goto destroy_flt_v4_base;
 	}
@@ -1526,7 +1528,7 @@ int ipa_init_flt_rt_stats(void)
 	rt_v4_base_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_REGISTER_WRITE,
 		&rt_v4_base, false);
 	if (!rt_v4_base_pyld) {
-		IPAERR("failed to construct register_write imm cmd\n");
+		IPAERR_BOOTUP("failed to construct register_write imm cmd\n");
 		ret = -ENOMEM;
 		goto destroy_flt_v6_base;
 	}
@@ -1546,7 +1548,7 @@ int ipa_init_flt_rt_stats(void)
 	rt_v6_base_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_REGISTER_WRITE,
 		&rt_v6_base, false);
 	if (!rt_v6_base_pyld) {
-		IPAERR("failed to construct register_write imm cmd\n");
+		IPAERR_BOOTUP("failed to construct register_write imm cmd\n");
 		ret = -ENOMEM;
 		goto destroy_rt_v4_base;
 	}
@@ -1566,7 +1568,7 @@ int ipa_init_flt_rt_stats(void)
 	cmd_pyld = ipahal_construct_imm_cmd(
 		IPA_IMM_CMD_DMA_SHARED_MEM, &cmd, false);
 	if (!cmd_pyld) {
-		IPAERR("failed to construct dma_shared_mem imm cmd\n");
+		IPAERR_BOOTUP("failed to construct dma_shared_mem imm cmd\n");
 		ret = -ENOMEM;
 		goto destroy_rt_v6_base;
 	}
@@ -1578,7 +1580,7 @@ int ipa_init_flt_rt_stats(void)
 
 	ret = ipa3_send_cmd(num_cmd, desc);
 	if (ret) {
-		IPAERR("failed to send immediate command (error %d)\n", ret);
+		IPAERR_BOOTUP("failed to send immediate command (error %d)\n", ret);
 		goto destroy_imm;
 	}
 
@@ -1964,7 +1966,7 @@ int ipa_init_drop_stats(u32 *pipe_bitmask)
 
 	desc = kzalloc(sizeof(*desc) * IPA_INIT_DROP_STATS_MAX_CMD_NUM, GFP_KERNEL);
 	if (!desc) {
-		IPAERR("failed to allocate memory\n");
+		IPAERR_BOOTUP("failed to allocate memory\n");
 		return -ENOMEM;
 	}
 
@@ -1978,13 +1980,13 @@ int ipa_init_drop_stats(u32 *pipe_bitmask)
 	pyld = ipahal_stats_generate_init_pyld(IPAHAL_HW_STATS_DROP,
 		&tmp_drop.init, false);
 	if (!pyld) {
-		IPAERR("failed to generate pyld\n");
+		IPAERR_BOOTUP("failed to generate pyld\n");
 		ret = -EPERM;
 		goto fail_free_desc;
 	}
 
 	if (pyld->len > IPA_MEM_PART(stats_drop_size)) {
-		IPAERR("SRAM partition too small: %d bytes (%d pipes)."
+		IPAERR_BOOTUP("SRAM partition too small: %d bytes (%d pipes)."
 			"Tried to add %d bytes (%d pipes)."
 			"Please disable some stats before adding new ones.\n",
 			IPA_MEM_PART(stats_drop_size), IPA_MEM_PART(stats_drop_size)/8,
@@ -2002,7 +2004,7 @@ int ipa_init_drop_stats(u32 *pipe_bitmask)
 		pyld->len,
 		DMA_TO_DEVICE);
 	if (dma_mapping_error(ipa3_ctx->pdev, dma_address)) {
-		IPAERR("failed to DMA map\n");
+		IPAERR_BOOTUP("failed to DMA map\n");
 		ret = -EPERM;
 		goto destroy_init_pyld;
 	}
@@ -2012,7 +2014,7 @@ int ipa_init_drop_stats(u32 *pipe_bitmask)
 		IPA_EP_NOT_ALLOCATED && !ipa3_ctx->ulso_wa) {
 		ipa_close_coal_frame(&coal_cmd_pyld);
 		if (!coal_cmd_pyld) {
-			IPAERR("failed to construct coal close IC\n");
+			IPAERR_BOOTUP("failed to construct coal close IC\n");
 			ret = -ENOMEM;
 			goto unmap;
 		}
@@ -2033,7 +2035,7 @@ int ipa_init_drop_stats(u32 *pipe_bitmask)
 			IPA_IMM_CMD_REGISTER_WRITE,
 			&drop_mask, false);
 		if (!drop_mask_pyld[0]) {
-			IPAERR("failed to construct register_write imm cmd\n");
+			IPAERR_BOOTUP("failed to construct register_write imm cmd\n");
 			ret = -ENOMEM;
 			goto destroy_coal_cmd;
 		}
@@ -2054,7 +2056,7 @@ int ipa_init_drop_stats(u32 *pipe_bitmask)
 			if (!drop_mask_pyld[i]) {
 				int j;
 
-				IPAERR(
+				IPAERR_BOOTUP(
 					"failed to construct register_write imm cmd\n"
 				);
 				for (j = i - 1; j >= 0; j--)
@@ -2081,7 +2083,7 @@ int ipa_init_drop_stats(u32 *pipe_bitmask)
 	drop_base_pyld = ipahal_construct_imm_cmd(IPA_IMM_CMD_REGISTER_WRITE,
 		&drop_base, false);
 	if (!drop_base_pyld) {
-		IPAERR("failed to construct register_write imm cmd\n");
+		IPAERR_BOOTUP("failed to construct register_write imm cmd\n");
 		ret = -ENOMEM;
 		goto destroy_drop_mask;
 	}
@@ -2101,7 +2103,7 @@ int ipa_init_drop_stats(u32 *pipe_bitmask)
 	cmd_pyld = ipahal_construct_imm_cmd(
 		IPA_IMM_CMD_DMA_SHARED_MEM, &cmd, false);
 	if (!cmd_pyld) {
-		IPAERR("failed to construct dma_shared_mem imm cmd\n");
+		IPAERR_BOOTUP("failed to construct dma_shared_mem imm cmd\n");
 		ret = -ENOMEM;
 		goto destroy_drop_base;
 	}
@@ -2113,7 +2115,7 @@ int ipa_init_drop_stats(u32 *pipe_bitmask)
 
 	ret = ipa3_send_cmd(num_cmd, desc);
 	if (ret) {
-		IPAERR("failed to send immediate command (error %d)\n", ret);
+		IPAERR_BOOTUP("failed to send immediate command (error %d)\n", ret);
 		goto destroy_imm;
 	}
 
@@ -2779,7 +2781,7 @@ static ssize_t ipa_debugfs_enable_disable_drop_stats(struct file *file,
 		goto bail;
 	}
 	dbg_buff[count] = '\0';
-	IPADBG("data is %s", dbg_buff);
+	IPADBG_BOOTUP("data is %s", dbg_buff);
 
 	i = 0;
 	while (dbg_buff[i] != ' ' && i < count)
@@ -2789,7 +2791,7 @@ static ssize_t ipa_debugfs_enable_disable_drop_stats(struct file *file,
 	if (i < count) {
 		if (dbg_buff[i] == '0') {
 			enable_pipe = false;
-			IPADBG("Drop stats will be disabled for pipes:");
+			IPAERR_BOOTUP("Drop stats will be disabled for pipes:");
 		}
 	}
 
@@ -2813,7 +2815,7 @@ static ssize_t ipa_debugfs_enable_disable_drop_stats(struct file *file,
 
 			else if (pipe_num >= 0 && pipe_num < ipa3_ctx->ipa_num_pipes
 				&& pipe_num_temp < IPA_CLIENT_MAX) {
-				IPADBG("pipe number %u\n", pipe_num);
+				IPAERR_BOOTUP("pipe number %u\n", pipe_num);
 				if (enable_pipe)
 					pipe_bitmask[pipe_ep_reg_idx] |=
 						pipe_ep_reg_bit;
@@ -2830,10 +2832,10 @@ static ssize_t ipa_debugfs_enable_disable_drop_stats(struct file *file,
 	if (ipa3_ctx->ipa_hw_type >= IPA_HW_v5_0 &&
 		(pipe_num_temp == IPA_CLIENT_USB_DPL_CONS ||
 		pipe_num_temp == IPA_CLIENT_ODL_DPL_CONS)) {
-		IPAERR("Enable/Disable hw stats on DPL is not supported");
+		IPADBG_BOOTUP("Enable/Disable hw stats on DPL is not supported");
 	} else if (is_pipe && pipe_num >= 0 && pipe_num < ipa3_ctx->ipa_num_pipes &&
 		ipa3_get_client_by_pipe(pipe_num) < IPA_CLIENT_MAX) {
-		IPADBG("pipe number %u\n", pipe_num);
+		IPADBG_BOOTUP("pipe number %u\n", pipe_num);
 		if (enable_pipe)
 			pipe_bitmask[pipe_ep_reg_idx] |= pipe_ep_reg_bit;
 		else
@@ -2883,42 +2885,42 @@ int ipa_debugfs_init_stats(struct dentry *parent)
 
 	dent = debugfs_create_dir("hw_stats", parent);
 	if (IS_ERR_OR_NULL(dent)) {
-		IPAERR("fail to create folder in debug_fs\n");
+		IPAERR_BOOTUP("fail to create folder in debug_fs\n");
 		return -EFAULT;
 	}
 
 	file = debugfs_create_file("quota", read_write_mode, dent, NULL,
 		&ipa3_quota_ops);
 	if (IS_ERR_OR_NULL(file)) {
-		IPAERR("fail to create file %s\n", "quota");
+		IPAERR_BOOTUP("fail to create file %s\n", "quota");
 		goto fail;
 	}
 
 	file = debugfs_create_file("drop", read_write_mode, dent, NULL,
 		&ipa3_drop_ops);
 	if (IS_ERR_OR_NULL(file)) {
-		IPAERR("fail to create file %s\n", "drop");
+		IPAERR_BOOTUP("fail to create file %s\n", "drop");
 		goto fail;
 	}
 
 	file = debugfs_create_file("enable_drop_stats", write_mode, dent, NULL,
 		&ipa3_enable_drop_ops);
 	if (IS_ERR_OR_NULL(file)) {
-		IPAERR("fail to create file %s\n", "enable_drop_stats");
+		IPAERR_BOOTUP("fail to create file %s\n", "enable_drop_stats");
 		goto fail;
 	}
 
 	file = debugfs_create_file("tethering", read_write_mode, dent, NULL,
 		&ipa3_tethering_ops);
 	if (IS_ERR_OR_NULL(file)) {
-		IPAERR("fail to create file %s\n", "tethering");
+		IPAERR_BOOTUP("fail to create file %s\n", "tethering");
 		goto fail;
 	}
 
 	file = debugfs_create_file("flt_rt", read_write_mode, dent, NULL,
 		&ipa3_flt_rt_ops);
 	if (IS_ERR_OR_NULL(file)) {
-		IPAERR("fail to create file flt_rt\n");
+		IPAERR_BOOTUP("fail to create file flt_rt\n");
 		goto fail;
 	}
 

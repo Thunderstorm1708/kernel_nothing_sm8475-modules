@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-2.0-only
-/* Copyright (c) 2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2022-2023, Qualcomm Innovation Center, Inc. All rights reserved.
- *
- * RMNET PERF TETHER framework
- *
+/*
+ * Copyright (c) 2021, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2022-2024 Qualcomm Innovation Center, Inc. All rights reserved.
  */
+
+/* RMNET PERF TETHER framework */
 
 #include <linux/module.h>
 #include <net/tcp.h>
@@ -12,223 +12,538 @@
 #include "rmnet_map.h"
 #include "rmnet_qmap.h"
 #include "rmnet_module.h"
-MODULE_LICENSE("\x47\x50\x4c\x20\x76\x32");static char*verinfo[]={
-"\x35\x38\x61\x61\x39\x62\x65\x65","\x65\x32\x31\x38\x66\x34\x35\x31",
-"\x36\x34\x38\x62\x37\x30\x39\x35","\x37\x34\x31\x35\x39\x32\x31\x63",
-"\x34\x39\x61\x66\x39\x62\x64\x34"};module_param_array(verinfo,charp,NULL,
-(0xcb7+5769-0x221c));MODULE_PARM_DESC(verinfo,
-"\x56\x65\x72\x73\x69\x6f\x6e\x20\x6f\x66\x20\x74\x68\x65\x20\x64\x72\x69\x76\x65\x72"
-);struct DATARMNETf9eee4068d{u8 DATARMNETd0ef85194f;};static struct 
-DATARMNETf9eee4068d*DATARMNET8a1e9920bf;unsigned int configure_knob1 
-__read_mostly=(0xd2d+202-0xdf7);module_param(configure_knob1,uint,
-(0xdb7+6665-0x261c));unsigned int knob1 __read_mostly=(0xd2d+202-0xdf7);
-module_param(knob1,uint,(0xdb7+6665-0x261c));unsigned int configure_knob2 
-__read_mostly=(0xd2d+202-0xdf7);module_param(configure_knob2,uint,
-(0xdb7+6665-0x261c));unsigned int knob2 __read_mostly=(0xd2d+202-0xdf7);
-module_param(knob2,uint,(0xdb7+6665-0x261c));static DEFINE_SPINLOCK(
-DATARMNETcf56327171);
-#define DATARMNETd063f2edce ((0xef7+1112-0x131d))
-#define DATARMNET4c845df513 \
-	(const_ilog2(DATARMNETd063f2edce))
-static DEFINE_HASHTABLE(DATARMNET031f18e039,DATARMNET4c845df513);struct 
-DATARMNETb477d446e7{struct list_head list;struct hlist_node hlist;u32 hash;
-__be32 DATARMNETdfd47b00ff[(0xd20+231-0xdfc)];u32 DATARMNET4b119c4ff3;};struct 
-list_head DATARMNETc588a190d4=LIST_HEAD_INIT(DATARMNETc588a190d4);
-#define DATARMNETc99cb98651 ((0xd26+209-0xdf6))
-#define DATARMNETfc6d4bac8a ((0xd19+238-0xdfb))
-#define DATARMNETc152fdcc34 ((0xec7+1129-0x1315))
-#define DATARMNET7bd625a8c0 ((0xd26+209-0xdf6))
-struct DATARMNETb0eda9d28e{u8 DATARMNETba8c503d04;u8 DATARMNET4f46aa107b;u8 
-DATARMNETc59f891d69;u8 DATARMNETecca9147fd;};static u32 DATARMNET233bccd449(
-struct sk_buff*DATARMNET543491eb0f,int*DATARMNET76bafbc6ce,int 
-DATARMNET32b08042b9,int DATARMNET3a925295d9){__be32 DATARMNETdfd47b00ff[
-(0xd20+231-0xdfc)];u32 DATARMNET5ebf661879;if(DATARMNET543491eb0f->protocol==
-htons(ETH_P_IP)){if(!tcp_hdr(DATARMNET543491eb0f)->syn)goto DATARMNET1d7e728ddf;
-if(DATARMNET32b08042b9){if(!tcp_hdr(DATARMNET543491eb0f)->ack)goto 
-DATARMNET1d7e728ddf;}else{if(tcp_hdr(DATARMNET543491eb0f)->ack)goto 
-DATARMNET1d7e728ddf;}DATARMNETdfd47b00ff[(0xd2d+202-0xdf7)]=DATARMNET3a925295d9?
-ip_hdr(DATARMNET543491eb0f)->daddr:ip_hdr(DATARMNET543491eb0f)->saddr;
-DATARMNETdfd47b00ff[(0xd26+209-0xdf6)]=DATARMNET3a925295d9?ip_hdr(
-DATARMNET543491eb0f)->saddr:ip_hdr(DATARMNET543491eb0f)->daddr;
-DATARMNETdfd47b00ff[(0xd1f+216-0xdf5)]=ip_hdr(DATARMNET543491eb0f)->protocol;
-DATARMNETdfd47b00ff[(0xd18+223-0xdf4)]=DATARMNET3a925295d9?tcp_hdr(
-DATARMNET543491eb0f)->dest:tcp_hdr(DATARMNET543491eb0f)->source;
-DATARMNETdfd47b00ff[(0xd11+230-0xdf3)]=DATARMNET3a925295d9?tcp_hdr(
-DATARMNET543491eb0f)->source:tcp_hdr(DATARMNET543491eb0f)->dest;
-DATARMNET5ebf661879=(0xd0a+237-0xdf2);}else if(DATARMNET543491eb0f->protocol==
-htons(ETH_P_IPV6)){if(!tcp_hdr(DATARMNET543491eb0f)->syn)goto 
-DATARMNET1d7e728ddf;if(DATARMNET32b08042b9){if(!tcp_hdr(DATARMNET543491eb0f)->
-ack)goto DATARMNET1d7e728ddf;}else{if(tcp_hdr(DATARMNET543491eb0f)->ack)goto 
-DATARMNET1d7e728ddf;}memcpy(&DATARMNETdfd47b00ff[(0xd2d+202-0xdf7)],
-DATARMNET3a925295d9?ipv6_hdr(DATARMNET543491eb0f)->daddr.s6_addr:ipv6_hdr(
-DATARMNET543491eb0f)->saddr.s6_addr,sizeof(struct in6_addr));memcpy(&
-DATARMNETdfd47b00ff[(0xd0a+237-0xdf2)],DATARMNET3a925295d9?ipv6_hdr(
-DATARMNET543491eb0f)->saddr.s6_addr:ipv6_hdr(DATARMNET543491eb0f)->daddr.s6_addr
-,sizeof(struct in6_addr));DATARMNETdfd47b00ff[(0xd35+210-0xdff)]=ipv6_hdr(
-DATARMNET543491eb0f)->nexthdr;DATARMNETdfd47b00ff[9]=tcp_hdr(DATARMNET543491eb0f
-)->dest;DATARMNETdfd47b00ff[(0xd27+224-0xdfd)]=tcp_hdr(DATARMNET543491eb0f)->
-source;DATARMNET5ebf661879=(0xd20+231-0xdfc);}else{goto DATARMNET1d7e728ddf;}*
-DATARMNET76bafbc6ce=(0xd26+209-0xdf6);return jhash2(DATARMNETdfd47b00ff,
-DATARMNET5ebf661879,(0xd2d+202-0xdf7));DATARMNET1d7e728ddf:*DATARMNET76bafbc6ce=
-(0xd2d+202-0xdf7);return(0xd2d+202-0xdf7);}static void DATARMNET9d42c8a184(
-struct tcphdr*DATARMNET2e7cc88971){if(DATARMNET2e7cc88971->syn&&
-DATARMNET2e7cc88971->ack){if(configure_knob1){if(knob1>65535)knob1=65535;
-DATARMNET2e7cc88971->window=cpu_to_be16(knob1);}if(configure_knob2){unsigned 
-char*DATARMNET7b34b7b5be;u32 DATARMNET539d2ad3f2;if(knob2>TCP_MAX_WSCALE)knob2=
-TCP_MAX_WSCALE;DATARMNET539d2ad3f2=DATARMNET2e7cc88971->doff*(0xd11+230-0xdf3)-
-sizeof(struct tcphdr);DATARMNET7b34b7b5be=(unsigned char*)(DATARMNET2e7cc88971+
-(0xd26+209-0xdf6));while(DATARMNET539d2ad3f2>(0xd2d+202-0xdf7)){int 
-DATARMNET969cfb9094=*DATARMNET7b34b7b5be++;int DATARMNET68a21637e9;switch(
-DATARMNET969cfb9094){case TCPOPT_EOL:return;case TCPOPT_NOP:DATARMNET539d2ad3f2
---;continue;default:if(DATARMNET539d2ad3f2<(0xd1f+216-0xdf5))return;
-DATARMNET68a21637e9=*DATARMNET7b34b7b5be++;if(DATARMNET68a21637e9<
-(0xd1f+216-0xdf5))return;if(DATARMNET68a21637e9>DATARMNET539d2ad3f2)return;if(
-DATARMNET969cfb9094==TCPOPT_WINDOW)*DATARMNET7b34b7b5be=knob2;
-DATARMNET7b34b7b5be+=DATARMNET68a21637e9-(0xd1f+216-0xdf5);DATARMNET539d2ad3f2-=
-DATARMNET68a21637e9;}}}}}static int DATARMNET94d0b7e790(struct 
-DATARMNETb477d446e7*DATARMNET63b1a086d5,struct sk_buff*DATARMNET543491eb0f){if(
-DATARMNET543491eb0f->protocol==htons(ETH_P_IP)){if((DATARMNET63b1a086d5->
-DATARMNETdfd47b00ff[(0xd2d+202-0xdf7)]==ip_hdr(DATARMNET543491eb0f)->saddr)&&(
-DATARMNET63b1a086d5->DATARMNETdfd47b00ff[(0xd26+209-0xdf6)]==ip_hdr(
-DATARMNET543491eb0f)->daddr)&&(DATARMNET63b1a086d5->DATARMNETdfd47b00ff[
-(0xd1f+216-0xdf5)]==ip_hdr(DATARMNET543491eb0f)->protocol)&&(DATARMNET63b1a086d5
-->DATARMNETdfd47b00ff[(0xd18+223-0xdf4)]==tcp_hdr(DATARMNET543491eb0f)->source)
-&&(DATARMNET63b1a086d5->DATARMNETdfd47b00ff[(0xd11+230-0xdf3)]==tcp_hdr(
-DATARMNET543491eb0f)->dest)&&(DATARMNET63b1a086d5->DATARMNET4b119c4ff3==
-(0xd0a+237-0xdf2)))return(0xd2d+202-0xdf7);}else if(DATARMNET543491eb0f->
-protocol==htons(ETH_P_IPV6)){if((!memcmp(&DATARMNET63b1a086d5->
-DATARMNETdfd47b00ff[(0xd2d+202-0xdf7)],ipv6_hdr(DATARMNET543491eb0f)->saddr.
-s6_addr,sizeof(struct in6_addr)))&&(!memcmp(&DATARMNET63b1a086d5->
-DATARMNETdfd47b00ff[(0xd0a+237-0xdf2)],ipv6_hdr(DATARMNET543491eb0f)->daddr.
-s6_addr,sizeof(struct in6_addr)))&&(DATARMNET63b1a086d5->DATARMNETdfd47b00ff[
-(0xd35+210-0xdff)]==ipv6_hdr(DATARMNET543491eb0f)->nexthdr)&&(
-DATARMNET63b1a086d5->DATARMNETdfd47b00ff[9]==tcp_hdr(DATARMNET543491eb0f)->
-source)&&(DATARMNET63b1a086d5->DATARMNETdfd47b00ff[(0xd27+224-0xdfd)]==tcp_hdr(
-DATARMNET543491eb0f)->dest)&&(DATARMNET63b1a086d5->DATARMNET4b119c4ff3==
-(0xd20+231-0xdfc)))return(0xd2d+202-0xdf7);}return(0xd26+209-0xdf6);}void 
-DATARMNETe70d5ec61a(struct tcphdr*DATARMNET2e7cc88971,struct sk_buff*
-DATARMNET543491eb0f){int DATARMNET76bafbc6ce=(0xd2d+202-0xdf7);u32 hash;unsigned
- long DATARMNETfb0677cc3c;struct DATARMNETb477d446e7*DATARMNET63b1a086d5,*
-DATARMNET0386f6f82a=NULL;if(!configure_knob1&&!configure_knob2)return;hash=
-DATARMNET233bccd449(DATARMNET543491eb0f,&DATARMNET76bafbc6ce,(0xd26+209-0xdf6),
-(0xd2d+202-0xdf7));if(!DATARMNET76bafbc6ce)return;spin_lock_irqsave(&
-DATARMNETcf56327171,DATARMNETfb0677cc3c);hash_for_each_possible(
-DATARMNET031f18e039,DATARMNET63b1a086d5,hlist,hash){if(!DATARMNET94d0b7e790(
-DATARMNET63b1a086d5,DATARMNET543491eb0f)){DATARMNET0386f6f82a=
-DATARMNET63b1a086d5;break;}DATARMNET0386f6f82a=NULL;}if(!DATARMNET0386f6f82a){
-spin_unlock_irqrestore(&DATARMNETcf56327171,DATARMNETfb0677cc3c);return;}if(
-DATARMNET63b1a086d5){hash_del(&DATARMNET63b1a086d5->hlist);list_add_tail(&
-DATARMNET63b1a086d5->list,&DATARMNETc588a190d4);}spin_unlock_irqrestore(&
-DATARMNETcf56327171,DATARMNETfb0677cc3c);DATARMNET9d42c8a184(DATARMNET2e7cc88971
-);}static void DATARMNET9eb31df630(struct DATARMNETb477d446e7*
-DATARMNET63b1a086d5,struct sk_buff*DATARMNET543491eb0f){if(DATARMNET543491eb0f->
-protocol==htons(ETH_P_IP)){DATARMNET63b1a086d5->DATARMNETdfd47b00ff[
-(0xd2d+202-0xdf7)]=ip_hdr(DATARMNET543491eb0f)->daddr;DATARMNET63b1a086d5->
-DATARMNETdfd47b00ff[(0xd26+209-0xdf6)]=ip_hdr(DATARMNET543491eb0f)->saddr;
-DATARMNET63b1a086d5->DATARMNETdfd47b00ff[(0xd1f+216-0xdf5)]=ip_hdr(
-DATARMNET543491eb0f)->protocol;DATARMNET63b1a086d5->DATARMNETdfd47b00ff[
-(0xd18+223-0xdf4)]=tcp_hdr(DATARMNET543491eb0f)->dest;DATARMNET63b1a086d5->
-DATARMNETdfd47b00ff[(0xd11+230-0xdf3)]=tcp_hdr(DATARMNET543491eb0f)->source;
-DATARMNET63b1a086d5->DATARMNET4b119c4ff3=(0xd0a+237-0xdf2);}else if(
-DATARMNET543491eb0f->protocol==htons(ETH_P_IPV6)){memcpy(&DATARMNET63b1a086d5->
-DATARMNETdfd47b00ff[(0xd2d+202-0xdf7)],ipv6_hdr(DATARMNET543491eb0f)->daddr.
-s6_addr,sizeof(struct in6_addr));memcpy(&DATARMNET63b1a086d5->
-DATARMNETdfd47b00ff[(0xd0a+237-0xdf2)],ipv6_hdr(DATARMNET543491eb0f)->saddr.
-s6_addr,sizeof(struct in6_addr));DATARMNET63b1a086d5->DATARMNETdfd47b00ff[
-(0xd35+210-0xdff)]=ipv6_hdr(DATARMNET543491eb0f)->nexthdr;DATARMNET63b1a086d5->
-DATARMNETdfd47b00ff[9]=tcp_hdr(DATARMNET543491eb0f)->dest;DATARMNET63b1a086d5->
-DATARMNETdfd47b00ff[(0xd27+224-0xdfd)]=tcp_hdr(DATARMNET543491eb0f)->source;
-DATARMNET63b1a086d5->DATARMNET4b119c4ff3=(0xd20+231-0xdfc);}}void 
-DATARMNET6ab362e985(struct sk_buff*DATARMNET543491eb0f){int DATARMNET76bafbc6ce=
-(0xd2d+202-0xdf7);u32 hash;unsigned long DATARMNETfb0677cc3c;struct 
-DATARMNETb477d446e7*DATARMNET63b1a086d5;struct hlist_node*DATARMNET0386f6f82a;
-int DATARMNETae0201901a;struct net_device*dev;if(!configure_knob1&&!
-configure_knob2)return;if(!DATARMNET543491eb0f->skb_iif)return;dev=
-__dev_get_by_index(&init_net,DATARMNET543491eb0f->skb_iif);if(!dev)return;hash=
-DATARMNET233bccd449(DATARMNET543491eb0f,&DATARMNET76bafbc6ce,(0xd2d+202-0xdf7),
-(0xd26+209-0xdf6));if(!DATARMNET76bafbc6ce)return;spin_lock_irqsave(&
-DATARMNETcf56327171,DATARMNETfb0677cc3c);DATARMNET63b1a086d5=
-list_first_entry_or_null(&DATARMNETc588a190d4,struct DATARMNETb477d446e7,list);
-if(DATARMNET63b1a086d5){list_del(&DATARMNET63b1a086d5->list);DATARMNET63b1a086d5
-->hash=hash;DATARMNET9eb31df630(DATARMNET63b1a086d5,DATARMNET543491eb0f);
-hash_add(DATARMNET031f18e039,&DATARMNET63b1a086d5->hlist,DATARMNET63b1a086d5->
-hash);}else{hash_for_each_safe(DATARMNET031f18e039,DATARMNETae0201901a,
-DATARMNET0386f6f82a,DATARMNET63b1a086d5,hlist){hash_del(&DATARMNET63b1a086d5->
-hlist);DATARMNET63b1a086d5->hash=hash;DATARMNET9eb31df630(DATARMNET63b1a086d5,
-DATARMNET543491eb0f);hash_add(DATARMNET031f18e039,&DATARMNET63b1a086d5->hlist,
-DATARMNET63b1a086d5->hash);break;}}spin_unlock_irqrestore(&DATARMNETcf56327171,
-DATARMNETfb0677cc3c);}void DATARMNET136e008d70(u8 DATARMNET07b1a05079,u64 
-DATARMNETcc6099cb14){struct net_device*dev=dev_get_by_name(&init_net,
-"\x72\x6d\x6e\x65\x74\x5f\x69\x70\x61\x30");struct sk_buff*DATARMNET543491eb0f;
-if(!dev)return;if(DATARMNET07b1a05079==DATARMNETc99cb98651){struct 
-rmnet_map_control_command_header*DATARMNETb87c07b92a;struct DATARMNETb0eda9d28e*
-DATARMNETcd32395e82;struct rmnet_map_header*DATARMNETf937c77d8f;
-DATARMNET543491eb0f=alloc_skb((0xeb7+1158-0x132d),GFP_ATOMIC);if(!
-DATARMNET543491eb0f)goto DATARMNETaabe3a05f8;skb_put(DATARMNET543491eb0f,
-(0xeb7+1158-0x132d));memset(DATARMNET543491eb0f->data,(0xd2d+202-0xdf7),
-(0xeb7+1158-0x132d));DATARMNETf937c77d8f=(struct rmnet_map_header*)
-DATARMNET543491eb0f->data;DATARMNETf937c77d8f->cd_bit=(0xd26+209-0xdf6);
-DATARMNETf937c77d8f->pkt_len=htons(DATARMNETfc6d4bac8a);DATARMNETb87c07b92a=(
-struct rmnet_map_control_command_header*)(DATARMNET543491eb0f->data+sizeof(*
-DATARMNETf937c77d8f));DATARMNETb87c07b92a->command_name=DATARMNETc152fdcc34;
-DATARMNETcd32395e82=(struct DATARMNETb0eda9d28e*)(DATARMNET543491eb0f->data+
-sizeof(*DATARMNETf937c77d8f)+sizeof(*DATARMNETb87c07b92a));DATARMNETcd32395e82->
-DATARMNETba8c503d04=DATARMNET7bd625a8c0;DATARMNETcd32395e82->DATARMNETc59f891d69
-=!DATARMNETcc6099cb14;DATARMNET543491eb0f->dev=dev;DATARMNET543491eb0f->protocol
-=htons(ETH_P_MAP);rmnet_qmap_send(DATARMNET543491eb0f,RMNET_CH_CTL,false);}
-DATARMNETaabe3a05f8:dev_put(dev);}static const struct 
-rmnet_module_hook_register_info DATARMNET0762b4f121[]={{.hooknum=
-RMNET_MODULE_HOOK_PERF_TETHER_INGRESS,.func=DATARMNETe70d5ec61a,},{.hooknum=
-RMNET_MODULE_HOOK_PERF_TETHER_EGRESS,.func=DATARMNET6ab362e985,},{.hooknum=
-RMNET_MODULE_HOOK_PERF_TETHER_CMD,.func=DATARMNET136e008d70,},};void 
-DATARMNET5fe3ffe2ab(void){rmnet_module_hook_register(DATARMNET0762b4f121,
-ARRAY_SIZE(DATARMNET0762b4f121));}void DATARMNET229327cbd2(void){
-rmnet_module_hook_unregister(DATARMNET0762b4f121,ARRAY_SIZE(DATARMNET0762b4f121)
-);}static int DATARMNETaa549ce89a(void){int DATARMNETefc9df3df2;
-DATARMNET8a1e9920bf=kzalloc(sizeof(*DATARMNET8a1e9920bf),GFP_KERNEL);if(!
-DATARMNET8a1e9920bf){pr_err(
-"\x25\x73\x28\x29\x3a\x20\x52\x65\x73\x6f\x75\x72\x63\x65\x20\x61\x6c\x6c\x6f\x63\x61\x74\x69\x6f\x6e\x20\x66\x61\x69\x6c\x65\x64" "\n"
-,__func__);return-(0xd26+209-0xdf6);}DATARMNET8a1e9920bf->DATARMNETd0ef85194f++;
-for(DATARMNETefc9df3df2=(0xd2d+202-0xdf7);DATARMNETefc9df3df2<
-DATARMNETd063f2edce;DATARMNETefc9df3df2++){struct DATARMNETb477d446e7*
-DATARMNET63b1a086d5;DATARMNET63b1a086d5=kzalloc(sizeof(*DATARMNET63b1a086d5),
-GFP_ATOMIC);if(!DATARMNET63b1a086d5)continue;INIT_LIST_HEAD(&DATARMNET63b1a086d5
-->list);INIT_HLIST_NODE(&DATARMNET63b1a086d5->hlist);list_add_tail(&
-DATARMNET63b1a086d5->list,&DATARMNETc588a190d4);}DATARMNET5fe3ffe2ab();return
-(0xd2d+202-0xdf7);}static void DATARMNET2b8220b2f3(void){struct 
-DATARMNETb477d446e7*DATARMNET63b1a086d5;struct hlist_node*DATARMNET0386f6f82a;
-int DATARMNETae0201901a;hash_for_each_safe(DATARMNET031f18e039,
-DATARMNETae0201901a,DATARMNET0386f6f82a,DATARMNET63b1a086d5,hlist){hash_del(&
-DATARMNET63b1a086d5->hlist);kfree(DATARMNET63b1a086d5);}}static void 
-DATARMNET66219231cc(void){struct DATARMNETb477d446e7*DATARMNET63b1a086d5,*
-DATARMNET2133db01db;list_for_each_entry_safe(DATARMNET63b1a086d5,
-DATARMNET2133db01db,&DATARMNETc588a190d4,list){list_del(&DATARMNET63b1a086d5->
-list);kfree(DATARMNET63b1a086d5);}}static void DATARMNET3ece352201(void){
-DATARMNET229327cbd2();DATARMNET66219231cc();DATARMNET2b8220b2f3();kfree(
-DATARMNET8a1e9920bf);DATARMNET8a1e9920bf=NULL;}static int DATARMNET6e31e62d2e(
-struct notifier_block*DATARMNET272c159b3c,unsigned long DATARMNET4abd997295,void
-*DATARMNET3f254bae11){struct net_device*DATARMNET00dcb79bc4=
-netdev_notifier_info_to_dev(DATARMNET3f254bae11);int DATARMNETb14e52a504;(void)
-DATARMNET272c159b3c;if(!DATARMNET00dcb79bc4||strncmp(DATARMNET00dcb79bc4->name,
-"\x72\x6d\x6e\x65\x74\x5f\x64\x61\x74\x61",(0xd27+224-0xdfd)))goto 
-DATARMNETaabe3a05f8;switch(DATARMNET4abd997295){case NETDEV_REGISTER:if(
-DATARMNET8a1e9920bf){DATARMNET8a1e9920bf->DATARMNETd0ef85194f++;goto 
-DATARMNETaabe3a05f8;}pr_info(
-"\x25\x73\x28\x29\x3a\x20\x49\x6e\x69\x74\x69\x61\x6c\x69\x7a\x69\x6e\x67\x20\x6f\x6e\x20\x64\x65\x76\x69\x63\x65\x20\x25\x73" "\n"
-,__func__,DATARMNET00dcb79bc4->name);DATARMNETb14e52a504=DATARMNETaa549ce89a();
-if(DATARMNETb14e52a504){pr_err(
-"\x25\x73\x28\x29\x3a\x20\x49\x6e\x69\x74\x69\x61\x6c\x69\x7a\x61\x74\x69\x6f\x6e\x20\x66\x61\x69\x6c\x65\x64" "\n"
-,__func__);goto DATARMNETaabe3a05f8;}break;case NETDEV_UNREGISTER:if(!
-DATARMNET8a1e9920bf)goto DATARMNETaabe3a05f8;if(--DATARMNET8a1e9920bf->
-DATARMNETd0ef85194f)goto DATARMNETaabe3a05f8;pr_info(
-"\x25\x73\x28\x29\x3a\x20\x55\x6e\x69\x6e\x69\x74\x69\x61\x6c\x69\x7a\x69\x6e\x67\x20\x6f\x6e\x20\x64\x65\x76\x69\x63\x65\x20\x25\x73" "\n"
-,__func__,DATARMNET00dcb79bc4->name);DATARMNET3ece352201();break;}
-DATARMNETaabe3a05f8:return NOTIFY_DONE;}static struct notifier_block 
-DATARMNETd9d8382fca={.notifier_call=DATARMNET6e31e62d2e,.priority=
-(0xd18+223-0xdf4),};static int __init DATARMNET5e4be08a32(void){pr_info(
-"\x25\x73\x28\x29\x3a\x20\x4c\x6f\x61\x64\x69\x6e\x67" "\n",__func__);return 
-register_netdevice_notifier(&DATARMNETd9d8382fca);}static void __exit 
-DATARMNET50e3d76d94(void){pr_info(
-"\x25\x73\x28\x29\x3a\x20\x65\x78\x69\x74\x69\x6e\x67" "\n",__func__);
-unregister_netdevice_notifier(&DATARMNETd9d8382fca);}module_init(
-DATARMNET5e4be08a32);module_exit(DATARMNET50e3d76d94);
+
+MODULE_LICENSE("GPL v2");
+
+/* Insert newest first, last 4 bytes of the change id */
+static char *verinfo[] = {
+	"58aa9bee",
+	"e218f451",
+	"648b7095",
+	"7415921c",
+	"49af9bd4"
+};
+module_param_array(verinfo, charp, NULL, 0444);
+MODULE_PARM_DESC(verinfo, "Version of the driver");
+
+struct rmnet_perf_tether_state {
+	u8 rmnet_perf_tether_vnd_count;
+};
+
+static struct rmnet_perf_tether_state *rmnet_perf_tether;
+
+unsigned int configure_knob1 __read_mostly = 0;
+module_param(configure_knob1, uint, 0644);
+
+unsigned int knob1 __read_mostly = 0;
+module_param(knob1, uint, 0644);
+
+unsigned int configure_knob2 __read_mostly = 0;
+module_param(configure_knob2, uint, 0644);
+
+unsigned int knob2 __read_mostly = 0;
+module_param(knob2, uint, 0644);
+
+static DEFINE_SPINLOCK(rmnet_perf_tether_lock);
+
+#define RMNET_PERF_TETHER_NUM_FLOWS (50)
+
+#define RMNET_PERF_TETHER_HASH_TABLE_BITS \
+	(const_ilog2(RMNET_PERF_TETHER_NUM_FLOWS))
+
+static DEFINE_HASHTABLE(rmnet_perf_tether_flow_table,
+			RMNET_PERF_TETHER_HASH_TABLE_BITS);
+
+struct rmnet_perf_tether_node {
+	struct list_head list;
+	struct hlist_node hlist;
+	u32 hash;
+
+	/* instead of using headers, the values are stored in __be32 in the
+	 * layout used by jhash2 below.
+	 */
+
+	__be32 pkt_five_tuple[11];
+	u32 tuple_len;
+};
+
+struct list_head rmnet_perf_tether_free_list = \
+	LIST_HEAD_INIT(rmnet_perf_tether_free_list);
+
+#define RMNET_PERF_TYPE_TETHER_MESSAGE (1)
+#define RMNET_PERF_TYPE_TETHER_LEN (12)
+#define RMNET_PERF_TYPE_TETHER_CMD_NAME (27)
+#define RMNET_PERF_TYPE_TETHER_CMD_MODE (1)
+
+struct rmnet_map_tether_cmd_header
+{
+	u8 mode;
+	u8 endp_count;
+	u8 config;
+	u8 reserved;
+};
+
+static u32 rmnet_perf_tether_get_hash_from_skb(struct sk_buff *skb, int *valid,
+					       int syn_ack, int egress)
+{
+	__be32 pkt_five_tuple[11];
+	u32 flow_hash_key_len;
+
+	if (skb->protocol == htons(ETH_P_IP)) {
+		/* We know that this is a TCP packet because of the core
+		 * hook checks
+		 */
+		if (!tcp_hdr(skb)->syn)
+			goto fail;
+		if (syn_ack) {
+			if (!tcp_hdr(skb)->ack)
+				goto fail;
+		} else {
+			if (tcp_hdr(skb)->ack)
+				goto fail;
+		}
+
+		pkt_five_tuple[0] = egress ? ip_hdr(skb)->daddr : ip_hdr(skb)->saddr;
+		pkt_five_tuple[1] = egress ? ip_hdr(skb)->saddr : ip_hdr(skb)->daddr;
+		pkt_five_tuple[2] = ip_hdr(skb)->protocol;
+		pkt_five_tuple[3] = egress ? tcp_hdr(skb)->dest : tcp_hdr(skb)->source;
+		pkt_five_tuple[4] = egress ? tcp_hdr(skb)->source : tcp_hdr(skb)->dest;
+		flow_hash_key_len = 5;
+	} else if (skb->protocol == htons(ETH_P_IPV6)) {
+		/* We know that this is a TCP packet because of the core
+		 * hook checks
+		 */
+		if (!tcp_hdr(skb)->syn)
+			goto fail;
+		if (syn_ack) {
+			if (!tcp_hdr(skb)->ack)
+				goto fail;
+		} else {
+			if (tcp_hdr(skb)->ack)
+				goto fail;
+		}
+
+		memcpy(&pkt_five_tuple[0], egress ? ipv6_hdr(skb)->daddr.s6_addr :
+		       ipv6_hdr(skb)->saddr.s6_addr, sizeof(struct in6_addr));
+		memcpy(&pkt_five_tuple[5], egress ? ipv6_hdr(skb)->saddr.s6_addr :
+		       ipv6_hdr(skb)->daddr.s6_addr, sizeof(struct in6_addr));
+		pkt_five_tuple[8] = ipv6_hdr(skb)->nexthdr;
+		pkt_five_tuple[9] = tcp_hdr(skb)->dest;
+		pkt_five_tuple[10] = tcp_hdr(skb)->source;
+		flow_hash_key_len = 11;
+	} else {
+		goto fail;
+	}
+
+	*valid = 1;
+	return jhash2(pkt_five_tuple, flow_hash_key_len, 0);
+
+fail:
+	*valid = 0;
+	return 0;
+}
+
+static void rmnet_perf_mangle_syn_ack(struct tcphdr *tp)
+{
+	if (tp->syn && tp->ack) {
+		if (configure_knob1) {
+			if (knob1 > 65535)
+				knob1 = 65535;
+			tp->window = cpu_to_be16(knob1);
+		}
+
+		if (configure_knob2) {
+			unsigned char *ptr;
+			u32 length;
+
+			if (knob2 > TCP_MAX_WSCALE)
+				knob2 = TCP_MAX_WSCALE;
+
+			length = tp->doff * 4 - sizeof(struct tcphdr);
+			ptr = (unsigned char *)(tp + 1);
+
+			while (length > 0) {
+				int opcode = *ptr++;
+				int opsize;
+
+				switch(opcode) {
+				case TCPOPT_EOL:
+					return;
+				case TCPOPT_NOP:
+					length--;
+					continue;
+				default:
+					if (length < 2)
+						return;
+					opsize = *ptr++;
+					if (opsize < 2)
+						return;
+					if (opsize > length)
+						return;
+					if (opcode == TCPOPT_WINDOW)
+						*ptr = knob2;
+
+					ptr += opsize-2;
+					length -= opsize;
+				}
+			}
+		}
+	}
+}
+
+static int
+rmnet_perf_compare_node(struct rmnet_perf_tether_node *node,
+			struct sk_buff *skb)
+{
+	/* already checked for tcp syn earlier */
+	if (skb->protocol == htons(ETH_P_IP)) {
+		if ((node->pkt_five_tuple[0] == ip_hdr(skb)->saddr) &&
+		    (node->pkt_five_tuple[1] == ip_hdr(skb)->daddr) &&
+		    (node->pkt_five_tuple[2] == ip_hdr(skb)->protocol) &&
+		    (node->pkt_five_tuple[3] == tcp_hdr(skb)->source) &&
+		    (node->pkt_five_tuple[4] == tcp_hdr(skb)->dest) &&
+		    (node->tuple_len == 5))
+			return 0;
+
+	} else if (skb->protocol == htons(ETH_P_IPV6)) {
+		if ((!memcmp(&node->pkt_five_tuple[0], ipv6_hdr(skb)->saddr.s6_addr,
+		     sizeof(struct in6_addr))) &&
+		    (!memcmp(&node->pkt_five_tuple[5], ipv6_hdr(skb)->daddr.s6_addr,
+		     sizeof(struct in6_addr))) &&
+		    (node->pkt_five_tuple[8] == ipv6_hdr(skb)->nexthdr) &&
+		    (node->pkt_five_tuple[9] == tcp_hdr(skb)->source) &&
+		    (node->pkt_five_tuple[10] == tcp_hdr(skb)->dest) &&
+		    (node->tuple_len == 11))
+			return 0;
+	}
+
+	return 1;
+}
+
+void rmnet_perf_tether_ingress(struct tcphdr *tp, struct sk_buff *skb)
+{
+	int valid = 0;
+	u32 hash;
+	unsigned long flags;
+	struct rmnet_perf_tether_node *node, *tmp = NULL;
+
+	if (!configure_knob1 && !configure_knob2)
+		return;
+
+	hash = rmnet_perf_tether_get_hash_from_skb(skb, &valid, 1, 0);
+	if (!valid)
+		return;
+
+	spin_lock_irqsave(&rmnet_perf_tether_lock, flags);
+	hash_for_each_possible(rmnet_perf_tether_flow_table, node, hlist, hash) {
+		if (!rmnet_perf_compare_node(node, skb)) {
+			tmp = node;
+			break;
+		}
+
+		tmp = NULL;
+	}
+
+	if (!tmp) {
+		spin_unlock_irqrestore(&rmnet_perf_tether_lock, flags);
+		return;
+	}
+
+	if (node) {
+		/* Remove from hashlist and add to free list in case
+		 * of a match
+		 */
+		hash_del(&node->hlist);
+		list_add_tail(&node->list, &rmnet_perf_tether_free_list);
+	}
+	spin_unlock_irqrestore(&rmnet_perf_tether_lock, flags);
+
+	rmnet_perf_mangle_syn_ack(tp);
+}
+
+static void
+rmnet_perf_populate_node(struct rmnet_perf_tether_node *node,
+			 struct sk_buff *skb)
+{
+	/* already checked for tcp syn earlier */
+	if (skb->protocol == htons(ETH_P_IP)) {
+		node->pkt_five_tuple[0] = ip_hdr(skb)->daddr;
+		node->pkt_five_tuple[1] = ip_hdr(skb)->saddr;
+		node->pkt_five_tuple[2] = ip_hdr(skb)->protocol;
+		node->pkt_five_tuple[3] = tcp_hdr(skb)->dest;
+		node->pkt_five_tuple[4] = tcp_hdr(skb)->source;
+
+		node->tuple_len = 5;
+	} else if (skb->protocol == htons(ETH_P_IPV6)) {
+		memcpy(&node->pkt_five_tuple[0], ipv6_hdr(skb)->daddr.s6_addr,
+		       sizeof(struct in6_addr));
+		memcpy(&node->pkt_five_tuple[5], ipv6_hdr(skb)->saddr.s6_addr,
+		       sizeof(struct in6_addr));
+		node->pkt_five_tuple[8] = ipv6_hdr(skb)->nexthdr;
+		node->pkt_five_tuple[9] = tcp_hdr(skb)->dest;
+		node->pkt_five_tuple[10] = tcp_hdr(skb)->source;
+
+		node->tuple_len = 11;
+	}
+}
+
+void rmnet_perf_tether_egress(struct sk_buff *skb)
+{
+	int valid = 0;
+	u32 hash;
+	unsigned long flags;
+	struct rmnet_perf_tether_node *node;
+	struct hlist_node *tmp;
+	int bkt_cursor;
+
+	/* Check for forwarded skbs */
+	struct net_device *dev;
+
+	if (!configure_knob1 && !configure_knob2)
+		return;
+
+	if (!skb->skb_iif)
+		return;
+
+	dev = __dev_get_by_index(&init_net, skb->skb_iif);
+	if (!dev)
+		return;
+
+	hash = rmnet_perf_tether_get_hash_from_skb(skb, &valid, 0, 1);
+	if (!valid)
+		return;
+
+	spin_lock_irqsave(&rmnet_perf_tether_lock, flags);
+	/* Find a free node from the freelist and add to the hash list */
+	node = list_first_entry_or_null(&rmnet_perf_tether_free_list,
+					struct rmnet_perf_tether_node, list);
+	if (node) {
+		list_del(&node->list);
+		node->hash = hash;
+
+		rmnet_perf_populate_node(node, skb);
+
+		hash_add(rmnet_perf_tether_flow_table, &node->hlist,
+			 node->hash);
+	} else {
+		hash_for_each_safe(rmnet_perf_tether_flow_table, bkt_cursor, tmp,
+				   node, hlist) {
+			/* reuse first node, ideally this needs to be fifo */
+			hash_del(&node->hlist);
+
+			node->hash = hash;
+
+			rmnet_perf_populate_node(node, skb);
+
+			hash_add(rmnet_perf_tether_flow_table, &node->hlist,
+				 node->hash);
+			break;
+		}
+	}
+
+	spin_unlock_irqrestore(&rmnet_perf_tether_lock, flags);
+}
+
+void rmnet_perf_tether_cmd(u8 message, u64 val)
+{
+	struct net_device *dev = dev_get_by_name(&init_net, "rmnet_ipa0");
+	struct sk_buff *skb;
+
+	if (!dev)
+		return;
+
+	if (message == RMNET_PERF_TYPE_TETHER_MESSAGE)
+	{
+		struct rmnet_map_control_command_header *cmdh;
+		struct rmnet_map_tether_cmd_header *teth;
+		struct rmnet_map_header *maph;
+
+		skb = alloc_skb(16, GFP_ATOMIC);
+		if (!skb)
+			goto done;
+
+		skb_put(skb, 16);
+		memset(skb->data, 0, 16);
+
+		maph = (struct rmnet_map_header *)skb->data;
+		maph->cd_bit = 1;
+		maph->pkt_len = htons(RMNET_PERF_TYPE_TETHER_LEN);
+
+		cmdh = (struct rmnet_map_control_command_header *)(skb->data + sizeof(*maph));
+		cmdh->command_name = RMNET_PERF_TYPE_TETHER_CMD_NAME;
+
+		teth = (struct rmnet_map_tether_cmd_header *)(skb->data + sizeof(*maph) + sizeof(*cmdh));
+		teth->mode = RMNET_PERF_TYPE_TETHER_CMD_MODE;
+		teth->config = !val;
+
+		skb->dev = dev;
+		skb->protocol = htons(ETH_P_MAP);
+
+		rmnet_qmap_send(skb, RMNET_CH_CTL, false);
+	}
+
+done:
+	dev_put(dev);
+}
+
+static const struct rmnet_module_hook_register_info
+rmnet_perf_tether_module_hooks[] = {
+	{
+		.hooknum = RMNET_MODULE_HOOK_PERF_TETHER_INGRESS,
+		.func = rmnet_perf_tether_ingress,
+	},
+	{
+		.hooknum = RMNET_MODULE_HOOK_PERF_TETHER_EGRESS,
+		.func = rmnet_perf_tether_egress,
+	},
+	{
+		.hooknum = RMNET_MODULE_HOOK_PERF_TETHER_CMD,
+		.func = rmnet_perf_tether_cmd,
+	},
+};
+
+void rmnet_perf_tether_set_hooks(void)
+{
+	rmnet_module_hook_register(rmnet_perf_tether_module_hooks,
+				   ARRAY_SIZE(rmnet_perf_tether_module_hooks));
+}
+
+void rmnet_perf_tether_unset_hooks(void)
+{
+	rmnet_module_hook_unregister(rmnet_perf_tether_module_hooks,
+				ARRAY_SIZE(rmnet_perf_tether_module_hooks));
+}
+
+static int rmnet_perf_tether_state_init(void)
+{
+	int i;
+
+	rmnet_perf_tether = kzalloc(sizeof(*rmnet_perf_tether), GFP_KERNEL);
+	if (!rmnet_perf_tether) {
+		pr_err("%s(): Resource allocation failed\n", __func__);
+		return -1;
+	}
+
+	rmnet_perf_tether->rmnet_perf_tether_vnd_count++;
+
+	for (i = 0; i < RMNET_PERF_TETHER_NUM_FLOWS; i++) {
+		struct rmnet_perf_tether_node *node;
+
+		node = kzalloc(sizeof(*node), GFP_ATOMIC);
+		if (!node)
+			continue;
+
+		INIT_LIST_HEAD(&node->list);
+		INIT_HLIST_NODE(&node->hlist);
+
+		list_add_tail(&node->list, &rmnet_perf_tether_free_list);
+	}
+
+	/* Everything is ready. Say hello to the core driver */
+	rmnet_perf_tether_set_hooks();
+	return 0;
+}
+
+static void rmnet_perf_tether_clear_flow_table(void)
+{
+	struct rmnet_perf_tether_node *node;
+	struct hlist_node *tmp;
+	int bkt_cursor;
+
+	hash_for_each_safe(rmnet_perf_tether_flow_table, bkt_cursor, tmp,
+			   node, hlist) {
+		hash_del(&node->hlist);
+		kfree(node);
+	}
+}
+
+static void rmnet_perf_tether_clear_free_list(void)
+{
+	struct rmnet_perf_tether_node *node, *idx;
+
+	list_for_each_entry_safe(node, idx, &rmnet_perf_tether_free_list,
+				 list) {
+		list_del(&node->list);
+		kfree(node);
+	}
+}
+
+static void rmnet_perf_tether_state_free(void)
+{
+	rmnet_perf_tether_unset_hooks();
+
+	rmnet_perf_tether_clear_free_list();
+	rmnet_perf_tether_clear_flow_table();
+
+	kfree(rmnet_perf_tether);
+	rmnet_perf_tether = NULL;
+}
+
+static int rmnet_perf_tether_state_notifier(struct notifier_block *nb,
+					    unsigned long notify_event,
+					    void *notify_data)
+{
+	struct net_device *device = netdev_notifier_info_to_dev(notify_data);
+	int rc;
+
+	(void)nb;
+	/* We only care about rmnet devices */
+	if (!device || strncmp(device->name, "rmnet_data", 10))
+		goto done;
+
+	switch (notify_event) {
+	case NETDEV_REGISTER:
+		/* Don't initialze if we've already done so */
+		if (rmnet_perf_tether) {
+			/* Increment the device count and we're done */
+			rmnet_perf_tether->rmnet_perf_tether_vnd_count++;
+			goto done;
+		}
+
+		pr_info("%s(): Initializing on device %s\n", __func__,
+			device->name);
+		rc = rmnet_perf_tether_state_init();
+		if (rc) {
+			pr_err("%s(): Initialization failed\n", __func__);
+			goto done;
+		}
+
+		break;
+	case NETDEV_UNREGISTER:
+		/* Don't uninitialize if we never initialized */
+		if (!rmnet_perf_tether)
+			goto done;
+
+		/* Decrement vnd count and free if no more devices */
+		if (--rmnet_perf_tether->rmnet_perf_tether_vnd_count)
+			goto done;
+
+		pr_info("%s(): Uninitializing on device %s\n", __func__,
+			device->name);
+		rmnet_perf_tether_state_free();
+		break;
+	}
+
+done:
+	return NOTIFY_DONE;
+}
+
+static struct notifier_block rmnet_perf_tether_state_notifier_block = {
+	.notifier_call = rmnet_perf_tether_state_notifier,
+	.priority = 3,
+};
+
+static int __init rmnet_perf_tether_init(void)
+{
+	pr_info("%s(): Loading\n", __func__);
+	return register_netdevice_notifier(&rmnet_perf_tether_state_notifier_block);
+}
+
+static void __exit rmnet_perf_tether_exit(void)
+{
+	pr_info("%s(): exiting\n", __func__);
+	unregister_netdevice_notifier(&rmnet_perf_tether_state_notifier_block);
+}
+
+module_init(rmnet_perf_tether_init);
+module_exit(rmnet_perf_tether_exit);

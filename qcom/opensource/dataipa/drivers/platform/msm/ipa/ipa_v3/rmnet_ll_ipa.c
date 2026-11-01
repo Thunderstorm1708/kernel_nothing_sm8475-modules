@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2024 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
  */
 
 #include <linux/debugfs.h>
@@ -237,14 +237,14 @@ int ipa3_rmnet_ll_init(void)
 	char buff[IPA_RESOURCE_NAME_MAX];
 
 	if (!ipa3_ctx) {
-		IPAERR("ipa3_ctx was not initialized\n");
+		IPAERR_BOOTUP("ipa3_ctx was not initialized\n");
 		return -EINVAL;
 	}
 
 	if (ipa_get_ep_mapping(IPA_CLIENT_APPS_WAN_LOW_LAT_DATA_PROD) == -1 ||
 		ipa_get_ep_mapping(IPA_CLIENT_APPS_WAN_LOW_LAT_DATA_CONS) == -1)
 	{
-		IPAERR("invalid low lat data endpoints\n");
+		IPAERR_BOOTUP("invalid low lat data endpoints\n");
 		return -EINVAL;
 	}
 

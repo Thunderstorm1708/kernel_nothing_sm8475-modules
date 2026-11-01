@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2018-2021, The Linux Foundation. All rights reserved.
  * Copyright (c) 2023 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -27,6 +28,7 @@ struct qmi_rmnet_ps_ind {
 	struct list_head list;
 };
 
+void qmi_reset_pm_notifier_state(u8 register_for_pm);
 
 #ifdef CONFIG_QTI_QMI_RMNET
 void qmi_rmnet_qmi_exit(void *qmi_pt, void *port);
@@ -78,6 +80,7 @@ bool qmi_rmnet_get_flow_state(struct net_device *dev, struct sk_buff *skb,
 void qmi_rmnet_burst_fc_check(struct net_device *dev,
 			      int ip_type, u32 mark, unsigned int len);
 int qmi_rmnet_get_queue(struct net_device *dev, struct sk_buff *skb);
+int qmi_rmnet_get_queue_legacy(struct net_device *dev, struct sk_buff *skb);
 #else
 static inline void *
 qmi_rmnet_qos_init(struct net_device *real_dev,

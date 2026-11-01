@@ -1,8 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
 /*
  * Copyright (c) 2015-2021, The Linux Foundation. All rights reserved.
- *
- * Copyright (c) 2022, 2024 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
  */
 
 #ifndef GSI_H
@@ -18,7 +17,6 @@
 #include <linux/ipc_logging.h>
 #include <linux/iommu.h>
 #include <linux/msi.h>
-#include <linux/ipa_usb.h>
 
 /*
  * The following for adding code (ie. for EMULATION) not found on x86.
@@ -542,7 +540,7 @@ enum gsi_chan_use_db_eng {
  */
 struct gsi_chan_props {
 	enum gsi_chan_prot prot;
-	enum ipa_usb_gsi_chan_dir dir;
+	enum gsi_chan_dir dir;
 	uint8_t ch_id;
 	unsigned long evt_ring_hdl;
 	enum gsi_chan_ring_elem_size re_size;
@@ -2516,6 +2514,15 @@ void gsi_update_almst_empty_thrshold(unsigned long chan_hdl, unsigned short thre
 * @Return void
 */
 void gsi_dump_ch_info(unsigned long chan_hdl);
+
+/**
+* gsi_dump_ch_scratch - channel scratch information.
+*
+* @chan_id: channel id
+*
+* @Return void
+*/
+void gsi_dump_ch_scratch(u32 chan_hdl);
 
 /**
  * gsi_get_hw_profiling_stats() - Query GSI HW profiling stats

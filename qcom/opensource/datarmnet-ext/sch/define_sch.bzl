@@ -5,15 +5,25 @@ def define_sch(target, variant):
     kernel_build_variant = "{}_{}".format(target, variant)
     include_base = "../../../{}".format(native.package_name())
 
+    deps_sch = select({
+	"//build/qcom_build_extensions:qtisocrepo_true": ["//soc-repo:all_headers"],
+	"//build/qcom_build_extensions:qtisocrepo_false": ["//msm-kernel:all_headers"],
+    })
+
+    kernel_build = select({
+	"//build/qcom_build_extensions:qtisocrepo_true": "//soc-repo:{}_base_kernel".format(kernel_build_variant),
+	"//build/qcom_build_extensions:qtisocrepo_false": "//msm-kernel:{}".format(kernel_build_variant),
+    })
+
     ddk_module(
         name = "{}_sch".format(kernel_build_variant),
         out = "rmnet_sch.ko",
         srcs = [
             "rmnet_sch_main.c",
         ],
-        deps = ["//vendor/nothing/pong-kernel:all_headers"],
+        deps = deps_sch,
         copts = ["-Wno-misleading-indentation"],
-        kernel_build = "//vendor/nothing/pong-kernel:{}".format(kernel_build_variant),
+        kernel_build = kernel_build,
     )
 
     copy_to_dist_dir(

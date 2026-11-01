@@ -1,15 +1,10 @@
-/* Copyright (c) 2018-2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2022, 2024 Qualcomm Innovation Center, Inc. All rights reserved.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 and
- * only version 2 as published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+// SPDX-License-Identifier: GPL-2.0-only
+/*
+ * Copyright (c) 2018-2021, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2022, 2024-2025 Qualcomm Innovation Center, Inc. All rights reserved.
  */
+
+/* rmnet_offload configuration handlers */
 
 #include <linux/module.h>
 #include <linux/netdevice.h>
@@ -19,81 +14,209 @@
 #include "qmi_rmnet.h"
 #include "rmnet_offload_state.h"
 #include "rmnet_offload_engine.h"
-MODULE_LICENSE("\x47\x50\x4c\x20\x76\x32");
-#define DATARMNET1f03ff7987 (0xd2d+202-0xdf7)
-static struct DATARMNET70f3b87b5d*DATARMNETe05748b000;static void 
-DATARMNETac9c8c14b1(void){struct rmnet_port*DATARMNETf0d9de7e2f=
-DATARMNETe05748b000->DATARMNET403589239f;struct DATARMNET74bb35b8f2*
-DATARMNET87b015f76f;qmi_rmnet_ps_ind_deregister(DATARMNETf0d9de7e2f,&
-DATARMNETe05748b000->DATARMNET341393eda2);DATARMNET87b015f76f=&
-DATARMNETe05748b000->DATARMNETa9f2b2f677;if(DATARMNET87b015f76f->
-DATARMNETc2832b8f85)rmnet_map_dl_ind_deregister(DATARMNETf0d9de7e2f,&
-DATARMNET87b015f76f->DATARMNET8633ae8f1e);}static void DATARMNET345f805b34(void)
-{LIST_HEAD(DATARMNET6f9bfa17e6);if(!DATARMNETe05748b000)return;
-DATARMNETac9c8c14b1();DATARMNETba38823a2f();DATARMNET560e127137();
-synchronize_rcu();DATARMNETae70636c90(&DATARMNET6f9bfa17e6);DATARMNETb98b78b8e3(
-);kfree(DATARMNETe05748b000);DATARMNETe05748b000=NULL;}static int 
-DATARMNETd68e3594a7(void){struct rmnet_port*DATARMNETf0d9de7e2f=
-DATARMNETe05748b000->DATARMNET403589239f;struct qmi_rmnet_ps_ind*
-DATARMNETbc78d7fd3c;struct DATARMNET74bb35b8f2*DATARMNET87b015f76f;struct 
-rmnet_map_dl_ind*DATARMNET8633ae8f1e;int DATARMNETb14e52a504=DATARMNET0529bb9c4e
-;DATARMNETbc78d7fd3c=&DATARMNETe05748b000->DATARMNET341393eda2;
-DATARMNETbc78d7fd3c->ps_on_handler=DATARMNET9292bebdd3;DATARMNETbc78d7fd3c->
-ps_off_handler=DATARMNETb7e47d7254;if(qmi_rmnet_ps_ind_register(
-DATARMNETf0d9de7e2f,DATARMNETbc78d7fd3c)){DATARMNETb14e52a504=
-DATARMNET8e1c5c09f8;pr_warn(
-"\x25\x73\x28\x29\x3a\x20\x50\x53\x20\x43\x42\x20\x72\x65\x67\x69\x73\x74\x72\x61\x74\x69\x6f\x6e\x20\x66\x61\x69\x6c\x65\x64" "\n"
-,__func__);}DATARMNET87b015f76f=&DATARMNETe05748b000->DATARMNETa9f2b2f677;
-DATARMNET8633ae8f1e=&DATARMNET87b015f76f->DATARMNET8633ae8f1e;
-DATARMNET8633ae8f1e->priority=DATARMNET1f03ff7987;DATARMNET8633ae8f1e->
-dl_hdr_handler_v2=DATARMNET95e1703026;DATARMNET8633ae8f1e->dl_trl_handler_v2=
-DATARMNETc9dd320f49;if(rmnet_map_dl_ind_register(DATARMNETf0d9de7e2f,
-DATARMNET8633ae8f1e)){DATARMNETb14e52a504=DATARMNET8e1c5c09f8;pr_warn(
-"\x25\x73\x28\x29\x3a\x20\x44\x4c\x20\x43\x42\x20\x72\x65\x67\x69\x73\x74\x72\x61\x74\x61\x74\x69\x6f\x6e\x20\x66\x61\x69\x6c\x65\x64" "\n"
-,__func__);}else{DATARMNET87b015f76f->DATARMNETc2832b8f85=true;}
-DATARMNETd4230b6bfe();return DATARMNETb14e52a504;}static int DATARMNET9f53d54812
-(struct rmnet_port*DATARMNETf0d9de7e2f){int DATARMNETb14e52a504;
-DATARMNETe05748b000=kzalloc(sizeof(*DATARMNETe05748b000),GFP_KERNEL);if(!
-DATARMNETe05748b000){pr_err(
-"\x25\x73\x28\x29\x3a\x20\x52\x65\x73\x6f\x75\x72\x63\x65\x20\x61\x6c\x6c\x6f\x63\x61\x74\x69\x6f\x6e\x20\x66\x61\x69\x6c\x65\x64" "\n"
-,__func__);return DATARMNETb881657565;}DATARMNETe05748b000->DATARMNET403589239f=
-DATARMNETf0d9de7e2f;DATARMNETb14e52a504=DATARMNETdbcaf01255();if(
-DATARMNETb14e52a504<(0xd2d+202-0xdf7))goto DATARMNET1d7e728ddf;
-DATARMNETb14e52a504=DATARMNETd68e3594a7();if(DATARMNETb14e52a504!=
-DATARMNET0529bb9c4e){pr_warn(
-"\x25\x73\x28\x29\x3a\x20\x43\x61\x6c\x6c\x62\x61\x63\x6b\x20\x72\x65\x67\x69\x73\x74\x72\x61\x74\x69\x6f\x6e\x20\x66\x61\x69\x6c\x65\x64" "\n"
-,__func__);}DATARMNETe05748b000->DATARMNETcb2b3ae8e4=(0xd26+209-0xdf6);
-DATARMNET818b960147();return DATARMNETb14e52a504;DATARMNET1d7e728ddf:kfree(
-DATARMNETe05748b000);DATARMNETe05748b000=NULL;return DATARMNETb14e52a504;}static
- int DATARMNET7dec24813e(struct notifier_block*DATARMNET272c159b3c,unsigned long
- DATARMNET4abd997295,void*DATARMNET3f254bae11){struct net_device*
-DATARMNET00dcb79bc4=netdev_notifier_info_to_dev(DATARMNET3f254bae11);struct 
-rmnet_port*DATARMNETf0d9de7e2f;struct rmnet_priv*DATARMNETe823dcf978;int 
-DATARMNETb14e52a504;(void)DATARMNET272c159b3c;if(!DATARMNET00dcb79bc4||strncmp(
-DATARMNET00dcb79bc4->name,"\x72\x6d\x6e\x65\x74\x5f\x64\x61\x74\x61",
-(0xd27+224-0xdfd)))goto DATARMNETaabe3a05f8;switch(DATARMNET4abd997295){case 
-NETDEV_REGISTER:if(DATARMNETe05748b000){DATARMNETe05748b000->DATARMNETcb2b3ae8e4
-++;goto DATARMNETaabe3a05f8;}DATARMNETe823dcf978=netdev_priv(DATARMNET00dcb79bc4
-);DATARMNETf0d9de7e2f=rmnet_get_port(DATARMNETe823dcf978->real_dev);if(!
-DATARMNETf0d9de7e2f){pr_err(
-"\x25\x73\x28\x29\x3a\x20\x49\x6e\x76\x61\x6c\x69\x64\x20\x72\x6d\x6e\x65\x74\x20\x63\x6f\x6e\x66\x69\x67\x75\x72\x61\x74\x69\x6f\x6e\x20\x6f\x6e\x20\x25\x73" "\n"
-,__func__,DATARMNET00dcb79bc4->name);goto DATARMNETaabe3a05f8;}pr_info(
-"\x25\x73\x28\x29\x3a\x20\x49\x6e\x69\x74\x69\x61\x6c\x69\x7a\x69\x6e\x67\x20\x6f\x6e\x20\x64\x65\x76\x69\x63\x65\x20\x25\x73" "\n"
-,__func__,DATARMNET00dcb79bc4->name);DATARMNETb14e52a504=DATARMNET9f53d54812(
-DATARMNETf0d9de7e2f);if(DATARMNETb14e52a504==DATARMNETb881657565){pr_err(
-"\x25\x73\x28\x29\x3a\x20\x49\x6e\x69\x74\x69\x61\x6c\x69\x7a\x61\x74\x69\x6f\x6e\x20\x66\x61\x69\x6c\x65\x64" "\n"
-,__func__);goto DATARMNETaabe3a05f8;}break;case NETDEV_UNREGISTER:if(!
-DATARMNETe05748b000)goto DATARMNETaabe3a05f8;if(--DATARMNETe05748b000->
-DATARMNETcb2b3ae8e4)goto DATARMNETaabe3a05f8;pr_info(
-"\x25\x73\x28\x29\x3a\x20\x55\x6e\x69\x6e\x69\x74\x69\x61\x6c\x69\x7a\x69\x6e\x67\x20\x6f\x6e\x20\x64\x65\x76\x69\x63\x65\x20\x25\x73" "\n"
-,__func__,DATARMNET00dcb79bc4->name);DATARMNET345f805b34();break;}
-DATARMNETaabe3a05f8:return NOTIFY_DONE;}static struct notifier_block 
-DATARMNETcae9c64c41={.notifier_call=DATARMNET7dec24813e,.priority=
-(0xd26+209-0xdf6),};static int __init DATARMNETb1c42acd9c(void){pr_info(
-"\x25\x73\x28\x29\x3a\x20\x72\x6d\x6e\x65\x74\x5f\x6f\x66\x66\x6c\x6f\x61\x64\x20\x69\x6e\x69\x74\x69\x61\x6c\x69\x7a\x69\x6e\x67" "\n"
-,__func__);return register_netdevice_notifier(&DATARMNETcae9c64c41);}static void
- __exit DATARMNET0f6d85e415(void){pr_info(
-"\x25\x73\x28\x29\x3a\x20\x72\x6d\x6e\x65\x74\x5f\x6f\x66\x66\x6c\x6f\x61\x64\x20\x65\x78\x69\x74\x69\x6e\x67" "\n"
-,__func__);unregister_netdevice_notifier(&DATARMNETcae9c64c41);}struct 
-DATARMNET70f3b87b5d*DATARMNETc2a630b113(void){return DATARMNETe05748b000;}
-module_init(DATARMNETb1c42acd9c);module_exit(DATARMNET0f6d85e415);
+
+MODULE_LICENSE("GPL v2");
+
+#define DL_PRIO_RMNET_OFFLOAD 0
+
+/* Our internal state */
+static struct rmnet_offload_state *rmnet_offload;
+
+static void rmnet_offload_state_deregister_cb(void)
+{
+	struct rmnet_port *port = rmnet_offload->core_port;
+	struct rmnet_offload_dl_marker_state *dl_state;
+
+	qmi_rmnet_ps_ind_deregister(port, &rmnet_offload->powersave_ind);
+	dl_state = &rmnet_offload->dl_marker_state;
+	if (dl_state->dl_marker_cb_registered)
+		rmnet_map_dl_ind_deregister(port, &dl_state->dl_ind);
+}
+
+static void rmnet_offload_state_free(void)
+{
+	LIST_HEAD(flush_list);
+	/* Nothing to free if it was never allocated */
+	if (!rmnet_offload)
+		return;
+
+	/* Unhook ourselves from the other drivers */
+	rmnet_offload_state_deregister_cb();
+	rmnet_offload_unset_hooks();
+	rmnet_offload_engine_disable_chain_flush();
+	synchronize_rcu();
+
+	/* Flush out before we destroy everything */
+	rmnet_offload_engine_flush_all_flows(&flush_list);
+	rmnet_offload_engine_exit();
+	kfree(rmnet_offload);
+	rmnet_offload = NULL;
+}
+
+/* Conditionally register for DL marker callbacks and powersave notifications
+ * from the core and DFC drivers.
+ */
+static int rmnet_offload_state_register_cb(void)
+{
+	struct rmnet_port *port = rmnet_offload->core_port;
+	struct qmi_rmnet_ps_ind *ps_ind;
+	struct rmnet_offload_dl_marker_state *dl_state;
+	struct rmnet_map_dl_ind *dl_ind;
+	int rc = RMNET_OFFLOAD_MGMT_SUCCESS;
+
+	/* Register for powersave indications */
+	ps_ind = &rmnet_offload->powersave_ind;
+	ps_ind->ps_on_handler = rmnet_offload_handle_powersave_on;
+	ps_ind->ps_off_handler = rmnet_offload_handle_powersave_off;
+	if (qmi_rmnet_ps_ind_register(port, ps_ind)) {
+		/* These callbacks are a no-op currently, but we might as well
+		 * warn about the failure, since that points to a problem in
+		 * rmnet_core.ko.
+		 */
+		rc = RMNET_OFFLOAD_MGMT_PARTIAL;
+		pr_warn("%s(): PS CB registration failed\n", __func__);
+	}
+
+	dl_state = &rmnet_offload->dl_marker_state;
+	dl_ind = &dl_state->dl_ind;
+	dl_ind->priority = DL_PRIO_RMNET_OFFLOAD;
+	dl_ind->dl_hdr_handler_v2 =
+		rmnet_offload_handle_dl_header;
+	dl_ind->dl_trl_handler_v2 =
+		rmnet_offload_handle_dl_trailer;
+	if (rmnet_map_dl_ind_register(port, dl_ind)) {
+		rc = RMNET_OFFLOAD_MGMT_PARTIAL;
+		pr_warn("%s(): DL CB registratation failed\n",
+			__func__);
+	} else {
+		dl_state->dl_marker_cb_registered = true;
+	}
+
+	/* Flush on the end of SKB chains as a backup for DL markers */
+	rmnet_offload_engine_enable_chain_flush();
+	return rc;
+}
+
+static int rmnet_offload_state_init(struct rmnet_port *port)
+{
+	int rc;
+
+	rmnet_offload = kzalloc(sizeof(*rmnet_offload), GFP_KERNEL);
+	if (!rmnet_offload) {
+		pr_err("%s(): Resource allocation failed\n", __func__);
+		return RMNET_OFFLOAD_MGMT_FAILURE;
+	}
+
+	/* Store the port struct for processing */
+	rmnet_offload->core_port = port;
+
+	/* Let the engine core initialize itself */
+	rc = rmnet_offload_engine_init();
+	if (rc < 0)
+		goto fail;
+
+	/* Register for callbacks */
+	rc = rmnet_offload_state_register_cb();
+	if (rc != RMNET_OFFLOAD_MGMT_SUCCESS) {
+		/* Traditionally this has not been an error. We just
+		 * warned about it.
+		 */
+		pr_warn("%s(): Callback registration failed\n", __func__);
+	}
+
+	rmnet_offload->rmnet_offload_vnd_count = 1;
+
+	/* Everything is ready. Say hello to the core driver */
+	rmnet_offload_set_hooks();
+	return rc;
+
+fail:
+	kfree(rmnet_offload);
+	rmnet_offload = NULL;
+	return rc;
+}
+
+static int rmnet_offload_state_notifier(struct notifier_block *nb,
+					unsigned long notify_event,
+					void *notify_data)
+{
+	struct net_device *device = netdev_notifier_info_to_dev(notify_data);
+	struct rmnet_port *port;
+	struct rmnet_priv *priv;
+	int rc;
+
+	(void)nb;
+	/* We only care about rmnet devices */
+	if (!device || strncmp(device->name, "rmnet_data", 10))
+		goto done;
+
+	switch (notify_event) {
+	case NETDEV_REGISTER:
+		/* Don't initialze if we've already done so */
+		if (rmnet_offload) {
+			/* Increment the device count and we're done */
+			rmnet_offload->rmnet_offload_vnd_count++;
+			goto done;
+		}
+
+		priv = netdev_priv(device);
+		port = rmnet_get_port(priv->real_dev);
+		if (!port) {
+			pr_err("%s(): Invalid rmnet configuration on %s\n",
+			       __func__, device->name);
+			goto done;
+		}
+
+		pr_info("%s(): Initializing on device %s\n", __func__,
+			device->name);
+		rc = rmnet_offload_state_init(port);
+		if (rc == RMNET_OFFLOAD_MGMT_FAILURE) {
+			pr_err("%s(): Initialization failed\n", __func__);
+			goto done;
+		}
+
+		break;
+	case NETDEV_UNREGISTER:
+		/* Don't uninitialize if we never initialized */
+		if (!rmnet_offload)
+			goto done;
+
+		/* Decrement vnd count and free if no more devices */
+		if (--rmnet_offload->rmnet_offload_vnd_count)
+			goto done;
+
+		pr_info("%s(): Uninitializing on device %s\n", __func__,
+			device->name);
+		rmnet_offload_state_free();
+		break;
+	}
+
+done:
+	return NOTIFY_DONE;
+}
+
+static struct notifier_block rmnet_offload_state_notifier_block = {
+	.notifier_call = rmnet_offload_state_notifier,
+	.priority = 1,
+};
+
+static int __init rmnet_offload_init(void)
+{
+	pr_info("%s(): rmnet_offload initializing\n", __func__);
+	return register_netdevice_notifier(&rmnet_offload_state_notifier_block);
+}
+
+static void __exit rmnet_offload_exit(void)
+{
+	pr_info("%s(): rmnet_offload exiting\n", __func__);
+	unregister_netdevice_notifier(&rmnet_offload_state_notifier_block);
+}
+
+/* Internal state accessor */
+struct rmnet_offload_state *rmnet_offload_state_get(void)
+{
+	return rmnet_offload;
+}
+
+module_init(rmnet_offload_init);
+module_exit(rmnet_offload_exit);

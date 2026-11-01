@@ -1,12 +1,24 @@
-load("//build/bazel_common_rules/dist:dist.bzl", "copy_to_dist_dir")
+load("@rules_pkg//pkg:install.bzl", "pkg_install")
+load("@rules_pkg//pkg:mappings.bzl", "pkg_files", "strip_prefix")
 load("//build/kernel/kleaf:kernel.bzl", "ddk_module")
 
-def define_modules(target, variant):
+def define_rmnet_ctl_module(target, variant):
     kernel_build_variant = "{}_{}".format(target, variant)
-    include_base = "../../../../../{}".format(native.package_name())
+    deps_ctl = select({
+        "//build/qcom_build_extensions:qtisocrepo_true": [
+            "//soc-repo:all_headers",
+            "//soc-repo:{}/drivers/soc/qcom/qmi_helpers".format(kernel_build_variant),
+            "//soc-repo:{}/kernel/trace/qcom_ipc_logging".format(kernel_build_variant),
+        ],
+        "//build/qcom_build_extensions:qtisocrepo_false": [
+            "//msm-kernel:all_headers",
+        ],
+    })
 
-    #The below will take care of the defconfig
-    #include_defconfig = ":{}_defconfig".format(variant)
+    kernel_build = select({
+        "//build/qcom_build_extensions:qtisocrepo_true": "//soc-repo:{}_base_kernel".format(kernel_build_variant),
+        "//build/qcom_build_extensions:qtisocrepo_false": "//msm-kernel:{}".format(kernel_build_variant),
+    })
 
     ddk_module(
         name = "{}_rmnet_ctl".format(kernel_build_variant),
@@ -18,91 +30,143 @@ def define_modules(target, variant):
         ],
         kconfig = "core/Kconfig",
         conditional_srcs = {
-            "CONFIG_ARCH_PINEAPPLE": {
-                True: [
-                    "core/rmnet_ctl_client.c",
-                ],
-            },
             "CONFIG_ARCH_SUN": {
                 True: [
                     "core/rmnet_ctl_client.c",
                 ],
-	    },
-            "CONFIG_ARCH_PARROT": {
+            },
+            "CONFIG_ARCH_CANOE": {
                 True: [
                     "core/rmnet_ctl_client.c",
                 ],
-	    },
+            },
+            "CONFIG_ARCH_VIENNA": {
+                True: [
+                    "core/rmnet_ctl_client.c",
+                ],
+            },
             "CONFIG_ARCH_MONACO": {
                 True: [
                     "core/rmnet_ctl_client.c",
                 ],
             },
-            "CONFIG_ARCH_TUNA": {
+            "CONFIG_ARCH_YUPIK": {
                 True: [
                     "core/rmnet_ctl_client.c",
                 ],
+            },
+            "CONFIG_ARCH_BENGAL": {
+                 True: [
+                     "core/rmnet_ctl_client.c",
+                 ],
+            },
+            "CONFIG_ARCH_CHORA": {
+                 True: [
+                     "core/rmnet_ctl_client.c",
+                 ],
+            },
+            "CONFIG_ARCH_MALABAR": {
+                 True: [
+                     "core/rmnet_ctl_client.c",
+                 ],
             },
             "CONFIG_ARCH_WAIPIO": {
-                True: [
-                    "core/rmnet_ctl_client.c",
-                ],
-            },
+                 True: [
+		    "core/rmnet_ctl_client.c",
+		 ],
+             },
         },
-        kernel_build = "//vendor/nothing/pong-kernel:{}".format(kernel_build_variant),
-        deps = [
-            "//vendor/nothing/pong-modules/qcom/opensource/dataipa:{}_ipam".format(kernel_build_variant),
-            "//vendor/nothing/pong-kernel:all_headers",
-            "//vendor/nothing/pong-modules/qcom/opensource/dataipa:include_headers",
+        kernel_build = kernel_build,
+        deps = deps_ctl + [
+            "//vendor/qcom/opensource/dataipa:{}_ipam".format(kernel_build_variant),
+            "//vendor/qcom/opensource/dataipa:include_headers",
         ],
     )
+
+def define_rmnet_core_module(target, variant):
+    kernel_build_variant = "{}_{}".format(target, variant)
+    include_base = "../../../{}".format(native.package_name())
+
+    #The below will take care of the defconfig
+    #include_defconfig = ":{}_defconfig".format(variant)
+    deps_core = select({
+        "//build/qcom_build_extensions:qtisocrepo_true": [
+            "//soc-repo:all_headers",
+            "//soc-repo:{}/drivers/soc/qcom/qmi_helpers".format(kernel_build_variant),
+        ],
+        "//build/qcom_build_extensions:qtisocrepo_false": [
+            "//msm-kernel:all_headers",
+        ],
+    })
+
+    kernel_build = select({
+        "//build/qcom_build_extensions:qtisocrepo_true": "//soc-repo:{}_base_kernel".format(kernel_build_variant),
+        "//build/qcom_build_extensions:qtisocrepo_false": "//msm-kernel:{}".format(kernel_build_variant),
+    })
+
+    rmnet_core_deps = deps_core + [
+        ":rmnet_core_headers",
+        "//vendor/qcom/opensource/datarmnet-ext/mem:{}_rmnet_mem".format(kernel_build_variant),
+        "//vendor/qcom/opensource/datarmnet-ext/mem:rmnet_mem_uapi_headers",
+    ]
+    if target != "shikra":
+        rmnet_core_deps += [
+            ":{}_rmnet_ctl".format(kernel_build_variant),
+            "//vendor/qcom/opensource/dataipa:{}_ipam".format(kernel_build_variant),
+            "//vendor/qcom/opensource/dataipa:include_headers",
+        ]
+
+    rmnet_core_srcs = [
+        "core/rmnet_config.c",
+        "core/rmnet_descriptor.c",
+        "core/rmnet_genl.c",
+        "core/rmnet_handlers.c",
+        "core/rmnet_map_command.c",
+        "core/rmnet_map_data.c",
+        "core/rmnet_module.c",
+        "core/rmnet_vnd.c",
+        "core/dfc_qmap.c",
+        "core/dfc_qmi.c",
+        "core/qmi_rmnet.c",
+        "core/wda_qmi.c",
+        "core/rmnet_qmap.c",
+        "core/rmnet_ll.c",
+        "core/rmnet_ll_ipa.c",
+        "core/rmnet_ll_qmap.c",
+    ]
+
+    rmnet_local_defines = ["RMNET_TRACE_INCLUDE_PATH={}/core".format(include_base)]
+    if target == "shikra":
+        rmnet_local_defines += ["TRANSPORT_RMNET_BAM"]
+    if target in ["malabar", "chora"]:
+        rmnet_local_defines += ["RMNET_DISABLE_DFC_SUSPEND"]
 
     ddk_module(
         name = "{}_rmnet_core".format(kernel_build_variant),
         out = "rmnet_core.ko",
-        srcs = [
-            "core/rmnet_config.c",
-            "core/rmnet_descriptor.c",
-            "core/rmnet_genl.c",
-            "core/rmnet_handlers.c",
-            "core/rmnet_map_command.c",
-            "core/rmnet_map_data.c",
-            "core/rmnet_module.c",
-            "core/rmnet_vnd.c",
-            "core/dfc_qmap.c",
-            "core/dfc_qmi.c",
-            "core/qmi_rmnet.c",
-            "core/wda_qmi.c",
-            "core/rmnet_ll.c",
-            "core/rmnet_ll_ipa.c",
-            "core/rmnet_qmap.c",
-            "core/rmnet_ll_qmap.c",
-        ],
-        local_defines = [
-            "RMNET_TRACE_INCLUDE_PATH={}/core".format(include_base),
-        ],
-        kernel_build = "//vendor/nothing/pong-kernel:{}".format(kernel_build_variant),
-        deps = [
-            ":rmnet_core_headers",
-            ":{}_rmnet_ctl".format(kernel_build_variant),
-            "//vendor/nothing/pong-modules/qcom/opensource/dataipa:{}_ipam".format(kernel_build_variant),
-            "//vendor/nothing/pong-modules/qcom/opensource/datarmnet-ext/mem:{}_rmnet_mem".format(kernel_build_variant),
-            "//vendor/nothing/pong-kernel:all_headers",
-            "//vendor/nothing/pong-modules/qcom/opensource/dataipa:include_headers",
-            "//vendor/nothing/pong-modules/qcom/opensource/datarmnet-ext/mem:rmnet_mem_headers",
-        ],
+        srcs = rmnet_core_srcs,
+        local_defines = rmnet_local_defines,
+        kernel_build = kernel_build,
+        deps = rmnet_core_deps,
     )
 
-    copy_to_dist_dir(
-        name = "{}_modules_dist".format(kernel_build_variant),
-        data = [
-            "{}_rmnet_core".format(kernel_build_variant),
+    dist_files_srcs = [
+        "{}_rmnet_core".format(kernel_build_variant),
+    ]
+    if target != "shikra":
+        dist_files_srcs += [
             "{}_rmnet_ctl".format(kernel_build_variant),
-        ],
-        dist_dir = "out/target/product/{}/dlkm/lib/modules/".format(target),
-        flat = True,
-        wipe_dist_dir = False,
-        allow_duplicate_filenames = False,
-        mode_overrides = {"**/*": "644"},
-        log = "info",
+        ]
+
+    pkg_files(
+        name = kernel_build_variant + "_dist_files",
+        srcs = dist_files_srcs,
+        visibility = ["//visibility:private"],
+        strip_prefix = strip_prefix.files_only(),
+    )
+
+    pkg_install(
+        name = "{}_modules_dist".format(kernel_build_variant),
+        srcs = [":{}_dist_files".format(kernel_build_variant)],
+        destdir = "out/target/product/{}/dlkm/lib/modules/".format(target),
     )

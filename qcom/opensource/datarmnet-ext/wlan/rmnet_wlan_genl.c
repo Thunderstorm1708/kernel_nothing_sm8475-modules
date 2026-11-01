@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
-/* Copyright (c) 2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2022-2024 Qualcomm Innovation Center, Inc. All rights reserved.
- *
- * RMNET WLAN Generic Netlink
- *
+/*
+ * Copyright (c) 2021, The Linux Foundation. All rights reserved.
+ * Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
  */
 
 #include <net/genetlink.h>
@@ -12,304 +10,628 @@
 #include <linux/if.h>
 #include <linux/inet.h>
 #include <linux/netdevice.h>
-#include "rmnet_wlan_genl.h"
+#include <uapi/linux/rmnet_wlan.h>
 #include "rmnet_wlan.h"
 #include "rmnet_wlan_connection.h"
 #include "rmnet_wlan_fragment.h"
-#define DATARMNET5fe2c6571f (0xf07+1104-0x131d)
-static struct nla_policy DATARMNET19c5fce390[DATARMNETf6bbad94a5+
-(0xd26+209-0xdf6)]={[DATARMNET8c062d7709]=NLA_POLICY_EXACT_LEN(sizeof(struct 
-DATARMNETb89ecedefc)),};static struct nla_policy DATARMNET0381a65e93[
-DATARMNETebcc30fe04+(0xd26+209-0xdf6)]={[DATARMNET4e9cd7b8bf]=
-NLA_POLICY_NESTED_ARRAY(DATARMNET19c5fce390),[DATARMNETb8afde4a5a]={.type=
-NLA_NUL_STRING,.len=IFNAMSIZ-(0xd26+209-0xdf6),},[DATARMNETea4b56dc2b]={.type=
-NLA_NUL_STRING,.len=INET6_ADDRSTRLEN,},[DATARMNET8bf80e4b66]={.type=
-NLA_NUL_STRING,.len=IFNAMSIZ-(0xd26+209-0xdf6),},[DATARMNET44a9a789aa]={.type=
-NLA_U16,},[DATARMNET149cafb1b7]={.type=NLA_U8,},[DATARMNET185fd3de68]={.type=
-NLA_NUL_STRING,.len=INET6_ADDRSTRLEN,},[DATARMNETd996a18fa6]={.type=
-NLA_NUL_STRING,.len=INET6_ADDRSTRLEN,},[DATARMNETd3dacf7559]={.type=NLA_U16,},[
-DATARMNETeaebe95912]={.type=NLA_U16,},};
-#define DATARMNET58eca5265b(DATARMNET5aeb0ef9bc, DATARMNETbd9859b58e) \
+
+#define RMNET_WLAN_GENL_ATTR_MAX RMNET_WLAN_GENL_ATTR_LL_DST_PORT
+#define RMNET_WLAN_GENL_TUPLE_ATTR_MAX RMNET_WLAN_GENL_TUPLE_ATTR_TUPLE
+
+/* Use integer 58 instead of ':' to avoid issues with scripts */
+#define RMNET_WLAN_CHAR_COLON 58
+
+static struct nla_policy
+rmnet_wlan_genl_tuple_policy[RMNET_WLAN_GENL_TUPLE_ATTR_MAX + 1] = {
+	[RMNET_WLAN_GENL_TUPLE_ATTR_TUPLE] =
+		NLA_POLICY_EXACT_LEN(sizeof(struct rmnet_wlan_tuple)),
+};
+
+static struct nla_policy
+rmnet_wlan_genl_attr_policy[RMNET_WLAN_GENL_ATTR_MAX + 1] = {
+	[RMNET_WLAN_GENL_ATTR_TUPLES] =
+		NLA_POLICY_NESTED_ARRAY(rmnet_wlan_genl_tuple_policy),
+	[RMNET_WLAN_GENL_ATTR_DEV] = {
+		.type = NLA_NUL_STRING,
+		.len = IFNAMSIZ - 1, /* Max len excluding NULL */
+	},
+	[RMNET_WLAN_GENL_ATTR_FWD_ADDR] = {
+		.type = NLA_NUL_STRING,
+		.len = INET6_ADDRSTRLEN,
+	},
+	[RMNET_WLAN_GENL_ATTR_FWD_DEV] = {
+		.type = NLA_NUL_STRING,
+		.len = IFNAMSIZ - 1, /* Max len excluding NULL */
+	},
+	[RMNET_WLAN_GENL_ATTR_ENCAP_PORT] = {
+		.type = NLA_U16,
+	},
+	[RMNET_WLAN_GENL_ATTR_NET_TYPE] = {
+		.type = NLA_U8,
+	},
+	[RMNET_WLAN_GENL_ATTR_LL_SRC_ADDR] = {
+		.type = NLA_NUL_STRING,
+		.len = INET6_ADDRSTRLEN,
+	},
+	[RMNET_WLAN_GENL_ATTR_LL_DST_ADDR] = {
+		.type = NLA_NUL_STRING,
+		.len = INET6_ADDRSTRLEN,
+	},
+	[RMNET_WLAN_GENL_ATTR_LL_SRC_PORT] = {
+		.type = NLA_U16,
+	},
+	[RMNET_WLAN_GENL_ATTR_LL_DST_PORT] = {
+		.type = NLA_U16,
+	},
+};
+
+#define RMNET_WLAN_GENL_OP(_cmd, _func) \
 	{ \
-		.cmd = DATARMNET5aeb0ef9bc, \
-		.doit = DATARMNETbd9859b58e, \
+		.cmd = _cmd, \
+		.doit = _func, \
 	}
-static struct genl_family DATARMNET61e8f41aae;static int DATARMNET72501635c8(
-struct sk_buff*DATARMNET543491eb0f,struct genl_info*DATARMNET54338da2ff){struct 
-nlattr*DATARMNET759bcdbf61[DATARMNETf6bbad94a5+(0xd26+209-0xdf6)];struct 
-DATARMNETb89ecedefc*DATARMNETcadc2ef9aa;struct nlattr*DATARMNETef7cdd7b6b;u32 
-DATARMNETef77661260=(0xd2d+202-0xdf7);int DATARMNET4b119c4ff3;int 
-DATARMNETb14e52a504=(0xd2d+202-0xdf7);if(!DATARMNET54338da2ff->attrs[
-DATARMNET4e9cd7b8bf]){GENL_SET_ERR_MSG(DATARMNET54338da2ff,
-"\x4d\x75\x73\x74\x20\x73\x75\x70\x70\x6c\x79\x20\x74\x75\x70\x6c\x65\x20\x69\x6e\x66\x6f"
-);return-EINVAL;}nla_for_each_nested(DATARMNETef7cdd7b6b,DATARMNET54338da2ff->
-attrs[DATARMNET4e9cd7b8bf],DATARMNET4b119c4ff3)DATARMNETef77661260++;
-DATARMNETcadc2ef9aa=kcalloc(DATARMNETef77661260,sizeof(*DATARMNETcadc2ef9aa),
-GFP_KERNEL);if(!DATARMNETcadc2ef9aa){GENL_SET_ERR_MSG(DATARMNET54338da2ff,
-"\x4b\x65\x72\x6e\x65\x6c\x20\x4f\x4f\x4d");return-ENOMEM;}DATARMNETef77661260=
-(0xd2d+202-0xdf7);nla_for_each_nested(DATARMNETef7cdd7b6b,DATARMNET54338da2ff->
-attrs[DATARMNET4e9cd7b8bf],DATARMNET4b119c4ff3){struct DATARMNETb89ecedefc*
-DATARMNET3396919a68;DATARMNETb14e52a504=nla_parse_nested(DATARMNET759bcdbf61,
-DATARMNETf6bbad94a5,DATARMNETef7cdd7b6b,DATARMNET19c5fce390,DATARMNET54338da2ff
-->extack);if(DATARMNETb14e52a504)goto DATARMNETbf4095f79e;if(!
-DATARMNET759bcdbf61[DATARMNET8c062d7709]){GENL_SET_ERR_MSG(DATARMNET54338da2ff,
-"\x4d\x75\x73\x74\x20\x73\x70\x65\x63\x69\x66\x79\x20\x74\x75\x70\x6c\x65\x20\x65\x6e\x74\x72\x79"
-);goto DATARMNETbf4095f79e;}DATARMNET3396919a68=nla_data(DATARMNET759bcdbf61[
-DATARMNET8c062d7709]);if(DATARMNET3396919a68->DATARMNET0d956cc77a!=
-(0xd11+230-0xdf3)&&DATARMNET3396919a68->DATARMNET0d956cc77a!=(0xd03+244-0xdf1)){
-GENL_SET_ERR_MSG(DATARMNET54338da2ff,
-"\x49\x6e\x76\x61\x6c\x69\x64\x20\x49\x50\x20\x70\x72\x6f\x74\x6f\x63\x6f\x6c");
-goto DATARMNETbf4095f79e;}if(DATARMNET3396919a68->DATARMNET4924e79411!=
-IPPROTO_TCP&&DATARMNET3396919a68->DATARMNET4924e79411!=IPPROTO_UDP&&
-DATARMNET3396919a68->DATARMNET4924e79411!=IPPROTO_ESP){GENL_SET_ERR_MSG(
-DATARMNET54338da2ff,
-"\x49\x6e\x76\x61\x6c\x69\x64\x20\x74\x72\x61\x6e\x73\x70\x6f\x72\x74\x20\x70\x72\x6f\x74\x6f\x63\x6f\x6c"
-);goto DATARMNETbf4095f79e;}memcpy(&DATARMNETcadc2ef9aa[DATARMNETef77661260],
-DATARMNET3396919a68,sizeof(*DATARMNET3396919a68));DATARMNETef77661260++;}
-DATARMNETb14e52a504=DATARMNET53f12a0f7d(DATARMNETcadc2ef9aa,DATARMNETef77661260,
-DATARMNET54338da2ff);DATARMNETbf4095f79e:kfree(DATARMNETcadc2ef9aa);return 
-DATARMNETb14e52a504;}static int DATARMNET41dd9b14ab(struct sk_buff*
-DATARMNET543491eb0f,struct genl_info*DATARMNET54338da2ff){struct nlattr*
-DATARMNET759bcdbf61[DATARMNETf6bbad94a5+(0xd26+209-0xdf6)];struct 
-DATARMNETb89ecedefc*DATARMNETcadc2ef9aa;struct nlattr*DATARMNETef7cdd7b6b;u32 
-DATARMNETef77661260=(0xd2d+202-0xdf7);int DATARMNET4b119c4ff3;int 
-DATARMNETb14e52a504;if(!DATARMNET54338da2ff->attrs[DATARMNET4e9cd7b8bf]){
-GENL_SET_ERR_MSG(DATARMNET54338da2ff,
-"\x4d\x75\x73\x74\x20\x73\x75\x70\x70\x6c\x79\x20\x74\x75\x70\x6c\x65\x20\x69\x6e\x66\x6f"
-);return-EINVAL;}nla_for_each_nested(DATARMNETef7cdd7b6b,DATARMNET54338da2ff->
-attrs[DATARMNET4e9cd7b8bf],DATARMNET4b119c4ff3)DATARMNETef77661260++;
-DATARMNETcadc2ef9aa=kcalloc(DATARMNETef77661260,sizeof(*DATARMNETcadc2ef9aa),
-GFP_KERNEL);if(!DATARMNETcadc2ef9aa){GENL_SET_ERR_MSG(DATARMNET54338da2ff,
-"\x4b\x65\x72\x6e\x65\x6c\x20\x4f\x4f\x4d");return-ENOMEM;}DATARMNETef77661260=
-(0xd2d+202-0xdf7);nla_for_each_nested(DATARMNETef7cdd7b6b,DATARMNET54338da2ff->
-attrs[DATARMNET4e9cd7b8bf],DATARMNET4b119c4ff3){struct DATARMNETb89ecedefc*
-DATARMNET3396919a68;DATARMNETb14e52a504=nla_parse_nested(DATARMNET759bcdbf61,
-DATARMNETf6bbad94a5,DATARMNETef7cdd7b6b,DATARMNET19c5fce390,DATARMNET54338da2ff
-->extack);if(DATARMNETb14e52a504)goto DATARMNETbf4095f79e;if(!
-DATARMNET759bcdbf61[DATARMNET8c062d7709]){GENL_SET_ERR_MSG(DATARMNET54338da2ff,
-"\x4d\x75\x73\x74\x20\x73\x70\x65\x63\x69\x66\x79\x20\x74\x75\x70\x6c\x65\x20\x65\x6e\x74\x72\x79"
-);DATARMNETb14e52a504=-EINVAL;goto DATARMNETbf4095f79e;}DATARMNET3396919a68=
-nla_data(DATARMNET759bcdbf61[DATARMNET8c062d7709]);memcpy(&DATARMNETcadc2ef9aa[
-DATARMNETef77661260],DATARMNET3396919a68,sizeof(*DATARMNET3396919a68));
-DATARMNETef77661260++;}DATARMNETb14e52a504=DATARMNET07f6485c9b(
-DATARMNETcadc2ef9aa,DATARMNETef77661260,DATARMNET54338da2ff);DATARMNETbf4095f79e
-:kfree(DATARMNETcadc2ef9aa);return DATARMNETb14e52a504;}static int 
-DATARMNETf1fa473089(struct sk_buff*DATARMNET543491eb0f,struct genl_info*
-DATARMNET54338da2ff){struct nlattr*DATARMNETef7cdd7b6b;int DATARMNET9954a624ac;
-int DATARMNET268a8314cf;if(!DATARMNET54338da2ff->attrs[DATARMNETb8afde4a5a]||!
-DATARMNET54338da2ff->attrs[DATARMNET149cafb1b7]){GENL_SET_ERR_MSG(
-DATARMNET54338da2ff,
-"\x4d\x75\x73\x74\x20\x73\x70\x65\x63\x69\x66\x79\x20\x64\x65\x76\x69\x63\x65\x20\x61\x6e\x64\x20\x6e\x65\x74\x77\x6f\x72\x6b\x20\x69\x6e\x66\x6f"
-);return-EINVAL;}DATARMNETef7cdd7b6b=DATARMNET54338da2ff->attrs[
-DATARMNETb8afde4a5a];DATARMNET9954a624ac=nla_get_u8(DATARMNET54338da2ff->attrs[
-DATARMNET149cafb1b7]);if(DATARMNET9954a624ac!=DATARMNET356f2a237e&&
-DATARMNET9954a624ac!=DATARMNET45ee632553&&DATARMNET9954a624ac!=
-DATARMNET9bfbc31cd6){GENL_SET_ERR_MSG(DATARMNET54338da2ff,
-"\x4e\x65\x74\x77\x6f\x72\x6b\x20\x74\x79\x70\x65\x20\x6e\x6f\x74\x20\x73\x75\x70\x70\x6f\x72\x74\x65\x64\x21"
-);return-EINVAL;}if(DATARMNET9954a624ac==DATARMNET45ee632553){
-DATARMNET268a8314cf=DATARMNET92e5468fc5(nla_data(DATARMNETef7cdd7b6b),
-DATARMNET54338da2ff);}else{DATARMNET268a8314cf=DATARMNET97b2388e63(nla_data(
-DATARMNETef7cdd7b6b),DATARMNET54338da2ff);}return DATARMNET268a8314cf;}static 
-int DATARMNETcd9478470c(struct sk_buff*DATARMNET543491eb0f,struct genl_info*
-DATARMNET54338da2ff){struct nlattr*DATARMNETef7cdd7b6b;int DATARMNET9954a624ac;
-int DATARMNET268a8314cf;if(!DATARMNET54338da2ff->attrs[DATARMNETb8afde4a5a]||!
-DATARMNET54338da2ff->attrs[DATARMNET149cafb1b7]){GENL_SET_ERR_MSG(
-DATARMNET54338da2ff,
-"\x4b\x65\x72\x6e\x65\x6c\x20\x65\x72\x72\x6f\x72\x2c\x20\x75\x6e\x72\x65\x67\x69\x73\x74\x65\x72\x69\x6e\x67\x20\x6e\x6f\x74\x69\x66\x69\x65\x72\x20\x66\x61\x69\x6c\x65\x64"
-);return-EINVAL;}DATARMNET9954a624ac=nla_get_u8(DATARMNET54338da2ff->attrs[
-DATARMNET149cafb1b7]);DATARMNETef7cdd7b6b=DATARMNET54338da2ff->attrs[
-DATARMNETb8afde4a5a];if(DATARMNET9954a624ac!=DATARMNET356f2a237e&&
-DATARMNET9954a624ac!=DATARMNET45ee632553&&DATARMNET9954a624ac!=
-DATARMNET9bfbc31cd6){GENL_SET_ERR_MSG(DATARMNET54338da2ff,
-"\x4e\x65\x74\x77\x6f\x72\x6b\x20\x74\x79\x70\x65\x20\x6e\x6f\x74\x20\x73\x75\x70\x70\x6f\x72\x74\x65\x64\x21"
-);return-EINVAL;}if(DATARMNET9954a624ac==DATARMNET45ee632553){
-DATARMNET268a8314cf=DATARMNET9d7bb9a63d(nla_data(DATARMNETef7cdd7b6b),
-DATARMNET54338da2ff);}else{DATARMNET268a8314cf=DATARMNETa903cd5994(nla_data(
-DATARMNETef7cdd7b6b),DATARMNET54338da2ff);}if(DATARMNET268a8314cf)
-GENL_SET_ERR_MSG(DATARMNET54338da2ff,
-"\x4b\x65\x72\x6e\x65\x6c\x20\x65\x72\x72\x6f\x72\x2c\x20\x75\x6e\x72\x65\x67\x69\x73\x74\x65\x72\x69\x6e\x67\x20\x6e\x6f\x74\x69\x66\x69\x65\x72\x20\x66\x61\x69\x6c\x65\x64"
-);return DATARMNET268a8314cf;}static int DATARMNETb86993aefb(struct sk_buff*
-DATARMNET543491eb0f,struct genl_info*DATARMNET54338da2ff){struct 
-DATARMNET8d3c2559ca DATARMNET2d4b4cfc9e={};struct nlattr*DATARMNETef7cdd7b6b;
-char*DATARMNETd7f4d7c495;int DATARMNET268a8314cf;if(!DATARMNET54338da2ff->attrs[
-DATARMNETea4b56dc2b]||!DATARMNET54338da2ff->attrs[DATARMNET8bf80e4b66]||!
-DATARMNET54338da2ff->attrs[DATARMNET149cafb1b7]){GENL_SET_ERR_MSG(
-DATARMNET54338da2ff,
-"\x4d\x75\x73\x74\x20\x73\x70\x65\x63\x69\x66\x79\x20\x46\x57\x44\x20\x64\x65\x76\x69\x63\x65\x2c\x20\x61\x64\x64\x72\x65\x73\x73\x2c\x20\x61\x6e\x64\x20\x6e\x65\x74\x77\x6f\x72\x6b"
-);return-EINVAL;}DATARMNET2d4b4cfc9e.DATARMNET9954a624ac=nla_get_u8(
-DATARMNET54338da2ff->attrs[DATARMNET149cafb1b7]);DATARMNETef7cdd7b6b=
-DATARMNET54338da2ff->attrs[DATARMNETea4b56dc2b];DATARMNETd7f4d7c495=nla_data(
-DATARMNETef7cdd7b6b);if(strnchr(DATARMNETd7f4d7c495,nla_len(DATARMNETef7cdd7b6b)
-,DATARMNET5fe2c6571f)){if(in6_pton(DATARMNETd7f4d7c495,nla_len(
-DATARMNETef7cdd7b6b),DATARMNET2d4b4cfc9e.DATARMNET5700daac01.s6_addr,-
-(0xd26+209-0xdf6),NULL)!=(0xd26+209-0xdf6)){GENL_SET_ERR_MSG(DATARMNET54338da2ff
-,
-"\x46\x57\x44\x20\x61\x64\x64\x72\x65\x73\x73\x20\x69\x73\x20\x69\x6e\x76\x61\x6c\x69\x64\x20\x69\x6e\x20\x49\x50\x76\x36"
-);return-EINVAL;}DATARMNET2d4b4cfc9e.DATARMNET0d956cc77a=(0xd03+244-0xdf1);}else
-{if(in4_pton(DATARMNETd7f4d7c495,nla_len(DATARMNETef7cdd7b6b),(u8*)&
-DATARMNET2d4b4cfc9e.DATARMNET0dc14167a1,-(0xd26+209-0xdf6),NULL)!=
-(0xd26+209-0xdf6)){GENL_SET_ERR_MSG(DATARMNET54338da2ff,
-"\x46\x57\x44\x20\x61\x64\x64\x72\x65\x73\x73\x20\x69\x73\x20\x69\x6e\x76\x61\x6c\x69\x64\x20\x69\x6e\x20\x49\x50\x76\x34"
-);return-EINVAL;}DATARMNET2d4b4cfc9e.DATARMNET0d956cc77a=(0xd11+230-0xdf3);}
-DATARMNETef7cdd7b6b=DATARMNET54338da2ff->attrs[DATARMNET8bf80e4b66];
-DATARMNET2d4b4cfc9e.DATARMNET57656f6f2f=dev_get_by_name(genl_info_net(
-DATARMNET54338da2ff),nla_data(DATARMNETef7cdd7b6b));if(!DATARMNET2d4b4cfc9e.
-DATARMNET57656f6f2f){GENL_SET_ERR_MSG(DATARMNET54338da2ff,
-"\x49\x6e\x76\x61\x6c\x69\x64\x20\x46\x57\x44\x20\x64\x65\x76\x69\x63\x65\x20\x6e\x61\x6d\x65"
-);return-EINVAL;}DATARMNET268a8314cf=DATARMNET947eb110d2(&DATARMNET2d4b4cfc9e,
-DATARMNET54338da2ff);dev_put(DATARMNET2d4b4cfc9e.DATARMNET57656f6f2f);return 
-DATARMNET268a8314cf;}static int DATARMNETc175a08219(struct sk_buff*
-DATARMNET543491eb0f,struct genl_info*DATARMNET54338da2ff){struct 
-DATARMNET8d3c2559ca DATARMNET2d4b4cfc9e={};struct nlattr*DATARMNETef7cdd7b6b;
-char*DATARMNETd7f4d7c495;int DATARMNET268a8314cf;if(!DATARMNET54338da2ff->attrs[
-DATARMNETea4b56dc2b]||!DATARMNET54338da2ff->attrs[DATARMNET8bf80e4b66]||!
-DATARMNET54338da2ff->attrs[DATARMNET149cafb1b7]){GENL_SET_ERR_MSG(
-DATARMNET54338da2ff,
-"\x4d\x75\x73\x74\x20\x73\x70\x65\x63\x69\x66\x79\x20\x46\x57\x44\x20\x64\x65\x76\x69\x63\x65\x20\x61\x6e\x64\x20\x61\x64\x64\x72\x65\x73\x73"
-);return-EINVAL;}DATARMNET2d4b4cfc9e.DATARMNET9954a624ac=nla_get_u8(
-DATARMNET54338da2ff->attrs[DATARMNET149cafb1b7]);DATARMNETef7cdd7b6b=
-DATARMNET54338da2ff->attrs[DATARMNETea4b56dc2b];DATARMNETd7f4d7c495=nla_data(
-DATARMNETef7cdd7b6b);if(strnchr(DATARMNETd7f4d7c495,nla_len(DATARMNETef7cdd7b6b)
-,DATARMNET5fe2c6571f)){if(in6_pton(DATARMNETd7f4d7c495,nla_len(
-DATARMNETef7cdd7b6b),DATARMNET2d4b4cfc9e.DATARMNET5700daac01.s6_addr,-
-(0xd26+209-0xdf6),NULL)!=(0xd26+209-0xdf6)){GENL_SET_ERR_MSG(DATARMNET54338da2ff
-,
-"\x46\x57\x44\x20\x61\x64\x64\x72\x65\x73\x73\x20\x69\x73\x20\x69\x6e\x76\x61\x6c\x69\x64\x20\x69\x6e\x20\x49\x50\x76\x36"
-);return-EINVAL;}DATARMNET2d4b4cfc9e.DATARMNET0d956cc77a=(0xd03+244-0xdf1);}else
-{if(in4_pton(DATARMNETd7f4d7c495,nla_len(DATARMNETef7cdd7b6b),(u8*)&
-DATARMNET2d4b4cfc9e.DATARMNET0dc14167a1,-(0xd26+209-0xdf6),NULL)!=
-(0xd26+209-0xdf6)){GENL_SET_ERR_MSG(DATARMNET54338da2ff,
-"\x46\x57\x44\x20\x61\x64\x64\x72\x65\x73\x73\x20\x69\x73\x20\x69\x6e\x76\x61\x6c\x69\x64\x20\x69\x6e\x20\x49\x50\x76\x34"
-);return-EINVAL;}DATARMNET2d4b4cfc9e.DATARMNET0d956cc77a=(0xd11+230-0xdf3);}
-DATARMNETef7cdd7b6b=DATARMNET54338da2ff->attrs[DATARMNET8bf80e4b66];
-DATARMNET2d4b4cfc9e.DATARMNET57656f6f2f=dev_get_by_name(genl_info_net(
-DATARMNET54338da2ff),nla_data(DATARMNETef7cdd7b6b));if(!DATARMNET2d4b4cfc9e.
-DATARMNET57656f6f2f){GENL_SET_ERR_MSG(DATARMNET54338da2ff,
-"\x49\x6e\x76\x61\x6c\x69\x64\x20\x46\x57\x44\x20\x64\x65\x76\x69\x63\x65\x20\x6e\x61\x6d\x65"
-);return-EINVAL;}DATARMNET268a8314cf=DATARMNETb8b35fdc18(&DATARMNET2d4b4cfc9e,
-DATARMNET54338da2ff);dev_put(DATARMNET2d4b4cfc9e.DATARMNET57656f6f2f);return 
-DATARMNET268a8314cf;}static int DATARMNETc5f6c112ec(struct sk_buff*
-DATARMNET543491eb0f,struct genl_info*DATARMNET54338da2ff){struct nlattr*
-DATARMNETef7cdd7b6b;DATARMNETef7cdd7b6b=DATARMNET54338da2ff->attrs[
-DATARMNET44a9a789aa];if(!DATARMNETef7cdd7b6b){GENL_SET_ERR_MSG(
-DATARMNET54338da2ff,
-"\x4d\x75\x73\x74\x20\x73\x70\x65\x63\x69\x66\x79\x20\x65\x6e\x63\x61\x70\x20\x70\x6f\x72\x74"
-);return-EINVAL;}return DATARMNET8d5a5a7047(nla_get_be16(DATARMNETef7cdd7b6b),
-DATARMNET54338da2ff);}static int DATARMNETa6aec23397(struct sk_buff*
-DATARMNET543491eb0f,struct genl_info*DATARMNET54338da2ff){struct nlattr*
-DATARMNETef7cdd7b6b;DATARMNETef7cdd7b6b=DATARMNET54338da2ff->attrs[
-DATARMNET44a9a789aa];if(!DATARMNETef7cdd7b6b){GENL_SET_ERR_MSG(
-DATARMNET54338da2ff,
-"\x4d\x75\x73\x74\x20\x73\x70\x65\x63\x69\x66\x79\x20\x65\x6e\x63\x61\x70\x20\x70\x6f\x72\x74"
-);return-EINVAL;}return DATARMNETc97c6a4265(nla_get_be16(DATARMNETef7cdd7b6b),
-DATARMNET54338da2ff);}static int DATARMNET16add73734(struct sk_buff*
-DATARMNET543491eb0f,struct genl_info*DATARMNET54338da2ff){struct nlattr*
-DATARMNETef7cdd7b6b;DATARMNETef7cdd7b6b=DATARMNET54338da2ff->attrs[
-DATARMNET44a9a789aa];if(!DATARMNETef7cdd7b6b){GENL_SET_ERR_MSG(
-DATARMNET54338da2ff,
-"\x4d\x75\x73\x74\x20\x73\x70\x65\x63\x69\x66\x79\x20\x65\x6e\x63\x61\x70\x20\x70\x6f\x72\x74"
-);return-EINVAL;}return DATARMNET59b8376224(nla_get_be16(DATARMNETef7cdd7b6b),
-DATARMNET54338da2ff);}static int DATARMNETb318ed4796(struct sk_buff*
-DATARMNET543491eb0f,struct genl_info*DATARMNET54338da2ff){struct nlattr*
-DATARMNETef7cdd7b6b;DATARMNETef7cdd7b6b=DATARMNET54338da2ff->attrs[
-DATARMNET44a9a789aa];if(!DATARMNETef7cdd7b6b){GENL_SET_ERR_MSG(
-DATARMNET54338da2ff,
-"\x4d\x75\x73\x74\x20\x73\x70\x65\x63\x69\x66\x79\x20\x65\x6e\x63\x61\x70\x20\x70\x6f\x72\x74"
-);return-EINVAL;}return DATARMNET0b12e969c5(nla_get_be16(DATARMNETef7cdd7b6b),
-DATARMNET54338da2ff);}static int DATARMNETa4773cb837(struct sk_buff*
-DATARMNET543491eb0f,struct genl_info*DATARMNET54338da2ff){(void)
-DATARMNET543491eb0f;(void)DATARMNET54338da2ff;DATARMNET078f6bd384();return
-(0xd2d+202-0xdf7);}static int DATARMNET6a53c4576d(struct sk_buff*
-DATARMNET543491eb0f,struct genl_info*DATARMNET54338da2ff){struct 
-DATARMNETe117226f58 DATARMNET3396919a68={};struct nlattr*DATARMNETef7cdd7b6b;
-char*DATARMNETd7f4d7c495;if(!DATARMNET54338da2ff->attrs[DATARMNET185fd3de68]||!
-DATARMNET54338da2ff->attrs[DATARMNETd996a18fa6]||!DATARMNET54338da2ff->attrs[
-DATARMNETd3dacf7559]||!DATARMNET54338da2ff->attrs[DATARMNETeaebe95912]){
-GENL_SET_ERR_MSG(DATARMNET54338da2ff,
-"\x4d\x75\x73\x74\x20\x73\x70\x65\x63\x69\x66\x79\x20\x46\x57\x44\x20\x64\x65\x76\x69\x63\x65\x20\x61\x6e\x64\x20\x61\x64\x64\x72\x65\x73\x73"
-);return-EINVAL;}DATARMNETef7cdd7b6b=DATARMNET54338da2ff->attrs[
-DATARMNET185fd3de68];DATARMNETd7f4d7c495=nla_data(DATARMNETef7cdd7b6b);if(
-strnchr(DATARMNETd7f4d7c495,nla_len(DATARMNETef7cdd7b6b),DATARMNET5fe2c6571f)){
-if(in6_pton(DATARMNETd7f4d7c495,nla_len(DATARMNETef7cdd7b6b),DATARMNET3396919a68
-.DATARMNET815cbb4bf5.s6_addr,-(0xd26+209-0xdf6),NULL)!=(0xd26+209-0xdf6)){
-GENL_SET_ERR_MSG(DATARMNET54338da2ff,
-"\x53\x52\x43\x20\x61\x64\x64\x72\x65\x73\x73\x20\x69\x73\x20\x69\x6e\x76\x61\x6c\x69\x64\x20\x69\x6e\x20\x49\x50\x76\x36"
-);return-EINVAL;}DATARMNET3396919a68.DATARMNET0d956cc77a=(0xd03+244-0xdf1);}else
-{if(in4_pton(DATARMNETd7f4d7c495,nla_len(DATARMNETef7cdd7b6b),(u8*)&
-DATARMNET3396919a68.DATARMNETdfe430c2d6,-(0xd26+209-0xdf6),NULL)!=
-(0xd26+209-0xdf6)){GENL_SET_ERR_MSG(DATARMNET54338da2ff,
-"\x53\x52\x43\x20\x61\x64\x64\x72\x65\x73\x73\x20\x69\x73\x20\x69\x6e\x76\x61\x6c\x69\x64\x20\x69\x6e\x20\x49\x50\x76\x34"
-);return-EINVAL;}DATARMNET3396919a68.DATARMNET0d956cc77a=(0xd11+230-0xdf3);}
-DATARMNETef7cdd7b6b=DATARMNET54338da2ff->attrs[DATARMNETd996a18fa6];
-DATARMNETd7f4d7c495=nla_data(DATARMNETef7cdd7b6b);if(strnchr(DATARMNETd7f4d7c495
-,nla_len(DATARMNETef7cdd7b6b),DATARMNET5fe2c6571f)){if(in6_pton(
-DATARMNETd7f4d7c495,nla_len(DATARMNETef7cdd7b6b),DATARMNET3396919a68.
-DATARMNETc3f31215b7.s6_addr,-(0xd26+209-0xdf6),NULL)!=(0xd26+209-0xdf6)){
-GENL_SET_ERR_MSG(DATARMNET54338da2ff,
-"\x44\x53\x54\x20\x61\x64\x64\x72\x65\x73\x73\x20\x69\x73\x20\x69\x6e\x76\x61\x6c\x69\x64\x20\x69\x6e\x20\x49\x50\x76\x36"
-);return-EINVAL;}}else{if(in4_pton(DATARMNETd7f4d7c495,nla_len(
-DATARMNETef7cdd7b6b),(u8*)&DATARMNET3396919a68.DATARMNET2cb607d686,-
-(0xd26+209-0xdf6),NULL)!=(0xd26+209-0xdf6)){GENL_SET_ERR_MSG(DATARMNET54338da2ff
-,
-"\x44\x53\x54\x20\x61\x64\x64\x72\x65\x73\x73\x20\x69\x73\x20\x69\x6e\x76\x61\x6c\x69\x64\x20\x69\x6e\x20\x49\x50\x76\x34"
-);return-EINVAL;}}DATARMNETef7cdd7b6b=DATARMNET54338da2ff->attrs[
-DATARMNETd3dacf7559];DATARMNET3396919a68.DATARMNET08e913477e=nla_get_be16(
-DATARMNETef7cdd7b6b);DATARMNETef7cdd7b6b=DATARMNET54338da2ff->attrs[
-DATARMNETeaebe95912];DATARMNET3396919a68.DATARMNETda7f7fa492=nla_get_be16(
-DATARMNETef7cdd7b6b);DATARMNET4c1c11d8a5(&DATARMNET3396919a68);return
-(0xd2d+202-0xdf7);}static int DATARMNET425149b729(struct sk_buff*
-DATARMNET543491eb0f,struct genl_info*DATARMNET54338da2ff){(void)
-DATARMNET543491eb0f;(void)DATARMNET54338da2ff;DATARMNET56fde5181e();return
-(0xd2d+202-0xdf7);}static int DATARMNETc0cc5d08ba(struct sk_buff*
-DATARMNET543491eb0f,struct genl_info*DATARMNET54338da2ff){struct sk_buff*
-DATARMNET49b2094b56=NULL;int DATARMNET268a8314cf=(0xd2d+202-0xdf7);
-DATARMNET268a8314cf=DATARMNETe14c875532(&DATARMNET49b2094b56,&
-DATARMNET61e8f41aae,DATARMNET54338da2ff);if(DATARMNET268a8314cf)goto 
-DATARMNETbf4095f79e;if(!DATARMNET49b2094b56){DATARMNET268a8314cf=-EINVAL;goto 
-DATARMNETbf4095f79e;}genlmsg_reply(DATARMNET49b2094b56,DATARMNET54338da2ff);
-DATARMNETbf4095f79e:return DATARMNET268a8314cf;}static const struct genl_ops 
-DATARMNETf9df19988d[]={DATARMNET58eca5265b(DATARMNET0604500302,
-DATARMNET72501635c8),DATARMNET58eca5265b(DATARMNET91becfb9ac,DATARMNET41dd9b14ab
-),DATARMNET58eca5265b(DATARMNET14a3625b43,DATARMNETf1fa473089),
-DATARMNET58eca5265b(DATARMNET4478d3511b,DATARMNETcd9478470c),DATARMNET58eca5265b
-(DATARMNETc2d5a4e103,DATARMNETb86993aefb),DATARMNET58eca5265b(
-DATARMNET18145b00f6,DATARMNETc175a08219),DATARMNET58eca5265b(DATARMNETb8857fe6d9
-,DATARMNETc5f6c112ec),DATARMNET58eca5265b(DATARMNET6d50a30ec2,
-DATARMNETa6aec23397),DATARMNET58eca5265b(DATARMNET2e5d7ed755,DATARMNETa4773cb837
-),DATARMNET58eca5265b(DATARMNETd37aaf8b58,DATARMNET16add73734),
-DATARMNET58eca5265b(DATARMNET3626d362d4,DATARMNETb318ed4796),DATARMNET58eca5265b
-(DATARMNET433fe7da93,DATARMNET6a53c4576d),DATARMNET58eca5265b(
-DATARMNET77d31b75a3,DATARMNET425149b729),DATARMNET58eca5265b(DATARMNET7c479706fb
-,DATARMNETc0cc5d08ba),};static struct genl_family DATARMNET61e8f41aae={.name=
-DATARMNET040266f460,.version=DATARMNET7c442b83bb,.maxattr=DATARMNETebcc30fe04,.
-policy=DATARMNET0381a65e93,.ops=DATARMNETf9df19988d,.n_ops=ARRAY_SIZE(
-DATARMNETf9df19988d),};static int __init DATARMNET7eb0fa5c8f(void){int 
-DATARMNET61c2303133=(0xd2d+202-0xdf7);pr_info(
-"\x25\x73\x28\x29\x3a\x20\x72\x6d\x6e\x65\x74\x5f\x77\x6c\x61\x6e\x20\x69\x6e\x69\x74\x69\x61\x6c\x69\x7a\x69\x6e\x67" "\n"
-,__func__);DATARMNET61c2303133=genl_register_family(&DATARMNET61e8f41aae);if(
-DATARMNET61c2303133){pr_err(
-"\x25\x73\x28\x29\x3a\x20\x72\x65\x67\x69\x73\x74\x65\x72\x69\x6e\x67\x20\x66\x61\x6d\x69\x6c\x79\x20\x66\x61\x69\x6c\x65\x64\x3a\x20\x25\x69" "\n"
-,__func__,DATARMNET61c2303133);goto DATARMNET27d4697979;}DATARMNET61c2303133=
-DATARMNET9f106ed933();if(DATARMNET61c2303133){pr_err(
-"\x25\x73\x28\x29\x3a\x20\x63\x6f\x6e\x6e\x65\x63\x74\x69\x6f\x6e\x20\x6d\x61\x6e\x61\x67\x65\x6d\x65\x6e\x74\x20\x69\x6e\x69\x74\x20\x66\x61\x69\x6c\x65\x64\x3a\x20\x25\x69" "\n"
-,__func__,DATARMNET61c2303133);goto DATARMNETb042feb7e2;}DATARMNET61c2303133=
-DATARMNET49c2c17e77();if(DATARMNET61c2303133){pr_err(
-"\x25\x73\x28\x29\x3a\x20\x66\x72\x61\x67\x6d\x65\x6e\x74\x20\x6d\x61\x6e\x61\x67\x65\x6d\x65\x6e\x74\x20\x69\x6e\x69\x74\x20\x66\x61\x69\x6c\x65\x64\x3a\x20\x25\x69" "\n"
-,__func__,DATARMNET61c2303133);goto DATARMNET321a78afb9;}DATARMNET333c107558();
-pr_info(
-"\x25\x73\x28\x29\x3a\x20\x72\x6d\x6e\x65\x74\x5f\x77\x6c\x61\x6e\x5f\x73\x65\x74\x5f\x68\x6f\x6f\x6b\x73\x20\x73\x65\x74" "\n"
-,__func__);return(0xd2d+202-0xdf7);DATARMNET321a78afb9:DATARMNETf56cbaa2b1();
-DATARMNETb042feb7e2:genl_unregister_family(&DATARMNET61e8f41aae);
-DATARMNET27d4697979:return DATARMNET61c2303133;}static void __exit 
-DATARMNET7a381832d5(void){int DATARMNET61c2303133;pr_info(
-"\x25\x73\x28\x29\x3a\x20\x72\x6d\x6e\x65\x74\x5f\x77\x6c\x61\x6e\x20\x65\x78\x69\x74\x69\x6e\x67" "\n"
-,__func__);DATARMNET61c2303133=DATARMNETf56cbaa2b1();if(DATARMNET61c2303133)
-pr_err(
-"\x25\x73\x28\x29\x3a\x20\x63\x6f\x6e\x6e\x65\x63\x74\x69\x6f\x6e\x20\x6d\x61\x6e\x61\x67\x65\x6d\x65\x6e\x74\x20\x64\x65\x2d\x69\x6e\x69\x74\x20\x66\x61\x69\x6c\x65\x64\x3a\x20\x25\x69" "\n"
-,__func__,DATARMNET61c2303133);DATARMNETfae36afa03();DATARMNET61c2303133=
-genl_unregister_family(&DATARMNET61e8f41aae);if(DATARMNET61c2303133)pr_err(
-"\x25\x73\x28\x29\x3a\x20\x75\x6e\x72\x65\x67\x69\x73\x74\x65\x72\x20\x66\x61\x6d\x69\x6c\x79\x20\x66\x61\x69\x6c\x65\x64\x3a\x20\x25\x69" "\n"
-,__func__,DATARMNET61c2303133);DATARMNET4c08c7210c();pr_info(
-"\x25\x73\x28\x29\x3a\x20\x72\x6d\x6e\x65\x74\x5f\x77\x6c\x61\x6e\x5f\x75\x6e\x73\x65\x74\x5f\x68\x6f\x6f\x6b\x73\x20\x75\x6e\x73\x65\x74" "\n"
-,__func__);}MODULE_LICENSE("\x47\x50\x4c\x20\x76\x32");module_init(
-DATARMNET7eb0fa5c8f);module_exit(DATARMNET7a381832d5);
+
+static struct genl_family rmnet_wlan_genl_family;
+
+static int rmnet_wlan_genl_add_tuples(struct sk_buff *skb,
+				      struct genl_info *info)
+{
+	struct nlattr *tb[RMNET_WLAN_GENL_TUPLE_ATTR_MAX + 1];
+	struct rmnet_wlan_tuple *tuples;
+	struct nlattr *nla;
+	u32 tuple_count = 0;
+	int tuple_len;
+	int rc = 0;
+
+	if (!info->attrs[RMNET_WLAN_GENL_ATTR_TUPLES]) {
+		/* Help me help you! */
+		GENL_SET_ERR_MSG(info, "Must supply tuple info");
+		return -EINVAL;
+	}
+
+	nla_for_each_nested(nla, info->attrs[RMNET_WLAN_GENL_ATTR_TUPLES],
+			    tuple_len)
+		tuple_count++;
+
+	tuples = kcalloc(tuple_count, sizeof(*tuples), GFP_KERNEL);
+	if (!tuples) {
+		GENL_SET_ERR_MSG(info, "Kernel OOM");
+		return -ENOMEM;
+	}
+
+	tuple_count = 0;
+	nla_for_each_nested(nla, info->attrs[RMNET_WLAN_GENL_ATTR_TUPLES],
+			    tuple_len) {
+		struct rmnet_wlan_tuple *tuple;
+
+		rc = nla_parse_nested(tb, RMNET_WLAN_GENL_TUPLE_ATTR_MAX, nla,
+				      rmnet_wlan_genl_tuple_policy,
+				      info->extack);
+		if (rc)
+			goto out;
+
+		if (!tb[RMNET_WLAN_GENL_TUPLE_ATTR_TUPLE]) {
+			GENL_SET_ERR_MSG(info, "Must specify tuple entry");
+			goto out;
+		}
+
+		/* Sanitize. It's 2020 after all.
+		 *
+		 * ...Too soon?
+		 */
+		tuple = nla_data(tb[RMNET_WLAN_GENL_TUPLE_ATTR_TUPLE]);
+		if (tuple->ip_proto != 4 && tuple->ip_proto != 6) {
+			GENL_SET_ERR_MSG(info, "Invalid IP protocol");
+			goto out;
+		}
+
+		if (tuple->trans_proto != IPPROTO_TCP &&
+		    tuple->trans_proto != IPPROTO_UDP &&
+		    tuple->trans_proto != IPPROTO_ESP) {
+			GENL_SET_ERR_MSG(info, "Invalid transport protocol");
+			goto out;
+		}
+
+		memcpy(&tuples[tuple_count], tuple, sizeof(*tuple));
+		tuple_count++;
+	}
+
+	rc = rmnet_wlan_add_tuples(tuples, tuple_count, info);
+
+out:
+	kfree(tuples);
+	return rc;
+}
+
+static int rmnet_wlan_genl_del_tuples(struct sk_buff *skb,
+				      struct genl_info *info)
+{
+	struct nlattr *tb[RMNET_WLAN_GENL_TUPLE_ATTR_MAX + 1];
+	struct rmnet_wlan_tuple *tuples;
+	struct nlattr *nla;
+	u32 tuple_count = 0;
+	int tuple_len;
+	int rc;
+
+	if (!info->attrs[RMNET_WLAN_GENL_ATTR_TUPLES]) {
+		GENL_SET_ERR_MSG(info, "Must supply tuple info");
+		return -EINVAL;
+	}
+
+	nla_for_each_nested(nla, info->attrs[RMNET_WLAN_GENL_ATTR_TUPLES],
+			    tuple_len)
+		tuple_count++;
+
+	tuples = kcalloc(tuple_count, sizeof(*tuples), GFP_KERNEL);
+	if (!tuples) {
+		GENL_SET_ERR_MSG(info, "Kernel OOM");
+		return -ENOMEM;
+	}
+
+	tuple_count = 0;
+	nla_for_each_nested(nla, info->attrs[RMNET_WLAN_GENL_ATTR_TUPLES],
+			    tuple_len) {
+		struct rmnet_wlan_tuple *tuple;
+
+		rc = nla_parse_nested(tb, RMNET_WLAN_GENL_TUPLE_ATTR_MAX, nla,
+				      rmnet_wlan_genl_tuple_policy,
+				      info->extack);
+		if (rc)
+			goto out;
+
+		if (!tb[RMNET_WLAN_GENL_TUPLE_ATTR_TUPLE]) {
+			GENL_SET_ERR_MSG(info, "Must specify tuple entry");
+			rc = -EINVAL;
+			goto out;
+		}
+
+		tuple = nla_data(tb[RMNET_WLAN_GENL_TUPLE_ATTR_TUPLE]);
+		memcpy(&tuples[tuple_count], tuple, sizeof(*tuple));
+		tuple_count++;
+	}
+
+	rc = rmnet_wlan_del_tuples(tuples, tuple_count, info);
+
+out:
+	kfree(tuples);
+	return rc;
+}
+
+static int rmnet_wlan_genl_set_device(struct sk_buff *skb,
+				      struct genl_info *info)
+{
+	struct nlattr *nla;
+	int net_type;
+	int err;
+
+	if (!info->attrs[RMNET_WLAN_GENL_ATTR_DEV] ||
+	    !info->attrs[RMNET_WLAN_GENL_ATTR_NET_TYPE]) {
+		GENL_SET_ERR_MSG(info, "Must specify device and network info");
+		return -EINVAL;
+	}
+
+	nla = info->attrs[RMNET_WLAN_GENL_ATTR_DEV];
+	net_type = nla_get_u8(info->attrs[RMNET_WLAN_GENL_ATTR_NET_TYPE]);
+
+	if (net_type != DATA_PATH_PROXY_NET_WLAN &&
+	    net_type != DATA_PATH_PROXY_NET_WWAN &&
+	    net_type != DATA_PATH_PROXY_NET_LBO) {
+		GENL_SET_ERR_MSG(info, "Network type not supported!");
+		return -EINVAL;
+	}
+
+	if (net_type == DATA_PATH_PROXY_NET_WWAN)
+		err = rmnet_wwan_set_device(nla_data(nla), info);
+	else
+		err = rmnet_wlan_set_device(nla_data(nla), info);
+
+	return err;
+}
+
+static int rmnet_wlan_genl_unset_device(struct sk_buff *skb,
+					struct genl_info *info)
+{
+	struct nlattr *nla;
+	int net_type;
+	int err = 0;
+
+	if (!info->attrs[RMNET_WLAN_GENL_ATTR_DEV] ||
+	    !info->attrs[RMNET_WLAN_GENL_ATTR_NET_TYPE]) {
+		GENL_SET_ERR_MSG(info, "Must specify device and network info");
+		return -EINVAL;
+	}
+
+	nla = info->attrs[RMNET_WLAN_GENL_ATTR_DEV];
+	net_type = nla_get_u8(info->attrs[RMNET_WLAN_GENL_ATTR_NET_TYPE]);
+
+	if (net_type != DATA_PATH_PROXY_NET_WLAN &&
+	    net_type != DATA_PATH_PROXY_NET_WWAN &&
+	    net_type != DATA_PATH_PROXY_NET_LBO) {
+		GENL_SET_ERR_MSG(info, "Network type not supported!");
+		return -EINVAL;
+	}
+
+	if (net_type == DATA_PATH_PROXY_NET_WWAN) {
+		if (!rmnet_wlan_strlcmp(rmnet_wwan_get_dev(), nla_data(nla), IFNAMSIZ))
+			err = rmnet_wwan_unset_device(nla_data(nla), info);
+	} else {
+		if (!rmnet_wlan_strlcmp(rmnet_wlan_get_dev(), nla_data(nla), IFNAMSIZ))
+			err = rmnet_wlan_unset_device(nla_data(nla), info);
+	}
+
+	return err;
+}
+
+static int rmnet_wlan_genl_add_fwd_info(struct sk_buff *skb,
+					struct genl_info *info)
+{
+	struct rmnet_wlan_fwd_info fwd_info = {};
+	struct nlattr *nla;
+	char *addr_str;
+	int err;
+
+	/* Must provide the address and device to forward to */
+	if (!info->attrs[RMNET_WLAN_GENL_ATTR_FWD_ADDR] ||
+	    !info->attrs[RMNET_WLAN_GENL_ATTR_FWD_DEV]  ||
+	    !info->attrs[RMNET_WLAN_GENL_ATTR_NET_TYPE]) {
+		GENL_SET_ERR_MSG(info,
+				 "Must specify FWD device, address, and network");
+		return -EINVAL;
+	}
+
+	fwd_info.net_type = nla_get_u8(info->attrs[RMNET_WLAN_GENL_ATTR_NET_TYPE]);
+
+	nla = info->attrs[RMNET_WLAN_GENL_ATTR_FWD_ADDR];
+	addr_str = nla_data(nla);
+	if (strchr(addr_str, RMNET_WLAN_CHAR_COLON)) {
+		if (in6_pton(addr_str, nla_len(nla),
+			     fwd_info.v6_addr.s6_addr, -1, NULL) != 1) {
+			GENL_SET_ERR_MSG(info,
+					 "FWD address is invalid in IPv6");
+			return -EINVAL;
+		}
+
+		fwd_info.ip_proto = 6;
+	} else {
+		if (in4_pton(addr_str, nla_len(nla),
+			     (u8 *)&fwd_info.v4_addr, -1, NULL) != 1) {
+			GENL_SET_ERR_MSG(info,
+					 "FWD address is invalid in IPv4");
+			return -EINVAL;
+		}
+
+		fwd_info.ip_proto = 4;
+	}
+
+	nla = info->attrs[RMNET_WLAN_GENL_ATTR_FWD_DEV];
+	fwd_info.fwd_dev = dev_get_by_name(genl_info_net(info), nla_data(nla));
+	if (!fwd_info.fwd_dev) {
+		GENL_SET_ERR_MSG(info, "Invalid FWD device name");
+		return -EINVAL;
+	}
+
+	err = rmnet_wlan_add_fwd_info(&fwd_info, info);
+	dev_put(fwd_info.fwd_dev);
+	return err;
+}
+
+static int rmnet_wlan_genl_del_fwd_info(struct sk_buff *skb,
+					struct genl_info *info)
+{
+	struct rmnet_wlan_fwd_info fwd_info = {};
+	struct nlattr *nla;
+	char *addr_str;
+	int err;
+
+	/* Must provide the address and device to forward to */
+	if (!info->attrs[RMNET_WLAN_GENL_ATTR_FWD_ADDR] ||
+	    !info->attrs[RMNET_WLAN_GENL_ATTR_FWD_DEV]  ||
+	    !info->attrs[RMNET_WLAN_GENL_ATTR_NET_TYPE]) {
+		GENL_SET_ERR_MSG(info,
+				 "Must specify FWD device and address");
+		return -EINVAL;
+	}
+
+	fwd_info.net_type = nla_get_u8(info->attrs[RMNET_WLAN_GENL_ATTR_NET_TYPE]);
+
+	nla = info->attrs[RMNET_WLAN_GENL_ATTR_FWD_ADDR];
+	addr_str = nla_data(nla);
+	if (strchr(addr_str, RMNET_WLAN_CHAR_COLON)) {
+		if (in6_pton(addr_str, nla_len(nla),
+			     fwd_info.v6_addr.s6_addr, -1, NULL) != 1) {
+			GENL_SET_ERR_MSG(info,
+					 "FWD address is invalid in IPv6");
+			return -EINVAL;
+		}
+
+		fwd_info.ip_proto = 6;
+	} else {
+		if (in4_pton(addr_str, nla_len(nla),
+			     (u8 *)&fwd_info.v4_addr, -1, NULL) != 1) {
+			GENL_SET_ERR_MSG(info,
+					 "FWD address is invalid in IPv4");
+			return -EINVAL;
+		}
+
+		fwd_info.ip_proto = 4;
+	}
+
+	nla = info->attrs[RMNET_WLAN_GENL_ATTR_FWD_DEV];
+	fwd_info.fwd_dev = dev_get_by_name(genl_info_net(info), nla_data(nla));
+	if (!fwd_info.fwd_dev) {
+		GENL_SET_ERR_MSG(info, "Invalid FWD device name");
+		return -EINVAL;
+	}
+
+	err = rmnet_wlan_del_fwd_info(&fwd_info, info);
+	dev_put(fwd_info.fwd_dev);
+	return err;
+}
+
+static int rmnet_wlan_genl_set_encap_port(struct sk_buff *skb,
+					  struct genl_info *info)
+{
+	struct nlattr *nla;
+
+	nla = info->attrs[RMNET_WLAN_GENL_ATTR_ENCAP_PORT];
+	if (!nla) {
+		GENL_SET_ERR_MSG(info, "Must specify encap port");
+		return -EINVAL;
+	}
+
+	return rmnet_wlan_set_encap_port(nla_get_be16(nla), info);
+}
+
+static int rmnet_wlan_genl_unset_encap_port(struct sk_buff *skb,
+					    struct genl_info *info)
+{
+	struct nlattr *nla;
+
+	nla = info->attrs[RMNET_WLAN_GENL_ATTR_ENCAP_PORT];
+	if (!nla) {
+		GENL_SET_ERR_MSG(info, "Must specify encap port");
+		return -EINVAL;
+	}
+
+	return rmnet_wlan_unset_encap_port(nla_get_be16(nla), info);
+}
+
+static int rmnet_wlan_genl_act_encap_port_pass_through(struct sk_buff *skb,
+						       struct genl_info *info)
+{
+	struct nlattr *nla;
+
+	nla = info->attrs[RMNET_WLAN_GENL_ATTR_ENCAP_PORT];
+	if (!nla) {
+		GENL_SET_ERR_MSG(info, "Must specify encap port");
+		return -EINVAL;
+	}
+
+	return rmnet_wlan_act_encap_port_pass_through(nla_get_be16(nla), info);
+}
+
+static int rmnet_wlan_genl_act_encap_port_drop(struct sk_buff *skb,
+					       struct genl_info *info)
+{
+	struct nlattr *nla;
+
+	nla = info->attrs[RMNET_WLAN_GENL_ATTR_ENCAP_PORT];
+	if (!nla) {
+		GENL_SET_ERR_MSG(info, "Must specify encap port");
+		return -EINVAL;
+	}
+
+	return rmnet_wlan_act_encap_port_drop(nla_get_be16(nla), info);
+}
+
+static int rmnet_wlan_genl_reset(struct sk_buff *skb, struct genl_info *info)
+{
+	(void)skb;
+	(void)info;
+
+	rmnet_wlan_reset();
+	return 0;
+}
+
+static int rmnet_wlan_genl_add_ll_tuple(struct sk_buff *skb,
+					  struct genl_info *info)
+{
+	struct rmnet_wlan_ll_tuple tuple = {};
+	struct nlattr *nla;
+	char *addr_str;
+
+	/* Must provide the saddr, daddr, sport, dport */
+	if (!info->attrs[RMNET_WLAN_GENL_ATTR_LL_SRC_ADDR]  ||
+	    !info->attrs[RMNET_WLAN_GENL_ATTR_LL_DST_ADDR]  ||
+	    !info->attrs[RMNET_WLAN_GENL_ATTR_LL_SRC_PORT]  ||
+	    !info->attrs[RMNET_WLAN_GENL_ATTR_LL_DST_PORT]) {
+		GENL_SET_ERR_MSG(info,
+				 "Must specify FWD device and address");
+		return -EINVAL;
+	}
+
+
+	/* Set SRC address and set IPv4 or IPv6 Protocol */
+	nla = info->attrs[RMNET_WLAN_GENL_ATTR_LL_SRC_ADDR];
+	addr_str = nla_data(nla);
+	if (strchr(addr_str, RMNET_WLAN_CHAR_COLON)) {
+		if (in6_pton(addr_str, nla_len(nla),
+			     tuple.v6_saddr.s6_addr, -1, NULL) != 1) {
+			GENL_SET_ERR_MSG(info,
+					 "SRC address is invalid in IPv6");
+			return -EINVAL;
+		}
+
+		tuple.ip_proto = 6;
+	} else {
+		if (in4_pton(addr_str, nla_len(nla),
+			     (u8 *)&tuple.v4_saddr, -1, NULL) != 1) {
+			GENL_SET_ERR_MSG(info,
+					 "SRC address is invalid in IPv4");
+			return -EINVAL;
+		}
+
+		tuple.ip_proto = 4;
+	}
+
+	/* Set DST address */
+	nla = info->attrs[RMNET_WLAN_GENL_ATTR_LL_DST_ADDR];
+	addr_str = nla_data(nla);
+	if (strchr(addr_str, RMNET_WLAN_CHAR_COLON)) {
+		if (in6_pton(addr_str, nla_len(nla),
+			     tuple.v6_daddr.s6_addr, -1, NULL) != 1) {
+			GENL_SET_ERR_MSG(info,
+					 "DST address is invalid in IPv6");
+			return -EINVAL;
+		}
+	} else {
+		if (in4_pton(addr_str, nla_len(nla),
+			     (u8 *)&tuple.v4_daddr, -1, NULL) != 1) {
+			GENL_SET_ERR_MSG(info,
+					 "DST address is invalid in IPv4");
+			return -EINVAL;
+		}
+	}
+
+	/* Set Source and Destination Port */
+	nla = info->attrs[RMNET_WLAN_GENL_ATTR_LL_SRC_PORT];
+	tuple.sport = nla_get_be16(nla);
+
+	nla = info->attrs[RMNET_WLAN_GENL_ATTR_LL_DST_PORT];
+	tuple.dport = nla_get_be16(nla);
+
+	rmnet_wlan_add_ll_tuple(&tuple);
+
+	return 0;
+}
+
+static int rmnet_wlan_genl_del_ll_tuple(struct sk_buff *skb,
+					  struct genl_info *info)
+{
+	(void)skb;
+	(void)info;
+
+	rmnet_wlan_del_ll_tuple();
+
+	return 0;
+}
+
+static int rmnet_wlan_genl_get_tuple(struct sk_buff *skb,
+				     struct genl_info *info)
+{
+	struct sk_buff *skb_out = NULL;
+	int err = 0;
+
+	/* Create a buffer and write the internal tuples */
+	err = rmnet_wlan_get_tuples(&skb_out, &rmnet_wlan_genl_family, info);
+	if (err)
+		goto out;
+
+	if (!skb_out) {
+		err = -EINVAL;
+		goto out;
+	}
+
+	genlmsg_reply(skb_out, info);
+out:
+	return err;
+}
+
+static const struct genl_ops rmnet_wlan_genl_ops[] = {
+	RMNET_WLAN_GENL_OP(RMNET_WLAN_GENL_CMD_ADD_TUPLES,
+			   rmnet_wlan_genl_add_tuples),
+	RMNET_WLAN_GENL_OP(RMNET_WLAN_GENL_CMD_DEL_TUPLES,
+			   rmnet_wlan_genl_del_tuples),
+	RMNET_WLAN_GENL_OP(RMNET_WLAN_GENL_CMD_SET_DEV,
+			   rmnet_wlan_genl_set_device),
+	RMNET_WLAN_GENL_OP(RMNET_WLAN_GENL_CMD_UNSET_DEV,
+			   rmnet_wlan_genl_unset_device),
+	RMNET_WLAN_GENL_OP(RMNET_WLAN_GENL_CMD_ADD_FWD_INFO,
+			   rmnet_wlan_genl_add_fwd_info),
+	RMNET_WLAN_GENL_OP(RMNET_WLAN_GENL_CMD_DEL_FWD_INFO,
+			   rmnet_wlan_genl_del_fwd_info),
+	RMNET_WLAN_GENL_OP(RMNET_WLAN_GENL_CMD_SET_ENCAP_PORT,
+			   rmnet_wlan_genl_set_encap_port),
+	RMNET_WLAN_GENL_OP(RMNET_WLAN_GENL_CMD_UNSET_ENCAP_PORT,
+			   rmnet_wlan_genl_unset_encap_port),
+	RMNET_WLAN_GENL_OP(RMNET_WLAN_GENL_CMD_RESET,
+			   rmnet_wlan_genl_reset),
+	RMNET_WLAN_GENL_OP(RMNET_WLAN_GENL_CMD_ENCAP_PORT_ACT_PASS_THROUGH,
+			   rmnet_wlan_genl_act_encap_port_pass_through),
+	RMNET_WLAN_GENL_OP(RMNET_WLAN_GENL_CMD_ENCAP_PORT_ACT_DROP,
+			   rmnet_wlan_genl_act_encap_port_drop),
+	RMNET_WLAN_GENL_OP(RMNET_WLAN_GENL_CMD_LL_ADDR_ADD,
+			   rmnet_wlan_genl_add_ll_tuple),
+	RMNET_WLAN_GENL_OP(RMNET_WLAN_GENL_CMD_LL_ADDR_DEL,
+			   rmnet_wlan_genl_del_ll_tuple),
+	RMNET_WLAN_GENL_OP(RMNET_WLAN_GENL_CMD_GET_TUPLES,
+			   rmnet_wlan_genl_get_tuple),
+};
+
+static struct genl_family rmnet_wlan_genl_family = {
+	.name    = RMNET_WLAN_GENL_FAMILY_NAME,
+	.version = RMNET_WLAN_GENL_VERSION,
+	.maxattr = RMNET_WLAN_GENL_ATTR_MAX,
+	.policy  = rmnet_wlan_genl_attr_policy,
+	.ops     = rmnet_wlan_genl_ops,
+	.n_ops   = ARRAY_SIZE(rmnet_wlan_genl_ops),
+};
+
+static int __init rmnet_wlan_genl_init(void)
+{
+	int ret = 0;
+
+	pr_info("%s(): rmnet_wlan initializing\n", __func__);
+	ret = genl_register_family(&rmnet_wlan_genl_family);
+	if (ret) {
+		pr_err("%s(): registering family failed: %i\n", __func__, ret);
+		goto err0;
+	}
+
+	ret = rmnet_wlan_connection_init();
+	if (ret) {
+		pr_err("%s(): connection management init failed: %i\n", __func__, ret);
+		goto err1;
+	}
+
+	ret = rmnet_wlan_fragment_init();
+	if (ret) {
+		pr_err("%s(): fragment management init failed: %i\n", __func__,
+		       ret);
+		goto err2;
+	}
+
+	rmnet_wlan_set_hooks();
+	pr_info("%s(): rmnet_wlan_set_hooks set\n", __func__);
+
+	return 0;
+err2:
+	rmnet_wlan_connection_deinit();
+err1:
+	genl_unregister_family(&rmnet_wlan_genl_family);
+err0:
+	return ret;
+}
+
+static void __exit rmnet_wlan_genl_exit(void)
+{
+	int ret;
+
+	pr_info("%s(): rmnet_wlan exiting\n", __func__);
+	ret = rmnet_wlan_connection_deinit();
+	if (ret)
+		pr_err("%s(): connection management de-init failed: %i\n", __func__, ret);
+
+	rmnet_wlan_deinit();
+	ret = genl_unregister_family(&rmnet_wlan_genl_family);
+	if (ret)
+		pr_err("%s(): unregister family failed: %i\n", __func__, ret);
+
+	rmnet_wlan_unset_hooks();
+	pr_info("%s(): rmnet_wlan_unset_hooks unset\n", __func__);
+}
+
+
+MODULE_LICENSE("GPL v2");
+module_init(rmnet_wlan_genl_init);
+module_exit(rmnet_wlan_genl_exit);

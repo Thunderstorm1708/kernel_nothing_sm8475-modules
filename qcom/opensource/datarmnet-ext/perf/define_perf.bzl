@@ -5,21 +5,32 @@ def define_perf(target, variant):
     kernel_build_variant = "{}_{}".format(target, variant)
     include_base = "../../../{}".format(native.package_name())
 
+    deps_perf = select({
+	"//build/qcom_build_extensions:qtisocrepo_true": ["//soc-repo:all_headers"],
+	"//build/qcom_build_extensions:qtisocrepo_false": ["//msm-kernel:all_headers"],
+    })
+
+    kernel_build = select({
+	"//build/qcom_build_extensions:qtisocrepo_true": "//soc-repo:{}_base_kernel".format(kernel_build_variant),
+	"//build/qcom_build_extensions:qtisocrepo_false": "//msm-kernel:{}".format(kernel_build_variant),
+    })
+
     ddk_module(
         name = "{}_perf".format(kernel_build_variant),
         out = "rmnet_perf.ko",
         srcs = [
             "rmnet_perf_main.c",
+            "rmnet_perf.h",
             "rmnet_perf_tcp.c",
             "rmnet_perf_tcp.h",
             "rmnet_perf_udp.c",
             "rmnet_perf_udp.h",
         ],
-        kernel_build = "//vendor/nothing/pong-kernel:{}".format(kernel_build_variant),
-        deps = [
-            "//vendor/nothing/pong-kernel:all_headers",
-            "//vendor/nothing/pong-modules/qcom/opensource/datarmnet:{}_rmnet_core".format(kernel_build_variant),
-            "//vendor/nothing/pong-modules/qcom/opensource/datarmnet:rmnet_core_headers",
+        kernel_build = kernel_build,
+        deps = deps_perf + [
+            ":include_headers",
+            "//vendor/qcom/opensource/datarmnet:{}_rmnet_core".format(kernel_build_variant),
+            "//vendor/qcom/opensource/datarmnet:rmnet_core_headers",
         ],
         copts = ["-Wno-misleading-indentation"],
     )
