@@ -58,8 +58,11 @@ modules_install:
 	cd $(INSTALL_MOD_PATH)/lib/modules/$(KERNEL_RELEASE)/kernel && \
 		find . -name '*.ko' | sed 's|^\./||' | sort > $(KBUILD_OUT)/in-tree-modules.txt && \
 		comm -23 $(KBUILD_OUT)/in-tree-modules.txt $(BUILD_DIR)/gki_modules.txt | xargs -r rm -f
-	$(MAKE) -C $(REPO_DIR)/soc-repo/build M=$(SOC_M) SOC_TARGET_VARIANT=$(SOC_TARGET_VARIANT) modules_install
-	$(MAKE) INSTALL_MOD_STRIP=1 -C $(KERNEL_SRC) M=$(TECHPACKS) modules_install
+	# Like a kleaf build, sign only the GKI modules: the kernel configuration
+	# signs on modules_install for them, the vendor modules stay unsigned
+	$(MAKE) -C $(REPO_DIR)/soc-repo/build M=$(SOC_M) SOC_TARGET_VARIANT=$(SOC_TARGET_VARIANT) \
+		CONFIG_MODULE_SIG_ALL= modules_install
+	$(MAKE) INSTALL_MOD_STRIP=1 -C $(KERNEL_SRC) M=$(TECHPACKS) CONFIG_MODULE_SIG_ALL= modules_install
 
 clean:
 	$(MAKE) -C $(REPO_DIR)/soc-repo/build M=$(SOC_M) clean

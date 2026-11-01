@@ -108,6 +108,12 @@ jobs:
               b=$(basename $m .ko); grep -qx ".*/$b" kernel/nothing/sm8475/android/protected_module_names_list || continue
               [ -n "$(modinfo -F signer $m)" ] || echo $b; done | sort -u | tr '\n' ' ')
             echo "protected GKI modules without a signature: ${unsigned:-none}"
+            signed_vendor=$(find $P/vendor_dlkm -name '*.ko' -path '*' | while read m; do
+              b=$(basename $m .ko); grep -qx ".*/$b" kernel/nothing/sm8475/android/protected_module_names_list && continue
+              grep -q "/$b.ko\$" <(find $P/obj/PACKAGING/kernel_modules_intermediates/lib/modules/*/kernel -name '*.ko') && continue
+              [ -z "$(modinfo -F signer $m)" ] || echo $b; done | wc -l)
+            echo "signed vendor (non-GKI) modules: $signed_vendor (a kleaf build signs none)"
+            [ -z "$unsigned" ] || { echo "::error::protected GKI modules are not signed: $unsigned"; exit 1; }
           } | tee -a ../compare.txt
 
       - name: Summary
