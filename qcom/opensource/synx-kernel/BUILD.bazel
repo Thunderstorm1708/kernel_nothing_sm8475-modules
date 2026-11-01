@@ -39,6 +39,12 @@ ddk_headers(
     hdrs = [":uapi_headers", ":synx_drivers_headers"]
 )
 
+# The 6.12 camera and eva drivers ask for the v1 synx API headers by this name
+ddk_headers(
+    name = "synx_v1_headers",
+    hdrs = [":synx_headers"]
+)
+
 ddk_uapi_headers(
     name = "msm_synx_ddk_uapi_headers",
     srcs = [
