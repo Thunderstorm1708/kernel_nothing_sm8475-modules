@@ -13,10 +13,15 @@ must load on the new Image. The checks follow the 6.12 module loader:
     GKI modules were signed by another build's key) is a vendor module and
     may only import vmlinux symbols on the permitted list
     (.vmlinux.permitted-imports.c, CONFIG_TRIM_UNUSED_KSYMS)
+  - CONFIG_MODULE_SIG_PROTECT: such a module may not export a symbol of a
+    protected GKI module (android/protected_module_names_list): rfkill.ko
+    of the ROM, exporting rfkill_alloc, fails like that and, being in
+    vendor_boot, makes first stage init give up (kernel panic)
   - symbols exported by other modules of the ROM resolve among themselves
 
 usage: check_rom_modules.py <Module.symvers> <.vmlinux.permitted-imports.c>
-                            <this kernel's vermagic> <rom modules dir>...
+                            <protected_module_names_list> <this kernel's vermagic>
+                            <rom modules dir>...
 """
 import glob
 import os
@@ -24,8 +29,8 @@ import re
 import subprocess
 import sys
 
-symvers, permitted_c, vermagic = sys.argv[1:4]
-dirs = sys.argv[4:]
+symvers, permitted_c, protected_list, vermagic = sys.argv[1:5]
+dirs = sys.argv[5:]
 
 vmlinux = {}
 for line in open(symvers):
@@ -33,6 +38,14 @@ for line in open(symvers):
     if owner.endswith("vmlinux"):
         vmlinux[sym] = int(crc, 16)
 permitted = set(re.findall(r'"([^"]+)"', open(permitted_c).read()))
+# exports of the protected GKI modules (what modpost puts in
+# .vmlinux.protected-exports.c), from Module.symvers of this build
+protected_mods = {l.strip().rsplit("/", 1)[-1] for l in open(protected_list) if l.strip()}
+protected_exports = set()
+for line in open(symvers):
+    crc, sym, owner = line.split("\t")[:3]
+    if owner.rsplit("/", 1)[-1] in protected_mods:
+        protected_exports.add(sym)
 want_magic = vermagic.split(" ", 1)[1]
 
 
@@ -59,6 +72,12 @@ for name, p in sorted(mods.items()):
         issues.append(f"vermagic '{magic}'")
     is_signed = bool(run("modinfo", "-F", "signer", p).strip())
     signed += is_signed
+    if is_signed:
+        nm = run(os.environ.get("LLVM_NM", "llvm-nm"), p)
+        exp = {l.split()[-1][len("__ksymtab_"):] for l in nm.splitlines() if " __ksymtab_" in l}
+        bad = sorted(exp & protected_exports)
+        if bad:
+            issues.append(f"exports protected symbol {bad[0]} (signed by another key)")
     for line in run("modprobe", "--dump-modversions", p).splitlines():
         crc, sym = line.split()[:2]
         if sym == "module_layout":

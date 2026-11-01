@@ -87,7 +87,7 @@ jobs:
         working-directory: tree
         run: |
           set -o pipefail
-          bash kernel/nothing/sm8475-modules/.github/ci/lineage-kernel.sh 2>&1 | tee ../build.log
+          CI_TEST_IMAGE=1 bash kernel/nothing/sm8475-modules/.github/ci/lineage-kernel.sh 2>&1 | tee ../build.log
 
       - name: Compare with redducc's kleaf build
         if: success()
@@ -102,6 +102,12 @@ jobs:
             echo "dtb.img vs cape-v2 + cape + capep: $(cat ../reference/dtbs/cape-v2.dtb ../reference/dtbs/cape.dtb ../reference/dtbs/capep.dtb | cmp -s - $P/dtb.img && echo identical || echo DIFFERENT)"
             n=$(stat -c %s $P/dtbo.img)
             echo "dtbo.img vs reference (without its AVB padding): $(cmp -s -n $n $P/dtbo.img ../reference/dtbs/dtbo.img && echo identical || echo DIFFERENT)"
+            # GKI modules must keep the signature of this build: unsigned ones may not
+            # export protected GKI symbols (CONFIG_MODULE_SIG_PROTECT), e.g. rfkill in vendor_boot
+            unsigned=$(for m in $(find $P/vendor_dlkm $P/vendor_ramdisk -name '*.ko'); do
+              b=$(basename $m .ko); grep -qx ".*/$b" kernel/nothing/sm8475/android/protected_module_names_list || continue
+              [ -n "$(modinfo -F signer $m)" ] || echo $b; done | sort -u | tr '\n' ' ')
+            echo "protected GKI modules without a signature: ${unsigned:-none}"
           } | tee -a ../compare.txt
 
       - name: Summary
@@ -123,8 +129,9 @@ jobs:
         run: |
           cp obj/KERNEL_OBJ/.config kernel.config
           cp obj/KERNEL_OBJ/System.map obj/KERNEL_OBJ/Module.symvers obj/KERNEL_OBJ/.vmlinux.permitted-imports.c .
-          zip -qr ../../../../../Pong-kernel.zip kernel dtb.img dtbo.img kernel.config System.map Module.symvers \
-            .vmlinux.permitted-imports.c vendor_dlkm vendor_ramdisk recovery
+          cp ../../../../kernel/nothing/sm8475/android/protected_module_names_list .
+          zip -qr ../../../../../Pong-kernel.zip kernel kernel-test-nosigprotect dtb.img dtbo.img kernel.config System.map Module.symvers \
+            .vmlinux.permitted-imports.c protected_module_names_list vendor_dlkm vendor_ramdisk recovery
 
       - uses: actions/upload-artifact@v4
         if: success()
@@ -171,7 +178,8 @@ jobs:
           git -C ak3 checkout -q 41f04bd
           rm -rf ak3/.git ak3/.github ak3/README.md ak3/modules ak3/patch ak3/ramdisk
           cp ci/.github/ci/anykernel.sh ak3/anykernel.sh
-          cp k/kernel ak3/Image
+          # the test Image: other ROMs' GKI modules are signed by another key
+          cp k/kernel-test-nosigprotect ak3/Image
           rel=$(strings k/kernel | grep -m1 -o "Linux version [^ ]*" | cut -d' ' -f3)
           sed -i "s|@RELEASE@|$rel|; s|@RUN@|${{ github.run_number }}|; s|@SHA@|${GITHUB_SHA::7}|" ak3/anykernel.sh
           (cd ak3 && zip -qr9 ../Pong-6.12-AnyKernel3-${{ github.run_number }}.zip .)
@@ -210,7 +218,8 @@ jobs:
             (cd rom/vendor_ramdisk && { lz4 -dc "../../$r" 2>/dev/null || gzip -dc "../../$r"; } | cpio -idm --quiet 2>/dev/null) || true
           done
           V=$(modinfo -F vermagic $(find k/vendor_dlkm -name '*.ko' | head -1))
-          LLVM_NM=llvm-nm python3 ci/.github/ci/check_rom_modules.py k/Module.symvers k/.vmlinux.permitted-imports.c "$V" \
+          LLVM_NM=llvm-nm python3 ci/.github/ci/check_rom_modules.py k/Module.symvers k/.vmlinux.permitted-imports.c \
+            k/protected_module_names_list "$V" \
             rom/vendor_dlkm rom/vendor_ramdisk | tee -a rom-check.txt
           echo "ROM modules not built here: $(comm -23 <(find rom -name '*.ko' -printf '%f\n' | sort -u) <(find k/vendor_dlkm -name '*.ko' -printf '%f\n' | sort -u) | tr '\n' ' ')" | tee -a rom-check.txt
 

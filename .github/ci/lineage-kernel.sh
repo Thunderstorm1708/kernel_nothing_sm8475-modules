@@ -273,3 +273,15 @@ if [ "$(b BOARD_KERNEL_SEPARATED_DTBO)" = true ]; then
 fi
 cp "$KERNEL_OUT/arch/$KERNEL_ARCH/boot/$(b BOARD_KERNEL_IMAGE_NAME)" "$PRODUCT_OUT/kernel"
 step "Done: kernel $kernel_release"
+
+# CI only, after everything the ROM build does: an Image for testing on a ROM
+# that brings its own GKI modules (AnyKernel3 on PenguinOS). Those are signed
+# by another build's key, which CONFIG_MODULE_SIG_PROTECT refuses for modules
+# exporting protected GKI symbols (rfkill in vendor_boot: init gives up).
+if [ -n "$CI_TEST_IMAGE" ]; then
+	step "Test Image without CONFIG_MODULE_SIG_PROTECT (for other ROMs' modules)"
+	"$KERNEL_SRC/scripts/config" --file "$KERNEL_OUT/.config" -d MODULE_SIG_PROTECT
+	kmake "$KERNEL_OUT" olddefconfig
+	kmake "$KERNEL_OUT" "$(b BOARD_KERNEL_IMAGE_NAME)"
+	cp "$KERNEL_OUT/arch/$KERNEL_ARCH/boot/$(b BOARD_KERNEL_IMAGE_NAME)" "$PRODUCT_OUT/kernel-test-nosigprotect"
+fi

@@ -5,7 +5,7 @@
 ### AnyKernel setup
 # global properties
 properties() { '
-kernel.string=Pong 6.12 inline build @RELEASE@ (CI run @RUN@, @SHA@) - test kernel, no KernelSU
+kernel.string=Pong 6.12 inline build @RELEASE@ (CI run @RUN@, @SHA@) - test kernel for ROMs with their own modules (no SIG_PROTECT), no KernelSU
 do.devicecheck=1
 do.modules=0
 do.systemless=0
