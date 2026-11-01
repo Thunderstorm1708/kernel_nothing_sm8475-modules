@@ -406,15 +406,21 @@ for pkg in sorted(h.PACKAGES):
         if name == "__evaluated__" or rec["rule"] != "ddk_module" or not name.startswith(args.tv + "_"):
             continue
         kw = rec["kw"]
-        cfg = {}
-        inputs = config_inputs(pkg, kw)
-        if inputs:
-            cfg = module_config(inputs)
         subs = []
         for d in plist(kw.get("deps")):
             p, t, r = resolve(d, pkg) if isinstance(d, str) else (None, None, None)
             if r is not None and r["rule"] == "ddk_submodule":
                 subs.append((p, r))
+        # Like Bazel, only analyse the modules that are built: the Bazel files
+        # of some techpacks define waipio modules whose inputs do not exist
+        # (mm-drivers hw_fence has no waipio_defconfig).
+        outs = [pick_one(kw.get("out"))] + [pick_one(r["kw"].get("out")) for p, r in subs]
+        if not any(isinstance(o, str) and o[:-3].replace("-", "_") in WANT for o in outs):
+            continue
+        cfg = {}
+        inputs = config_inputs(pkg, kw)
+        if inputs:
+            cfg = module_config(inputs)
         if kw.get("out"):
             units.append(make_unit(pkg, rec, None, cfg))
         for p, r in subs:
