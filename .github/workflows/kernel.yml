@@ -7,7 +7,9 @@ name: Kernel (LineageOS inline build)
 
 on:
   push:
-    branches: [17-6.12]
+    # ci-run: push any commit of 17-6.12 there to rebuild, e.g. after a change
+    # of the kernel, devicetrees or device repos (which cannot trigger this)
+    branches: [17-6.12, ci-run]
   workflow_dispatch:
     inputs:
       kernel_branch:
