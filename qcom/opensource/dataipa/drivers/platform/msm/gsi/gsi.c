@@ -5954,7 +5954,7 @@ static int qcom_va_md_gsi_notif_handler(struct notifier_block *this,
 {
 	struct va_md_entry entry;
 
-	strlcpy(entry.owner, "gsi_mini", sizeof(entry.owner));
+	strscpy(entry.owner, "gsi_mini", sizeof(entry.owner));
 	entry.vaddr = (unsigned long)gsi_ctx;
 	entry.size = sizeof(struct gsi_ctx);
 	qcom_va_md_add_region(&entry);

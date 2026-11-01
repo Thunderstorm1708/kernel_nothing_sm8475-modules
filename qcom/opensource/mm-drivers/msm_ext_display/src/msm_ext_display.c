@@ -676,9 +676,15 @@ static const struct of_device_id msm_ext_dt_match[] = {
 };
 MODULE_DEVICE_TABLE(of, msm_ext_dt_match);
 
+/* Linux 6.11+: platform_driver.remove returns void */
+static void msm_ext_disp_remove_void(struct platform_device *pdev)
+{
+	msm_ext_disp_remove(pdev);
+}
+
 static struct platform_driver this_driver = {
 	.probe = msm_ext_disp_probe,
-	.remove = msm_ext_disp_remove,
+	.remove = msm_ext_disp_remove_void,
 	.driver = {
 		.name = "msm-ext-disp",
 		.of_match_table = msm_ext_dt_match,

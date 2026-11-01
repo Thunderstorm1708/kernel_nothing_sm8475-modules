@@ -3915,6 +3915,12 @@ static const struct dev_pm_ops rmnet_ipa_pm_ops = {
 	.resume_early = rmnet_ipa_ap_resume,
 };
 
+/* Linux 6.11+: platform_driver.remove returns void */
+static void ipa3_wwan_remove_void(struct platform_device *pdev)
+{
+	ipa3_wwan_remove(pdev);
+}
+
 static struct platform_driver rmnet_ipa_driver = {
 	.driver = {
 		.name = "rmnet_ipa3",
@@ -3922,7 +3928,7 @@ static struct platform_driver rmnet_ipa_driver = {
 		.of_match_table = rmnet_ipa_dt_match,
 	},
 	.probe = ipa3_wwan_probe,
-	.remove = ipa3_wwan_remove,
+	.remove = ipa3_wwan_remove_void,
 };
 
 /**

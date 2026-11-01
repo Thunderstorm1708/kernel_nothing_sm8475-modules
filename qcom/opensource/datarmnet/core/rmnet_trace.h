@@ -40,7 +40,7 @@ TRACE_EVENT(rmnet_xmit_skb,
 	),
 
 	TP_fast_assign(
-		__assign_str(dev_name, skb->dev->name);
+		__assign_str(dev_name);
 		__entry->len = skb->len;
 	),
 
@@ -139,8 +139,8 @@ TRACE_EVENT(print_skb_gso,
 		__entry->dest = dest;
 		__entry->ip_proto = ip_proto;
 		__entry->xport_proto = xport_proto;
-		__assign_str(saddr, saddr);
-		__assign_str(daddr, daddr);
+		__assign_str(saddr);
+		__assign_str(daddr);
 	),
 
 	TP_printk("GSO: skbaddr=%pK, len=%d, data_len=%d, [%s][%s] src=%s %u dest=%s %u",
@@ -174,8 +174,8 @@ DECLARE_EVENT_CLASS(print_icmp,
 		__entry->ip_proto = ip_proto;
 		__entry->type = type;
 		__entry->sequence = sequence;
-		__assign_str(saddr, saddr);
-		__assign_str(daddr, daddr);
+		__assign_str(saddr);
+		__assign_str(daddr);
 	),
 
 	TP_printk("ICMP: skbaddr=%pK, len=%d, [%s] type=%u sequence=%u source=%s dest=%s",
@@ -227,8 +227,8 @@ DECLARE_EVENT_CLASS(print_tcp,
 	TP_fast_assign(
 		__entry->skbaddr = skb;
 		__entry->len = skb->len;
-		__assign_str(saddr, saddr);
-		__assign_str(daddr, daddr);
+		__assign_str(saddr);
+		__assign_str(daddr);
 		__entry->source = tp->source;
 		__entry->dest = tp->dest;
 		__entry->seq = tp->seq;
@@ -284,8 +284,8 @@ DECLARE_EVENT_CLASS(print_udp,
 	TP_fast_assign(
 		__entry->skbaddr = skb;
 		__entry->len = skb->len;
-		__assign_str(saddr, saddr);
-		__assign_str(daddr, daddr);
+		__assign_str(saddr);
+		__assign_str(daddr);
 		__entry->source = uh->source;
 		__entry->dest = uh->dest;
 		__entry->ip_id = ip_id;

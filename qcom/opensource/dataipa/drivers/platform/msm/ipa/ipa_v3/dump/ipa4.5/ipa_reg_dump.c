@@ -1933,7 +1933,7 @@ int ipa_reg_save_init(u32 value)
 	/*Adding ipa_reg_save pointer to minidump list*/
 	mini_dump = (struct ipa_minidump_data *)kzalloc(sizeof(struct ipa_minidump_data), GFP_KERNEL);
 	if (mini_dump != NULL) {
-		strlcpy(mini_dump->data.owner, "ipa_reg_save", sizeof(mini_dump->data.owner));
+		strscpy(mini_dump->data.owner, "ipa_reg_save", sizeof(mini_dump->data.owner));
 		mini_dump->data.vaddr = (unsigned long)&ipa_reg_save;
 		mini_dump->data.size = sizeof(ipa_reg_save);
 		list_add(&mini_dump->entry, &ipa3_ctx->minidump_list_head);

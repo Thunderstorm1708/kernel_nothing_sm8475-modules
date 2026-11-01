@@ -3,6 +3,7 @@
  * Copyright (c) 2020-2021, The Linux Foundation. All rights reserved.
  */
 
+#include <linux/of.h>
 #include <linux/module.h>
 #include <linux/of_platform.h>
 #include <linux/platform_device.h>
@@ -559,9 +560,15 @@ static const struct of_device_id msm_mmrm_dt_match[] = {
 
 MODULE_DEVICE_TABLE(of, msm_mmrm_dt_match);
 
+/* Linux 6.11+: platform_driver.remove returns void */
+static void msm_mmrm_remove_void(struct platform_device *pdev)
+{
+	msm_mmrm_remove(pdev);
+}
+
 static struct platform_driver msm_mmrm_driver = {
 	.probe = msm_mmrm_probe,
-	.remove = msm_mmrm_remove,
+	.remove = msm_mmrm_remove_void,
 	.driver = {
 		.name = "msm-mmrm",
 		.of_match_table = msm_mmrm_dt_match,

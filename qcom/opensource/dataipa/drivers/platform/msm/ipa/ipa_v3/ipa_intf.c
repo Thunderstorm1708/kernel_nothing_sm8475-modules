@@ -782,6 +782,8 @@ ssize_t ipa3_read(struct file *filp, char __user *buf, size_t count,
 	if (locked)
 		mutex_unlock(&ipa3_ctx->msg_lock);
 
+	/* count is only decremented; keep -Wunused-but-set-parameter quiet */
+	(void)count;
 	return ret;
 }
 
