@@ -1,0 +1,11 @@
+/* SPDX-License-Identifier: GPL-2.0 */
+/* ipanetm.ko: values of its Kconfig with its defconfig */
+#define CONFIG_GSI_MODULE 1
+#define CONFIG_IPA3_MODULE 1
+#define CONFIG_IPA3_REGDUMP 1
+#define CONFIG_IPA3_REGDUMP_IPA_5_5 1
+#define CONFIG_IPA_CLIENTS_MANAGER_MODULE 1
+#define CONFIG_IPA_KERNEL_TESTS_MODULE_MODULE 1
+#define CONFIG_IPA_WDI_UNIFIED_API 1
+#define CONFIG_RMNET_IPA3 1
+#define CONFIG_RNDIS_IPA_MODULE 1
