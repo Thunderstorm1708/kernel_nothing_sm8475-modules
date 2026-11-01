@@ -120,6 +120,8 @@ fi
 read -r -a ADD <<< "$(b TARGET_KERNEL_ADDITIONAL_FLAGS)"
 KERNEL_MAKE_FLAGS+=("${ADD[@]}")
 KERNEL_MAKE_CMD=$BT/bin/make
+# CI diagnostics only (not what the ROM build does): keep going after errors
+[ -z "$CI_KEEP_GOING" ] || KERNEL_MAKE_FLAGS+=(-k)
 
 # PATH_OVERRIDE + TOOLS_PATH_OVERRIDE
 export PATH=$T/$HOST_OUT_EXECUTABLES:$PATH

@@ -8,7 +8,8 @@ name: Kernel (LineageOS inline build)
 on:
   push:
     # ci-run: push any commit of 17-6.12 there to rebuild, e.g. after a change
-    # of the kernel, devicetrees or device repos (which cannot trigger this)
+    # of the kernel, devicetrees or device repos (which cannot trigger this).
+    # Builds there use make -k, to collect all compile errors at once.
     branches: [17-6.12, ci-run]
   workflow_dispatch:
     inputs:
@@ -24,6 +25,10 @@ on:
       lineage_branch:
         description: LineageOS branch (toolchain versions)
         default: lineage-24.0
+      keep_going:
+        description: Diagnostics, make -k (collect all compile errors)
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -38,6 +43,7 @@ env:
   DEVICETREES_BRANCH: ${{ inputs.devicetrees_branch || '17-6.12' }}
   DEVICE_BRANCH: ${{ inputs.device_branch || '17-6.12-src' }}
   LINEAGE_BRANCH: ${{ inputs.lineage_branch || 'lineage-24.0' }}
+  CI_KEEP_GOING: ${{ (inputs.keep_going || github.ref_name == 'ci-run') && '1' || '' }}
 
 jobs:
   build:
