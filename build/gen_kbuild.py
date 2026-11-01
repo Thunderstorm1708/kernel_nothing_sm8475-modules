@@ -483,6 +483,11 @@ for u in sorted(units, key=lambda u: u.out):
                 w = f"{stem}__{os.path.basename(s)}"
                 open(os.path.join(args.out, w), "w").write(f'#include "{os.path.relpath(s, args.out)}"\n')
                 obj = f"build/kbuild/{w[:-2]}.o"
+            if obj in objs:
+                # listed twice in the Bazel srcs (qcacld-3.0): build it once,
+                # and do not double its flags, which would make the command
+                # lines of qca_cld3 too long for deep build trees
+                continue
             owner[obj] = mod
             objs.append(obj)
         elif s.endswith(".o_shipped") or s.endswith(".o"):
