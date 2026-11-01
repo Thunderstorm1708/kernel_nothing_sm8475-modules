@@ -1271,6 +1271,8 @@ static int haptics_get_status_data(struct haptics_chip *chip,
 		name = "FIFO_REAL_TIME_STS";
 	else if (sel == AUTO_BRAKE_CAL_STS)
 		name = "AUTO_BRAKE_CAL_STS";
+	else
+		name = "UNKNOWN_STS";
 
 	dev_dbg(chip->dev, "Get status data[%s] = (%#x, %#x)\n", name, data[0], data[1]);
 	trace_qcom_haptics_status(name, data[0], data[1]);
