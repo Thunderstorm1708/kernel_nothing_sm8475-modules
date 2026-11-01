@@ -1,0 +1,136 @@
+# SPDX-License-Identifier: GPL-2.0
+#
+# Build the Nothing Phone (2) 6.12 kernel the way a LineageOS 24.0 ROM build
+# does (same prebuilt toolchain, same make steps and module packaging), then
+# compare it with redducc's kleaf build.
+name: Kernel (LineageOS inline build)
+
+on:
+  push:
+    branches: [17-6.12]
+  workflow_dispatch:
+    inputs:
+      kernel_branch:
+        description: kernel_nothing_sm8475 branch
+        default: 17-6.12
+      devicetrees_branch:
+        description: kernel_nothing_sm8475-devicetrees branch
+        default: 17-6.12
+      device_branch:
+        description: device_nothing_Pong branch
+        default: 17-6.12-src
+      lineage_branch:
+        description: LineageOS branch (toolchain versions)
+        default: lineage-24.0
+
+permissions:
+  contents: write
+
+concurrency:
+  group: kernel-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  OWNER: Thunderstorm1708
+  KERNEL_BRANCH: ${{ inputs.kernel_branch || '17-6.12' }}
+  DEVICETREES_BRANCH: ${{ inputs.devicetrees_branch || '17-6.12' }}
+  DEVICE_BRANCH: ${{ inputs.device_branch || '17-6.12-src' }}
+  LINEAGE_BRANCH: ${{ inputs.lineage_branch || 'lineage-24.0' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 355
+    steps:
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /usr/local/.ghcup \
+            /opt/hostedtoolcache/CodeQL /usr/local/share/boost /usr/share/swift /usr/local/share/powershell
+          sudo docker image prune -af >/dev/null || true
+          df -h /
+
+      - name: Host packages
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq bc cpio device-tree-compiler git kmod libelf-dev libssl-dev lz4 \
+            python3 rsync patch zip zlib1g-dev >/dev/null
+
+      - name: Sources (ROM tree layout)
+        run: |
+          mkdir -p tree && cd tree
+          git clone -q --depth=1 -b "$KERNEL_BRANCH" https://github.com/$OWNER/kernel_nothing_sm8475 kernel/nothing/sm8475
+          git init -q kernel/nothing/sm8475-modules
+          git -C kernel/nothing/sm8475-modules fetch -q --depth=1 https://github.com/${{ github.repository }} ${{ github.sha }}
+          git -C kernel/nothing/sm8475-modules checkout -q FETCH_HEAD
+          git clone -q --depth=1 -b "$DEVICETREES_BRANCH" https://github.com/$OWNER/kernel_nothing_sm8475-devicetrees kernel/nothing/sm8475-devicetrees
+          git clone -q --depth=1 -b "$DEVICE_BRANCH" https://github.com/$OWNER/device_nothing_Pong device/nothing/Pong
+          for d in kernel/nothing/sm8475 kernel/nothing/sm8475-modules kernel/nothing/sm8475-devicetrees device/nothing/Pong; do
+            echo "$d $(git -C $d log -1 --format='%h %s')"
+          done | tee ../sources.txt
+
+      - name: LineageOS toolchain prebuilts
+        working-directory: tree
+        run: bash kernel/nothing/sm8475-modules/.github/ci/fetch-prebuilts.sh 2>&1 | tee ../prebuilts.log
+
+      - name: Build (as kernel.mk does)
+        working-directory: tree
+        run: |
+          set -o pipefail
+          bash kernel/nothing/sm8475-modules/.github/ci/lineage-kernel.sh 2>&1 | tee ../build.log
+
+      - name: Compare with redducc's kleaf build
+        if: success()
+        working-directory: tree
+        run: |
+          git clone -q --depth=1 https://github.com/redducc-stuff/android_device_nothing_phone2-kernel ../reference
+          P=out/target/product/Pong
+          CLANG=$(ls -d prebuilts/clang/host/linux-x86/clang-*/bin | head -1)
+          LLVM_NM=$PWD/$CLANG/llvm-nm python3 kernel/nothing/sm8475-modules/.github/ci/compare_modules.py \
+            $P/vendor_dlkm/lib/modules ../reference | tee ../compare.txt
+          {
+            echo "dtb.img vs cape-v2 + cape + capep: $(cat ../reference/dtbs/cape-v2.dtb ../reference/dtbs/cape.dtb ../reference/dtbs/capep.dtb | cmp -s - $P/dtb.img && echo identical || echo DIFFERENT)"
+            n=$(stat -c %s $P/dtbo.img)
+            echo "dtbo.img vs reference (without its AVB padding): $(cmp -s -n $n $P/dtbo.img ../reference/dtbs/dtbo.img && echo identical || echo DIFFERENT)"
+          } | tee -a ../compare.txt
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "## Pong kernel, LineageOS inline build"
+            echo '```'; cat sources.txt 2>/dev/null; echo '```'
+            echo '```'; grep -hE "^clang " prebuilts.log 2>/dev/null; grep -hE "^clang:" build.log 2>/dev/null; echo '```'
+            echo "### Steps"; echo '```'; grep -E "^==== |ERROR|modules, " build.log 2>/dev/null; echo '```'
+            if [ -f compare.txt ]; then echo "### Comparison with redducc's build"; echo '```'; cat compare.txt; echo '```'; fi
+            echo "### Last lines of the build log"; echo '```'; tail -n 40 build.log 2>/dev/null; echo '```'
+          } > summary.md
+          cat summary.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Package
+        if: success()
+        working-directory: tree/out/target/product/Pong
+        run: |
+          cp obj/KERNEL_OBJ/.config kernel.config
+          cp obj/KERNEL_OBJ/System.map obj/KERNEL_OBJ/Module.symvers .
+          zip -qr ../../../../../Pong-kernel.zip kernel dtb.img dtbo.img kernel.config System.map Module.symvers \
+            vendor_dlkm vendor_ramdisk recovery
+
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: Pong-kernel-${{ github.run_number }}
+          path: Pong-kernel.zip
+          retention-days: 14
+
+      - name: Publish logs to the ci-logs branch
+        if: always()
+        run: |
+          mkdir -p logs && cd logs
+          cp ../summary.md ../sources.txt ../compare.txt . 2>/dev/null || true
+          for f in prebuilts build; do [ -f ../$f.log ] && gzip -c ../$f.log > $f.log.gz; done
+          git init -q -b ci-logs
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -qm "Kernel CI run ${{ github.run_number }} (${{ job.status }}) for ${{ github.sha }}"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" HEAD:refs/heads/ci-logs
