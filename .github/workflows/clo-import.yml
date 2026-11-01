@@ -1,0 +1,55 @@
+name: Import CodeLinaro repos
+on:
+  push:
+    branches: [clo-import]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: qcacld-3.0,         path: platform/vendor/qcom-opensource/wlan/qcacld-3.0,        sha: 717612775cbd29a659fa1dff45fb69fcf7f24c07, ref: wlan-cld3.driver.lnx.2.0.9.r37-rel }
+          - { name: qca-wifi-host-cmn,  path: platform/vendor/qcom-opensource/wlan/qca-wifi-host-cmn, sha: 22ca4023995d63560c3a91506ba770ce90554483, ref: wlan-cmn.driver.lnx.2.0.9.r37-rel }
+          - { name: fw-api,             path: platform/vendor/qcom-opensource/wlan/fw-api,            sha: 586c5ba66bf107691661a2dee61935cd19463b80, ref: wlan-api.lnx.1.0.r367-rel }
+          - { name: wlan-platform,      path: platform/vendor/qcom-opensource/wlan/platform,          sha: 88fb1a3008f4ec2c89126cfb03a6cba94e32b7a7, ref: wlan-platform.lnx.2.0.r53-rel }
+          - { name: dataipa,            path: platform/vendor/opensource/dataipa,                     sha: 779b9f7275285fe5592d496d2ac760fd544fe13d, ref: data-kernel.lnx.5.0.r46-rel }
+          - { name: datarmnet,          path: platform/vendor/qcom/opensource/datarmnet,              sha: 74c5fb93fd03d8340256339a7701a3f5818b3cb8, ref: "" }
+          - { name: datarmnet-ext,      path: platform/vendor/qcom/opensource/datarmnet-ext,          sha: 34b8a61bc60d0f9e703b67da04e5463fb67de987, ref: "" }
+          - { name: dsp-kernel,         path: platform/vendor/qcom/opensource/dsp-kernel,             sha: 74e26300fee879aa9d717ac9cba8b47662855d5e, ref: "" }
+          - { name: mmrm-driver,        path: platform/vendor/opensource/mmrm-driver,                 sha: d0ba247110e62ed0100381a868bae2e973a2b259, ref: mmrm-kernel-handset.lnx.1.0.r16-rel }
+          - { name: mm-drivers,         path: platform/vendor/opensource/mm-drivers,                  sha: 490326c7f766ea7a52f9729d3b3493e9d513cd9d, ref: display-kernel.lnx.12.0.r14-rel }
+          - { name: display-drivers,    path: platform/vendor/opensource/display-drivers,             sha: 940e60b585f6d5d832e89b14072929b0cac204ef, ref: display-kernel.lnx.12.0.r14-rel }
+          - { name: video-driver,       path: platform/vendor/opensource/video-driver,                sha: 253c217b0494f04728df22518ce68e79fdfbaed0, ref: video-kernel-handset.lnx.1.0.r16-rel }
+          - { name: taro612,            path: platform/vendor/qcom/taro612,                           sha: 24b1651f, ref: "" }
+    steps:
+      - name: Fetch ${{ matrix.name }} @ ${{ matrix.sha }} from CodeLinaro
+        run: |
+          set -x
+          url=https://git.codelinaro.org/clo/la/${{ matrix.path }}.git
+          git init -q src && cd src
+          git remote add origin "$url"
+          if ! git fetch -q --depth=1 origin ${{ matrix.sha }}; then
+            if [ -n "${{ matrix.ref }}" ]; then
+              git fetch -q --filter=blob:none origin "refs/heads/${{ matrix.ref }}"
+            else
+              git fetch -q --filter=blob:none origin
+            fi
+          fi
+          full=$(git rev-parse --verify "${{ matrix.sha }}^{commit}")
+          git checkout -q --detach "$full"
+          echo "FULL_SHA=$full" >> "$GITHUB_ENV"
+          echo "SUBJECT=$(git log -1 --format=%s "$full")" >> "$GITHUB_ENV"
+          rm -rf .git
+      - name: Push snapshot to branch clo/${{ matrix.name }}
+        run: |
+          cd src
+          git init -q -b "clo/${{ matrix.name }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Import CodeLinaro ${{ matrix.path }} at ${FULL_SHA}" -m "Source: https://git.codelinaro.org/clo/la/${{ matrix.path }}" -m "Commit: ${FULL_SHA} (${SUBJECT})" -m "Branch: ${{ matrix.ref }}" -m "Manifest: CLO LA.VENDOR.16.2.9.r1-02600-WAIPIO.QSSI17.0 / techpack manifests"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" "HEAD:refs/heads/clo/${{ matrix.name }}"
