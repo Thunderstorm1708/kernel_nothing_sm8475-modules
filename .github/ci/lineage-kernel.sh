@@ -280,8 +280,10 @@ step "Done: kernel $kernel_release"
 # exporting protected GKI symbols (rfkill in vendor_boot: init gives up).
 if [ -n "$CI_TEST_IMAGE" ]; then
 	step "Test Image without CONFIG_MODULE_SIG_PROTECT (for other ROMs' modules)"
-	"$KERNEL_SRC/scripts/config" --file "$KERNEL_OUT/.config" -d MODULE_SIG_PROTECT
+	# MODULE_SIG_PROTECT is def_bool y depending on a non-empty protect list
+	"$KERNEL_SRC/scripts/config" --file "$KERNEL_OUT/.config" --set-str MODULE_SIG_PROTECT_LIST ""
 	kmake "$KERNEL_OUT" olddefconfig
 	kmake "$KERNEL_OUT" "$(b BOARD_KERNEL_IMAGE_NAME)"
+	! grep -q "^CONFIG_MODULE_SIG_PROTECT=y" "$KERNEL_OUT/.config" || { echo "MODULE_SIG_PROTECT still set" >&2; exit 1; }
 	cp "$KERNEL_OUT/arch/$KERNEL_ARCH/boot/$(b BOARD_KERNEL_IMAGE_NAME)" "$PRODUCT_OUT/kernel-test-nosigprotect"
 fi
