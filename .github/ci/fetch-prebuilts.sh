@@ -55,8 +55,15 @@ CLANG=$(python3 vendor/lineage/tools/get_clang_version.py)
 RUST=$(grep 'RustDefaultVersion =' build/soong/rust/config/global.go | awk '{print $3}' | awk -F '"' '{print $2}')
 echo "clang $CLANG, rust $RUST"
 
+# The kernel's clang in full; of the other clangs what vendor/lineage's
+# select_kernel_libclang.sh looks at when the kernel clang's libclang cannot
+# be used by bindgen: their version and libclang
 sparse prebuilts/clang/host/linux-x86 $AOSP/platform/prebuilts/clang/host/linux-x86 \
-	"$(rev prebuilts/clang/host/linux-x86)" "/$CLANG/"
+	"$(rev prebuilts/clang/host/linux-x86)" "/$CLANG/" "/clang-*/AndroidVersion.txt" "/clang-*/lib/libclang.so*" \
+	"/clang-*/lib/libc++.so*" "/clang-*/lib64/libc++.so*"
+for d in prebuilts/clang/host/linux-x86/clang-*/; do
+	echo "  $(basename "$d"): $(head -1 "$d/AndroidVersion.txt" 2>/dev/null)"
+done
 sparse prebuilts/rust-toolchain/linux-x86 $AOSP/platform/prebuilts/rust-toolchain/linux-x86 \
 	"$(rev prebuilts/rust-toolchain/linux-x86)" "/$RUST/"
 sparse prebuilts/clang-tools $AOSP/platform/prebuilts/clang-tools \

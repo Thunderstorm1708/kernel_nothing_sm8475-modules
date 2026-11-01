@@ -79,6 +79,17 @@ else
 	LIBCLANG_PATH=$CLANG_PATH/lib
 fi
 echo "clang: $KERNEL_CLANG_VERSION, rust: $RUST_VERSION, libclang: $LIBCLANG_PATH"
+# Diagnostics: which libclang bindgen can use (the probe of select_kernel_libclang.sh)
+BG=$T/prebuilts/clang-tools/linux-x86/bin/bindgen
+echo "bindgen: $("$BG" --version 2>&1 | head -1)"
+P=$(mktemp -d)
+printf 'struct probe_a { struct probe_b *p; };\nstruct probe_b { int x; };\n' > "$P/probe.h"
+for l in "$T"/prebuilts/clang/host/linux-x86/clang-*/lib; do
+	o=$(LIBCLANG_PATH=$l LD_LIBRARY_PATH="$l:$CLANG_PATH/lib:$CLANG_PATH/lib64" "$BG" "$P/probe.h" --use-core \
+		--no-layout-tests --no-doc-comments --formatter=none --no-include-path-detection --allowlist-type probe_b -- -x c 2>&1) || true
+	case "$o" in *"struct probe_b"*"_address"*) r=opaque;; *"struct probe_b"*) r=ok;; *) r="fails: $(echo "$o" | head -2 | tr '\n' ' ')";; esac
+	echo "  libclang $(basename "$(dirname "$l")") ($(head -1 "$(dirname "$l")/AndroidVersion.txt" 2>/dev/null)): $r"
+done
 for d in "$CLANG_PATH/bin" "$T/prebuilts/rust-toolchain/linux-x86/$RUST_VERSION/bin"; do
 	[ -d "$d" ] || { echo "missing toolchain dir $d" >&2; exit 1; }
 done
