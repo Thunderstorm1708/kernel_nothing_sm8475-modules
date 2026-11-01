@@ -40,9 +40,9 @@ PATCH   ?= patch
 RSYNC   ?= rsync
 MKDIR_P ?= mkdir -p
 
-EXT_ROOT := $(patsubst %/,%,$(KCONFIG_EXT_PREFIX))
+EXT_ROOT ?= $(patsubst %/,%,$(KCONFIG_EXT_PREFIX))
 SRC_ROOT := $(KERNEL_SRC)
-SOC_STAGING := $(abspath $(EXT_ROOT)/../soc-repo-staging)
+SOC_STAGING ?= $(abspath $(EXT_ROOT)/../soc-repo-staging)
 
 # Use the staged tree as the effective SoC repo after this file is included.
 KCONFIG_EXT_PREFIX := $(SOC_STAGING)/

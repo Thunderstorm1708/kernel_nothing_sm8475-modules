@@ -1,0 +1,3 @@
+# SPDX-License-Identifier: GPL-2.0
+# Entry point for KCONFIG_EXT_PREFIX (the ACK Kconfig sources Kconfig.ext)
+source "$(KCONFIG_EXT_PREFIX)Kconfig.msm"
