@@ -91,10 +91,10 @@ define PATCHED_DRIVERS
     src="$${tmp%%|*}"; \
     diff="$${tmp#*|}"; \
     $(MKDIR_P) $(SOC_STAGING)/$$(dirname $$dst); \
-    $(PATCH) --follow-symlinks -p0 --batch \
+    $(PATCH) -p0 --batch \
         -o $(SOC_STAGING)/$$dst \
         -i $(EXT_ROOT)/$$diff \
-        $(SRC_ROOT)/$$src;
+        $$(readlink -f $(SRC_ROOT)/$$src);
 endef
 
 # -------------------------------------------------
