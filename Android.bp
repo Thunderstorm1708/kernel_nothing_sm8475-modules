@@ -1,0 +1,7 @@
+// Keep the modules of the techpacks in their own namespace, as LineageOS does
+// in its kernel modules repositories: the techpacks define header libraries
+// (qti_display_kernel_headers, qti_audio_kernel_uapi, ...) which
+// hardware/qcom-caf/common defines globally from the generated kernel headers.
+// soc-repo provides unifdef and headers_install.sh to them in this namespace.
+soong_namespace {
+}
