@@ -7322,6 +7322,22 @@ sde_crtc_fod_atomic_check(struct sde_crtc_state *cstate,
 		dim_layer_stage = (cnt > 0) ? (max_stage + 1) : 0;
 	}
 
+	{
+		/* Bring-up: report FOD plane / force_fod_ui transitions only */
+		static int last_fod_state = -1;
+		int fod_state = (fod_plane_idx >= 0) ? 1 : (force_fod_ui ? 2 : 0);
+
+		if (fod_state != last_fod_state) {
+			last_fod_state = fod_state;
+			pr_info("sde_crtc: udfps fod_plane=%d force_fod_ui=%d planes=%d dim_stage=%u\n",
+				fod_plane_idx, force_fod_ui, cnt, dim_layer_stage);
+			for (plane_idx = 0; plane_idx < cnt; plane_idx++)
+				pr_info("sde_crtc: udfps  plane %d stage %d fod %d\n", plane_idx,
+					pstates[plane_idx].stage,
+					sde_plane_is_fod_layer(pstates[plane_idx].drm_pstate));
+		}
+	}
+
 	if (fod_plane_idx >= 0 || force_fod_ui)
 		fod_dim_layer = sde_crtc_setup_fod_dim_layer(cstate, dim_layer_stage);
 
