@@ -2593,6 +2593,9 @@ static void _sde_crtc_blend_setup_mixer(struct drm_crtc *crtc,
 
 			_sde_crtc_setup_dim_layer_cfg(crtc, sde_crtc,
 				mixer, cstate->fod_dim_layer);
+			for (i = 1; i <= cstate->fod_dim_extra; i++)
+				_sde_crtc_setup_dim_layer_cfg(crtc, sde_crtc,
+					mixer, cstate->fod_dim_layer + i);
 			cstate->fod_dim_valid = true;
 		}
 	}
@@ -7282,6 +7285,62 @@ error:
 	return dim_layer;
 }
 
+/*
+ * Pong UDFPS sensor area in 1080x2412 panel coordinates (centre 540,2186,
+ * radius 93, as reported by the fingerprint HAL). Used when the pressed
+ * layer is GPU composed and the kernel cannot see where the dot is.
+ */
+#define PONG_FOD_REF_W		1080
+#define PONG_FOD_REF_H		2412
+#define PONG_FOD_CX		540
+#define PONG_FOD_CY		2186
+#define PONG_FOD_R		93
+
+/*
+ * Turn the single FOD dim layer into four that cover everything except a
+ * square around the sensor, so the screen keeps its dimmed look under FOD
+ * HBM and only the illumination dot stays at full brightness. Returns
+ * false (the caller then makes the dim layer transparent) if there are not
+ * enough dim layer slots or blend stages.
+ */
+static bool _sde_crtc_fod_dim_around_sensor(struct sde_kms *kms,
+		struct sde_crtc_state *cstate, struct sde_hw_dim_layer *base)
+{
+	struct drm_display_mode *mode = &cstate->base.adjusted_mode;
+	u32 w = mode->hdisplay, h = mode->vdisplay;
+	u32 x0, x1, y0, y1, slot, k;
+	struct sde_rect rects[4];
+
+	if (!kms || !kms->catalog || !w || !h)
+		return false;
+
+	slot = base - cstate->dim_layer;
+	if (slot + 4 > SDE_MAX_DIM_LAYERS ||
+	    base->stage + 3 > kms->catalog->mixer[0].sblk->maxblendstages)
+		return false;
+
+	x0 = (PONG_FOD_CX - PONG_FOD_R) * w / PONG_FOD_REF_W;
+	x1 = (PONG_FOD_CX + PONG_FOD_R) * w / PONG_FOD_REF_W;
+	y0 = (PONG_FOD_CY - PONG_FOD_R) * h / PONG_FOD_REF_H;
+	y1 = (PONG_FOD_CY + PONG_FOD_R) * h / PONG_FOD_REF_H;
+	if (x1 > w || y1 > h)
+		return false;
+
+	rects[0] = (struct sde_rect){ 0, 0, w, y0 };			/* above */
+	rects[1] = (struct sde_rect){ 0, y1, w, h - y1 };		/* below */
+	rects[2] = (struct sde_rect){ 0, y0, x0, y1 - y0 };		/* left */
+	rects[3] = (struct sde_rect){ x1, y0, w - x1, y1 - y0 };	/* right */
+
+	for (k = 1; k < 4; k++) {
+		cstate->dim_layer[slot + k] = *base;
+		cstate->dim_layer[slot + k].stage = base->stage + k;
+		cstate->dim_layer[slot + k].rect = rects[k];
+	}
+	base->rect = rects[0];
+	cstate->fod_dim_extra = 3;
+	return true;
+}
+
 static void
 sde_crtc_fod_atomic_check(struct sde_crtc_state *cstate,
 			  struct plane_state *pstates, int cnt,
@@ -7348,7 +7407,9 @@ sde_crtc_fod_atomic_check(struct sde_crtc_state *cstate,
 	 * sensor reads a dim spot (Goodix GF_ERROR_PREPROCESS_FAILED). Keep the
 	 * dim layer, it is what requests FOD HBM, but make it fully transparent.
 	 */
-	if (fod_dim_layer && fod_plane_idx < 0)
+	cstate->fod_dim_extra = 0;
+	if (fod_dim_layer && fod_plane_idx < 0 &&
+	    !_sde_crtc_fod_dim_around_sensor(kms, cstate, fod_dim_layer))
 		fod_dim_layer->color_fill.color_3 = 0;
 
 	if (!fod_dim_layer && !cstate->fod_dim_layer)
