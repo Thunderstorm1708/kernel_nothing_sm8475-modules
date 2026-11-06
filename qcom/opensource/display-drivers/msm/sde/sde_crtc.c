@@ -7341,6 +7341,16 @@ sde_crtc_fod_atomic_check(struct sde_crtc_state *cstate,
 	if (fod_plane_idx >= 0 || force_fod_ui)
 		fod_dim_layer = sde_crtc_setup_fod_dim_layer(cstate, dim_layer_stage);
 
+	/*
+	 * No FOD pressed plane (the UDFPS illumination dot was composed by the
+	 * GPU into the client target): the dim layer is staged above every
+	 * plane, so a dimming alpha would darken the dot itself and the optical
+	 * sensor reads a dim spot (Goodix GF_ERROR_PREPROCESS_FAILED). Keep the
+	 * dim layer, it is what requests FOD HBM, but make it fully transparent.
+	 */
+	if (fod_dim_layer && fod_plane_idx < 0)
+		fod_dim_layer->color_fill.color_3 = 0;
+
 	if (!fod_dim_layer && !cstate->fod_dim_layer)
 		return;
 
