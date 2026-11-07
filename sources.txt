@@ -1,0 +1,4 @@
+kernel/nothing/sm8475 306283e04 ANDROID: Pong: Find the vendor uapi headers for LineageOS' headers_install
+kernel/nothing/sm8475-modules e7e67e0 sde: crtc: Drop the UDFPS FOD plane bring-up logging
+kernel/nothing/sm8475-devicetrees 27f93fe Pong: Build with the soc-repo dt-bindings in make builds
+device/nothing/Pong 78dee8a Pong: fingerprint: Give the FOD illumination 50 ms to settle
