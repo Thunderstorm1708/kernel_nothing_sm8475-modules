@@ -153,8 +153,8 @@ jobs:
           cp ../summary.md ../sources.txt ../compare.txt . 2>/dev/null || true
           for f in prebuilts build; do [ -f ../$f.log ] && gzip -c ../$f.log > $f.log.gz; done
           git init -q -b ci-logs
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "Thunderstorm1708"
+          git config user.email "89205550+Thunderstorm1708@users.noreply.github.com"
           git add -A
           git commit -qm "Kernel CI run ${{ github.run_number }} (${{ job.status }}) for ${{ github.sha }}"
           git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" HEAD:refs/heads/ci-logs
@@ -235,7 +235,7 @@ jobs:
           git clone -q --depth=1 -b ci-logs https://x-access-token:${{ github.token }}@github.com/${{ github.repository }} logs || exit 0
           cp anykernel.txt rom-check.txt logs/ 2>/dev/null || true
           cd logs
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "Thunderstorm1708"
+          git config user.email "89205550+Thunderstorm1708@users.noreply.github.com"
           git add -A && git commit -qm "AnyKernel3 / ROM check, run ${{ github.run_number }}" && git push -q origin HEAD:ci-logs || true
           cat ../rom-check.txt >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
