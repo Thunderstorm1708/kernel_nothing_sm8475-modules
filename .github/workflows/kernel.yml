@@ -14,10 +14,10 @@ on:
   workflow_dispatch:
     inputs:
       kernel_branch:
-        description: kernel_nothing_sm8475 branch
+        description: kernel_nothing_pong branch
         default: 17-6.12
       devicetrees_branch:
-        description: kernel_nothing_sm8475-devicetrees branch
+        description: kernel_nothing_pong-devicetree branch
         default: 17-6.12
       device_branch:
         description: device_nothing_Pong branch
@@ -69,11 +69,11 @@ jobs:
       - name: Sources (ROM tree layout)
         run: |
           mkdir -p tree && cd tree
-          git clone -q --depth=1 -b "$KERNEL_BRANCH" https://github.com/$OWNER/kernel_nothing_sm8475 kernel/nothing/sm8475
+          git clone -q --depth=1 -b "$KERNEL_BRANCH" https://github.com/$OWNER/kernel_nothing_pong kernel/nothing/sm8475
           git init -q kernel/nothing/sm8475-modules
           git -C kernel/nothing/sm8475-modules fetch -q --depth=1 https://github.com/${{ github.repository }} ${{ github.sha }}
           git -C kernel/nothing/sm8475-modules checkout -q FETCH_HEAD
-          git clone -q --depth=1 -b "$DEVICETREES_BRANCH" https://github.com/$OWNER/kernel_nothing_sm8475-devicetrees kernel/nothing/sm8475-devicetrees
+          git clone -q --depth=1 -b "$DEVICETREES_BRANCH" https://github.com/$OWNER/kernel_nothing_pong-devicetree kernel/nothing/sm8475-devicetrees
           git clone -q --depth=1 -b "$DEVICE_BRANCH" https://github.com/$OWNER/device_nothing_Pong device/nothing/Pong
           for d in kernel/nothing/sm8475 kernel/nothing/sm8475-modules kernel/nothing/sm8475-devicetrees device/nothing/Pong; do
             echo "$d $(git -C $d log -1 --format='%h %s')"
