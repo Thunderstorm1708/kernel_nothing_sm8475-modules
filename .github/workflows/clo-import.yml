@@ -48,8 +48,8 @@ jobs:
         run: |
           cd src
           git init -q -b "clo/${{ matrix.name }}"
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "Thunderstorm1708"
+          git config user.email "89205550+Thunderstorm1708@users.noreply.github.com"
           git add -A
           git commit -q -m "Import CodeLinaro ${{ matrix.path }} at ${FULL_SHA}" -m "Source: https://git.codelinaro.org/clo/la/${{ matrix.path }}" -m "Commit: ${FULL_SHA} (${SUBJECT})" -m "Branch: ${{ matrix.ref }}" -m "Manifest: CLO LA.VENDOR.16.2.9.r1-02600-WAIPIO.QSSI17.0 / techpack manifests"
           git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" "HEAD:refs/heads/clo/${{ matrix.name }}"
