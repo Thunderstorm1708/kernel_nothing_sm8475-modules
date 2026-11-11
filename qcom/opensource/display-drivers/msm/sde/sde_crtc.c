@@ -7352,6 +7352,7 @@ sde_crtc_fod_atomic_check(struct sde_crtc_state *cstate,
 	bool force_fod_ui;
 	int plane_idx;
 	int fod_plane_idx = -1;
+	bool fod_in_target = false;
 
 	display = get_main_display();
 	if (!display || !display->panel) {
@@ -7362,6 +7363,8 @@ sde_crtc_fod_atomic_check(struct sde_crtc_state *cstate,
 	force_fod_ui = dsi_panel_get_force_fod_ui(display->panel);
 
 	for (plane_idx = 0; plane_idx < cnt; plane_idx++) {
+		if (sde_plane_has_fod_in_target(pstates[plane_idx].drm_pstate))
+			fod_in_target = true;
 		if (sde_plane_is_fod_layer(pstates[plane_idx].drm_pstate)) {
 			fod_plane_idx = plane_idx;
 			break;
@@ -7391,8 +7394,15 @@ sde_crtc_fod_atomic_check(struct sde_crtc_state *cstate,
 	 * sensor reads a dim spot (Goodix GF_ERROR_PREPROCESS_FAILED). Keep the
 	 * dim layer, it is what requests FOD HBM, but make it fully transparent.
 	 */
+	/*
+	 * Without a FOD plane, the display HAL marks the client target plane
+	 * when the UDFPS dot was composed into it: then cut the dim layer
+	 * around the sensor so the dot keeps its brightness. With no dot at all
+	 * (FOD HBM starts at the touch, before SystemUI draws the dot, and a
+	 * light touch never gets one) keep the whole screen dimmed.
+	 */
 	cstate->fod_dim_extra = 0;
-	if (fod_dim_layer && fod_plane_idx < 0 &&
+	if (fod_dim_layer && fod_plane_idx < 0 && fod_in_target &&
 	    !_sde_crtc_fod_dim_around_sensor(kms, cstate, fod_dim_layer))
 		fod_dim_layer->color_fill.color_3 = 0;
 

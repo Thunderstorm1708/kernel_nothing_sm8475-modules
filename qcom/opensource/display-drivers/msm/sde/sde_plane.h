@@ -476,6 +476,7 @@ int sde_plane_helper_reset_custom_properties(struct drm_plane *plane,
 		struct drm_plane_state *plane_state);
 
 int sde_plane_is_fod_layer(const struct drm_plane_state *drm_state);
+int sde_plane_has_fod_in_target(const struct drm_plane_state *drm_state);
 
 /* sde_plane_is_sec_ui_allowed - indicates if the sspp allows secure-ui layers
  * @plane: Pointer to DRM plane object

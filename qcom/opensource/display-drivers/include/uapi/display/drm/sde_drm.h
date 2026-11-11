@@ -684,6 +684,8 @@ struct sde_drm_roi_v1 {
  * sde fod dim layer
  */
 #define FOD_PRESSED_LAYER_ZORDER	0x20000000u
+/* The UDFPS dot was composed into this (client target) plane */
+#define FOD_IN_CLIENT_TARGET_ZORDER	0x10000000u
 
 /**
  * struct sde_drm_ubwc_stats_roi - region of interest for ubwc stats

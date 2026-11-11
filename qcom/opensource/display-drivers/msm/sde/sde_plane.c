@@ -4287,7 +4287,19 @@ int sde_plane_is_fod_layer(const struct drm_plane_state *drm_state)
 
 	pstate = to_sde_plane_state(drm_state);
 
-	return sde_plane_get_property(pstate, PLANE_PROP_FOD);
+	return sde_plane_get_property(pstate, PLANE_PROP_FOD) == 1;
+}
+
+int sde_plane_has_fod_in_target(const struct drm_plane_state *drm_state)
+{
+	struct sde_plane_state *pstate;
+
+	if (!drm_state)
+		return 0;
+
+	pstate = to_sde_plane_state(drm_state);
+
+	return sde_plane_get_property(pstate, PLANE_PROP_FOD) == 2;
 }
 
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 15, 0))
@@ -5333,14 +5345,20 @@ static int sde_plane_atomic_set_property(struct drm_plane *plane,
 
 			fod_property = psde->property_info.
 					property_array[PLANE_PROP_FOD];
+			/*
+			 * 1: this plane is the UDFPS dot
+			 * 2: the dot was composed into this client target plane
+			 */
 			ret = msm_property_atomic_set(&psde->property_info,
 					&pstate->property_state,
 					fod_property,
-					!!(val & FOD_PRESSED_LAYER_ZORDER));
+					(val & FOD_PRESSED_LAYER_ZORDER) ? 1 :
+					(val & FOD_IN_CLIENT_TARGET_ZORDER) ? 2 : 0);
 			if (ret)
 				SDE_ERROR("failed to set fod prop");
 
-			val &= ~FOD_PRESSED_LAYER_ZORDER;
+			val &= ~(FOD_PRESSED_LAYER_ZORDER |
+				 FOD_IN_CLIENT_TARGET_ZORDER);
 		}
 
 		ret = msm_property_atomic_set(&psde->property_info,
