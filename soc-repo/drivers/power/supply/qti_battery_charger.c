@@ -3888,6 +3888,59 @@ static ssize_t wls_en_store(const struct class *c,
 	return count;
 }
 static CLASS_ATTR_RW(wls_en);
+
+/*
+ * One switch for all charging, as on the 5.10 kernel: the Lineage health HAL
+ * (charging control) and the 80% charge limit toggle it.
+ */
+static ssize_t charging_en_show(const struct class *c, const struct class_attribute *attr,
+				char *buf)
+{
+	struct battery_chg_dev *bcdev = container_of(c, struct battery_chg_dev,
+						battery_class);
+	struct psy_state *pst_usb = &bcdev->psy_list[PSY_TYPE_USB];
+	struct psy_state *pst_wls = &bcdev->psy_list[PSY_TYPE_WLS];
+	int rc;
+
+	rc = read_property_id(bcdev, pst_usb, USB_CHARGE_ENABLE);
+	if (rc < 0)
+		return rc;
+
+	rc = read_property_id(bcdev, pst_wls, WLS_EN);
+	if (rc < 0)
+		return rc;
+
+	return scnprintf(buf, PAGE_SIZE, "%d\n",
+			 !!pst_usb->prop[USB_CHARGE_ENABLE] && !!pst_wls->prop[WLS_EN]);
+}
+
+static ssize_t charging_en_store(const struct class *c,
+					const struct class_attribute *attr,
+					const char *buf, size_t count)
+{
+	struct battery_chg_dev *bcdev = container_of(c, struct battery_chg_dev,
+						battery_class);
+	int rc;
+	u32 val;
+
+	if (kstrtou32(buf, 0, &val))
+		return -EINVAL;
+
+	pr_info("%s,val:%d", __func__, val);
+
+	rc = write_property_id(bcdev, &bcdev->psy_list[PSY_TYPE_USB],
+				USB_CHARGE_ENABLE, val);
+	if (rc < 0)
+		return rc;
+
+	rc = write_property_id(bcdev, &bcdev->psy_list[PSY_TYPE_WLS],
+				WLS_EN, val);
+	if (rc < 0)
+		return rc;
+
+	return count;
+}
+static CLASS_ATTR_RW(charging_en);
 static ssize_t wls_patch_push_store(const struct class *c,
 					const struct class_attribute *attr,
 					const char *buf, size_t count)
@@ -3992,6 +4045,7 @@ static struct attribute *battery_class_attrs[] = {
 	&class_attr_wls_reverse_status.attr,
 	&class_attr_wls_reverse_fod.attr,
 	&class_attr_wls_en.attr,
+	&class_attr_charging_en.attr,
 	&class_attr_wls_patch_push.attr,
 	&class_attr_wls_cfg_push.attr,
 	&class_attr_wls_cp_reg.attr,
