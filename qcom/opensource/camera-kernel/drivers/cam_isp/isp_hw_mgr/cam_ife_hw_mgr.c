@@ -1807,6 +1807,28 @@ static int cam_ife_mgr_process_base_info(
 	return 0;
 }
 
+/*
+ * In dual IFE/SFE mode both halves of an output port report the same res_id:
+ * record it in its comp group only once, otherwise every buf done of the group
+ * walks the port twice and logs "Duplicate BUF_DONE" for each port and frame.
+ */
+static void cam_ife_hw_mgr_add_comp_grp_res(
+	struct cam_isp_hw_comp_record *comp_grp, uint32_t res_id)
+{
+	uint32_t i;
+
+	for (i = 0; i < comp_grp->num_res; i++)
+		if (comp_grp->res_id[i] == res_id)
+			return;
+
+	if (comp_grp->num_res >= CAM_NUM_OUT_PER_COMP_IRQ_MAX) {
+		CAM_ERR(CAM_ISP, "comp grp full, res_id 0x%x not added", res_id);
+		return;
+	}
+
+	comp_grp->res_id[comp_grp->num_res++] = res_id;
+}
+
 static int cam_ife_hw_mgr_acquire_res_ife_out_rdi(
 	struct cam_ife_hw_mgr_ctx       *ife_ctx,
 	struct cam_isp_hw_mgr_res       *ife_src_res,
@@ -1990,9 +2012,8 @@ static int cam_ife_hw_mgr_acquire_res_ife_out_pixel(
 				vfe_acquire.vfe_out.rsrc_node;
 			index = vfe_acquire.vfe_out.comp_grp_id;
 			comp_grp = &ife_ctx->vfe_bus_comp_grp[index];
-			comp_grp->res_id[comp_grp->num_res] =
-				ife_out_res->hw_res[j]->res_id;
-			comp_grp->num_res++;
+			cam_ife_hw_mgr_add_comp_grp_res(comp_grp,
+				ife_out_res->hw_res[j]->res_id);
 
 			CAM_DBG(CAM_ISP, "resource type:0x%x res id:0x%x comp grp id:%d",
 				ife_out_res->hw_res[j]->res_type,
@@ -2187,9 +2208,8 @@ static int cam_ife_hw_mgr_acquire_res_sfe_out_pix(
 				sfe_acquire.sfe_out.rsrc_node;
 			index = sfe_acquire.sfe_out.comp_grp_id;
 			comp_grp = &ife_ctx->sfe_bus_comp_grp[index];
-			comp_grp->res_id[comp_grp->num_res] =
-				sfe_out_res->hw_res[j]->res_id;
-			comp_grp->num_res++;
+			cam_ife_hw_mgr_add_comp_grp_res(comp_grp,
+				sfe_out_res->hw_res[j]->res_id);
 
 			CAM_DBG(CAM_ISP, "resource type:0x%x res: %s res id: 0x%x comp grp id:%d",
 				sfe_out_res->hw_res[j]->res_type,
