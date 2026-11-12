@@ -1,0 +1,17 @@
+ours 500 modules, prebuilt 451
+only prebuilt: dispcc_waipio gcc_waipio regmap_ram regmap_raw_ram
+only ours: 8021q 9pnet 9pnet_fd aes_neon_blk asix ax88179_178a can_bcm can_dev can_gw cctrng cdc_ether cdc_ncm efivarfs exynos_hvm ftdi_sio gnss gzvm ieee802154_socket kheaders macsec netfs nhc_dest nhc_fragment nhc_hop nhc_ipv6 nhc_mobility nhc_routing nhc_udp open_dice pps_core pstore_blk pstore_zone ptp ptp_kvm r8153_ecm rust_binder slcan snd_hda_codec_hdmi snd_soc_audio_graph_card snd_soc_simple_card_utils tipc_diag usbmon usbserial vcan vcpu_stall_detector virtio_balloon virtio_blk virtio_console virtio_pci virtio_pci_legacy_dev virtio_pci_modern_dev vmw_vsock_virtio_transport wwan
+   bluetooth: imports only ours=[] only ref=['memmove']
+   mpam_msc_slc: imports only ours=[] only ref=['memcpy']
+   msm_eva: depends ours=['frpc_adsprpc', 'llcc_qcom', 'mdt_loader', 'mem_buf_dev', 'minidump', 'msm_mmrm', 'qcom_scm', 'qcom_va_minidump', 'synx_driver'] ref=['frpc_adsprpc', 'llcc_qcom', 'mdt_loader', 'msm_mmrm', 'qcom_scm', 'synx_driver']
+   msm_eva: imports only ours=['mem_buf_dma_buf_copy_vmperm', 'msm_minidump_add_region', 'msm_minidump_enabled', 'msm_minidump_remove_region', 'qcom_va_md_add_region', 'qcom_va_md_enabled'] only ref=[]
+   qcom_stats: imports only ours=['__copy_overflow'] only ref=[]
+   qti_battery_charger: imports only ours=[] only ref=['__warn_printk']
+   slhc: imports only ours=[] only ref=['__warn_printk']
+   tornado_mod: imports only ours=[] only ref=['__fortify_panic']
+   tz_log_dlkm: depends ours=['qcom_scm', 'tmecom_intf'] ref=['qcom_scm', 'tmecom_intf_dlkm']
+{'compared': 447, 'imports': 7, 'depends': 2}
+dtb.img vs cape-v2 + cape + capep: identical
+dtbo.img vs reference (without its AVB padding): DIFFERENT
+protected GKI modules without a signature: none
+signed vendor (non-GKI) modules: 0 (a kleaf build signs none)
